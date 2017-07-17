@@ -5,7 +5,7 @@ const slackRTM = require('./services/slackrtm');
 const routes = require('./routes/routes.js');
 
 //run slack RTM file
-//slackRTM();
+slackRTM();
 
 const nlp = require('./services/nlp');
 nlp();

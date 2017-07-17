@@ -4,6 +4,7 @@ module.exports = function() {
 
     var RtmClient = require('@slack/client').RtmClient;
     var CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS;
+    var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
 
     var bot_token = slackConfig.SLACK_BOT_TOKEN || '';
 
@@ -14,8 +15,14 @@ module.exports = function() {
     console.log(`Logged in as ${rtmStartData.self.name} of team ${rtmStartData.team.name}, but not yet connected to a channel`);
     });
 
-    rtm.start(); 
-    console.log('testing pt2');
+    rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
+        if (message.user === 'U69S5RTGT') {
+
+            var channel = "#general"; //could also be a channel, group, DM, or user ID (C1234), or a username (@don)
+            rtm.sendMessage("Shut the fuck up <@" + message.user + ">!", message.channel);
+        }
+    });
+    rtm.start();
 }
 
 

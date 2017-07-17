@@ -74,8 +74,14 @@ module.exports = function() {
      }
     });
 
-    rtm.start(); 
-    console.log('testing pt2');
+    rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
+        if (message.user === 'U69S5RTGT') {
+
+            var channel = "#general"; //could also be a channel, group, DM, or user ID (C1234), or a username (@don)
+            rtm.sendMessage("Shut the fuck up <@" + message.user + ">!", message.channel);
+        }
+    });
+    rtm.start();
 }
 
 

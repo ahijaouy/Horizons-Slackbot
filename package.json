@@ -1,0 +1,22 @@
+{
+  "name": "horizons-slackbot",
+  "version": "1.0.0",
+  "description": "A scheduling slackbot",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahijaouy/Horizons-Slackbot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ahijaouy/Horizons-Slackbot/issues"
+  },
+  "homepage": "https://github.com/ahijaouy/Horizons-Slackbot#readme",
+  "dependencies": {
+    "nodemon": "^1.11.0"
+  }
+}

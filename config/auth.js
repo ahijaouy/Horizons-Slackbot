@@ -1,9 +1,9 @@
 module.exports = {
 
     'googleAuth' : {
-        'clientID'      : '925901605067-i6uvth9dr8j76q2b223ar8fjtn2k9qht.apps.googleusercontent.com',
-        'clientSecret'  : 'ohVmGDg703IUkrMt6Y4hkMwi',
-        'callbackURL'   : 'http://tutor-me-now.herokuapp.com/auth/google/callback'
+        'clientID'      : '925901605067-pfe65okm3c1qm5js1imhgiln13ruge4k.apps.googleusercontent.com',
+        'clientSecret'  : 'J_7uT9kC7nKQpaXP_2ksQesW',
+        'callbackURL'   : 'http://localhost:3000/connect/callback'
     }
 
 };

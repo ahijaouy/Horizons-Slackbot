@@ -21,7 +21,9 @@
     "@slack/client": "^3.10.0",
     "axios": "^0.16.2",
     "express": "^4.15.3",
+    "mongoose": "^4.11.3",
     "nodemon": "^1.11.0",
+    "underscore": "^1.8.3",
     "uuid": "^3.1.0"
   }
 }

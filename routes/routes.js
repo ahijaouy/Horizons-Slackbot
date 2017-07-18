@@ -1,14 +1,15 @@
 const express = require('express');
 const router = express.Router();
+const auth = require('../services/authentication');
 
-//handle Slack button press: handles request of Confirm/Cancel reminder
-router.post('/slack/interactive', (req, res) => {
-    console.log(JSON.parse(req.body.payload));
-    if (req.body.payload.actions[0].value === 'true') {
-        res.send('Created reminder! :white_check_mark:');
-    } else {
-        res.send('Canceled! :x:');
-    }
+router.get('/connect', (req, res) => {
+    res.redirect(auth.generateAuthUrl(req.query.auth_id));
+});
+
+router.get('/connect/callback', (req, res) => {
+    const id = JSON.parse(decodeURIComponent(req.query.state)).auth_id;
+    auth.generateAuthTokens(req.query.code, id);
+    res.send('Successfully Authenticated with Google!');
 });
 
 module.exports = router;

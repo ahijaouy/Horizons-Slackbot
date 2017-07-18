@@ -16,14 +16,11 @@ exports.helloWorld = function helloWorld (event, callback) {
   callback();
 };
 
-exports.helloHttp = function helloHttp (req, res) {
-    //res.json(req);
-  console.log(req.body);
-  if (req.body.payload) { console.log(req.body.payload); }
-  response = "This is a sample response from your webhook!" //Default response from the webhook to show it's working
-
-  res.setHeader('Content-Type', 'application/json'); //Requires application/json MIME type
-  res.send(JSON.stringify({ "speech": response, "displayText": response 
-  //"speech" is the spoken version of the response, "displayText" is the visual version
-  }));
-};
+exports.testBody = function testBody(req, res) {
+  const payload = JSON.parse(req.body.payload);
+  if (payload.actions[0].value === 'true') {
+      res.send('Created reminder! :white_check_mark:');
+  } else {
+      res.send('Canceled! :x:');
+  }
+}

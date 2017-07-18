@@ -2,67 +2,126 @@ const { RtmClient, WebClient, CLIENT_EVENTS, RTM_EVENTS } = require('@slack/clie
 const { sendQuery } = require('./nlp');
 const slackConfig = require('../config/slack');
 const bot_token = slackConfig.SLACK_BOT_TOKEN || '';
-// var token = slackConfig.SLACK_BOT_TOKEN || ''; //see section above on sensitive data
+const slack_verification = slackConfig.PRADY_TOKEN || '';
 
 const rtm = new RtmClient(bot_token);
 var web = new WebClient(bot_token);
 
 const axios = require('axios');
 
-// const cloudFuncs = require('../cloudFunctions/index.js');
-const express = require('express')
-const request = require('request')
-const bodyParser = require('body-parser')
-const app = express()
-// const urlencodedParser = bodyParser.urlencoded({ extended: false })
+let channel;
 
-module.exports = function() {
-    let channel;    
-
-    function sendMessageToSlackResponseURL(responseURL, JSONmessage){
-        var postOptions = {
-            uri: responseURL,
-            method: 'POST',
-            headers: {
-                'Content-type': 'application/json'
-            },
-            json: JSONmessage
-        }
-        request(postOptions, (error, response, body) => {
-            if (error){
-                // handle errors as you see fit
+getResponseMessage = (action, parameters) => {
+    let returnMsg;
+    if (action === 'reminder.add') {
+        returnMsg = 'Creating reminder to '+parameters.subject;
+    } else {
+        let people = parameters['given-name'][0];
+        parameters['given-name'].forEach((person, index) => {
+            if (index === parameters['given-name'].length-1 && parameters['given-name'].length > 1) {
+                people += ' and '+person;
+            } else if (index !== 0) {
+                people += ', '+person;
             }
         })
+        returnMsg = 'Scheduling a meeting with '+people+' about '+parameters.subject;
     }
-
-    function getSlackEditableDate(messageDate, time) {
-        const date = Math.round(new Date(messageDate) / 1000);
-        if (time) {
-            return "<!date^"+date+"^on {date_short} at {time}|Default date: 2000-01-01 1:11:11 AM>";
-        } else {
-            return "<!date^"+date+"^on {date_short}|Default date: 2000-01-01 1:11:11 AM>";
-        }
+    returnMsg += getSlackEditableDate(parameters.date, parameters.time); 
+    return returnMsg       
+}
+    
+getSlackEditableDate = (messageDate, messageTime) => {
+    console.log('received date: ', messageDate);
+    let date;
+    // if (! parseInt(date) ) {
+    //     date = new Date('2000-01-01 1:11:11 AM') / 1000;
+    // }
+    if (messageTime) {
+        date = new Date(messageDate+' '+messageTime) / 1000;
+        console.log('received time: ',messageTime);
+        return "<!date^"+date+"^ on {date_short} at {time}|Default date: 2000-01-01 1:11:11 AM>";
+    } else {
+        date = new Date(messageDate) / 1000 + 86400; 
+        return "<!date^"+date+"^ on {date}|Default date: 2000-01-01 1:11:11 AM>";
     }
+}
 
-    // The client will emit an RTM.AUTHENTICATED event on successful connection, with the `rtm.start` payload if you want to cache it
-    rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
-        // console.log('start data: ', rtmStartData.channels);
-        for (const c of rtmStartData.channels) {
-            if (c.is_member && c.name ==='general') {
-                channel = c.id; }
-        }
-        console.log(`Logged in as ${rtmStartData.self.name} of team ${rtmStartData.team.name}, but not yet connected to a channel`);
-    });
+getApiResponse = (message) => {
+    const responseJSON = {
+        // "text": "*optional add text here*",
+        "attachments": [
+            {
+                "text": "Click the button!",
+                "fallback": "Supposed to show the button",
+                "callback_id": "something",
+                "color": "#3AA3E3",
+                "attachment_type": "default",
+                "actions": [
+                    {
+                        "name": "confirm",
+                        "text": "Confirm",
+                        "type": "button",
+                        "value": "true"
+                    },
+                    {
+                        "name": "confirm",
+                        "text": "Cancel",
+                        "type": "button",
+                        "value": "false"
+                    }
+                ]
+            }
+        ]
+    };
 
-    rtm.on(CLIENT_EVENTS.RTM.RTM_CONNECTION_OPENED, () => {
-        // if (!channel || !channel.id) {
-        //     throw new Error('no channel id!');
-        // }
-        console.log('JARVIS started!');
-        // rtm.sendMessage("Hello! Convo has started!", channel);
-    });
+    return sendQuery(message.text, message.user)
+        .then((response) => {
+            let data = response.data;
 
-    rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
+            // console.log('DATA RESPONSE:', data.result);
+
+            if (data.result.action.startsWith('smalltalk')) {
+                console.log('responding to SMALL TALK');
+                rtm.sendMessage(response.data.result.fulfillment.speech, message.channel);
+            } else if (data.result.action !== 'reminder.add' && data.result.action !== 'meeting.add') {
+                // unspecified intents
+                console.log('UNSPECIFIED')
+                return;
+            } else if (data.result.actionIncomplete) {
+                console.log('action INCOMPLETE');
+                rtm.sendMessage(response.data.result.fulfillment.speech, message.channel);
+            } else {
+                console.log('ACTION IS COMPLETE', data.result.parameters);
+
+                let responseMsg = getResponseMessage(data.result.action, data.result.parameters);
+
+                web.chat.postMessage(message.channel, responseMsg, responseJSON, function(err, res) {
+                    if (err) {
+                        console.log('Error:', err);
+                    } else {
+                        console.log('Message sent: ', res);
+                        needToRespond = false;
+                    }
+                });
+            }
+        })
+}
+
+// The client will emit an RTM.AUTHENTICATED event on successful connection, with the `rtm.start` payload if you want to cache it
+rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
+    for (const c of rtmStartData.channels) {
+        if (c.is_member && c.name ==='general') {
+            channel = c.id; }
+    }
+    console.log(`Logged in as ${rtmStartData.self.name} of team ${rtmStartData.team.name}, but not yet connected to a channel`);
+});
+
+rtm.on(CLIENT_EVENTS.RTM.RTM_CONNECTION_OPENED, () => {
+    rtm.sendMessage('I am Iron Man', channel);
+    console.log('JARVIS started!');
+});
+
+rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
 
     const dm = rtm.dataStore.getDMByUserId(message.user);
     if (!dm || dm.id !== message.channel || message.type !== 'message') {
@@ -70,85 +129,35 @@ module.exports = function() {
         return;
     }
 
-    else if (message.text /* && message.user !== "jarvis2" && message.channel !== GENERAL_CHANNEL */) {
+    else if (message.text) {
         console.log('message: ',message);
-        // const channel = "#general"; //could also be a channel, group, DM, or user ID (C1234), or a username (@don)
         
-        if (parseInt(new Date(message.text))) {
-            
-            rtm.sendMessage("<@" + message.user + "> you sent a message with this date! \n "+formatted_date, message.channel); 
-            // rtm.sendMessage(formatted_date, message.channel);   
-        } else if (message.text === "button") {
-            // const date = Math.round(new Date(message.text) / 1000);
-            // const formatted_date = "<!date^"+date+"^Date is:  {date_short} at {time}|Posted 2000-01-01 1:11:11 AM>";
-            const responseJSON = {
-                "text": "*optional add text here*",
-                "attachments": [
-                    {
-                        "text": "Click the button!",
-                        "fallback": "Supposed to show the button",
-                        "callback_id": "wopr_game",
-                        "color": "#3AA3E3",
-                        "attachment_type": "default",
-                        "actions": [
-                            {
-                                "name": "confirm",
-                                "text": "Confirm",
-                                "type": "button",
-                                "value": "true"
-                            },
-                            {
-                                "name": "confirm",
-                                "text": "Cancel",
-                                "type": "button",
-                                "value": "false"
-                            }
-                        ]
-                    }
-                ]
-            };
-            // cloudFuncs.helloHttp()
-            rtm.sendMessage("responding with button: ", message.channel);
-            
-        } else {
-            rtm.sendMessage("<@" + message.user + "> you sent this message: *"+message.text+"*", message.channel);
+        //INSERT PENDING PART :: DON'T SEND QUERY IF PENDING
+        
+        //Process if input is Slack user id
+        if (message.text.indexOf('<@') >= 0) {
+            console.log('recognizing user id input');
+            axios.get('https://slack.com/api/users.list?token=xoxp-214075203605-214001278996-215348011622-6220a67bf54d0165d770c06e356c255a&pretty=1')
+            .then((response) =>{
+                console.log('*****************************************');
+                console.log('axios response', response.data);
 
-            sendQuery(message.text, message.user)
-            .then((data) => {
-                console.log(data);
-                if (data.result.actionIncomplete) {
-                    rtm.sendMessage(data.result.fulfillment.speech, message.channel);
-                } else {
-                    console.log('ACTION IS COMPLETE', data.result.parameters);
-                    let responseMsg = 'Creating reminder for '+data.result.parameters.subject;
-                    responseMsg += ' on '+getSlackEditableDate(data.result.parameters.date, data.result.parameters.time);
-                    web.postMessage(message.channel, 'Creating reminder for ', responseJSON, function(err, res) {
-                        if (err) {
-                            console.log('Error:', err);
-                        } else {
-                            console.log('Message sent: ', res);
-                        }
-                    });
-                }
+                // GET USERNAME FROM ID
+                return message.text;
             })
-        }        
-
-     }
-    });
-
-    rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
-        if (message.user === 'U69S5RTGT') {
-
-            var channel = "#general"; //could also be a channel, group, DM, or user ID (C1234), or a username (@don)
-            rtm.sendMessage("Shut the fuck up <@" + message.user + ">!", message.channel);
+            .then((resp) => {
+                getApiResponse(message);
+            });
+        } else {
+            getApiResponse(message)
+            .catch((err) => {
+                console.log('error: ', err);
+            });
         }
-    });
+    }
+});
 
-
-    
-
-    rtm.start();
-}
+module.exports = { web, rtm };
 
 
 //NOTES: 
@@ -288,3 +297,51 @@ const date = Math.round(new Date('2017-07-21 20:00:00') / 1000);
             //         console.log('Message sent: ', res);
             //     }
             // });
+
+
+            // const channel = "#general"; //could also be a channel, group, DM, or user ID (C1234), or a username (@don)
+        
+        // if (parseInt(new Date(message.text))) {
+            
+        //     rtm.sendMessage("<@" + message.user + "> you sent a message with this date! \n "+formatted_date, message.channel); 
+        //     // rtm.sendMessage(formatted_date, message.channel);   
+        // } else if (message.text === "button") {
+            // const date = Math.round(new Date(message.text) / 1000);
+            // const formatted_date = "<!date^"+date+"^Date is:  {date_short} at {time}|Posted 2000-01-01 1:11:11 AM>";
+
+            // cloudFuncs.helloHttp()
+            // rtm.sendMessage("responding with button: ", message.channel);
+        // }
+            
+        // } else {
+            // rtm.sendMessage("<@" + message.user + "> you sent this message: *"+message.text+"*", message.channel);
+
+             // rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
+    //     if (message.user === 'U69S5RTGT') {
+
+    //         var channel = "#general"; //could also be a channel, group, DM, or user ID (C1234), or a username (@don)
+    //         rtm.sendMessage("Shut the fuck up <@" + message.user + ">!", message.channel);
+    //     }
+    // });
+
+
+    
+
+    // rtm.start();
+// }
+
+// function sendMessageToSlackResponseURL(responseURL, JSONmessage){
+//     var postOptions = {
+//         uri: responseURL,
+//         method: 'POST',
+//         headers: {
+//             'Content-type': 'application/json'
+//         },
+//         json: JSONmessage
+//     }
+//     request(postOptions, (error, response, body) => {
+//         if (error){
+//             // handle errors as you see fit
+//         }
+//     })
+// }

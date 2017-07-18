@@ -2,7 +2,7 @@ const axios = require('axios');
 const aiConfig = require('../config/ai');
 const api_ai = axios.create({
   baseURL: aiConfig.API_URL_BASE,
-  headers: {'Authorization': 'Bearer ' + aiConfig.DEV_ACCESS_TOKEN}
+  headers: {'Authorization': 'Bearer ' + aiConfig.CLIENT_ACCESS_TOKEN}
 });
 
 function generateQueryString(query, id) {
@@ -10,6 +10,7 @@ function generateQueryString(query, id) {
 }
 
 function sendQuery(query, id) {
+    console.log('processing send query');
     return api_ai.get(generateQueryString(query, id))
 }
     

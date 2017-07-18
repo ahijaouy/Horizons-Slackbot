@@ -8,7 +8,7 @@ const routes = require('./routes/routes.js');
 //slackRTM();
 
 const nlp = require('./services/nlp');
-nlp();
+nlp.sendQuery('remind me to buy coffee for dom ');
 //handle all the routes
 app.use('/', routes);
 

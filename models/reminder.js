@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const reminderSchema = ({
+const reminderSchema = mongoose.Schema({
   subject: String,
   date: Date,
   user_id: {

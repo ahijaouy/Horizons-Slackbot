@@ -15,10 +15,12 @@ app.use('/', routes);
 
 mongoose.connect(dbconfig.url);
 
+const calendar = require('./services/calendar');
 const auth = require('./services/authentication');
-//auth.userRegistered('ANDREH').then(console.log).catch(console.log);
-//auth.checkUser('ANDREH2').then(resp => console.log(resp)).catch(err => console.log('ERROR: ', err));  
-// auth.userAuthenticated('ANDREH1').then(resp => console.log(resp));
+auth.checkUser('ANDREH');
+let myDate = new Date();
+//console.log('My Date: ', myDate);
+//calendar.createReminder('ANDREH', myDate, 'TESTING :D');
 
 //start the server
 app.listen(3000, function() {

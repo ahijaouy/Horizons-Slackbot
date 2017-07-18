@@ -126,32 +126,14 @@ function generateAuthUrl(slackId) {
     });
 }
 
+// Returns an instance of Google Calendar that is configured for the
+// user afiliated with the slackId passed in. 
 function getGoogleCalendar(slackId) {
     return new Promise(function(resolve, reject) {
         getAuthClient(slackId)
             .then(client => resolve(google.calendar({version: 'v3',auth: client})))
             .catch(reject)
     })
-    
-}
-
-function getEmail(slackId) {
-    return new Promise(function(resolve, reject) {
-        getAuthClient(slackId)
-            .then(client => {
-                plus.people.get({
-                    auth: client,
-                    userId: 'me'
-                }, function(err, resp) {
-                    console.log("RESP: ", resp.emails[0].value);
-                })
-            })
-
-    })
-    
-
-    
-
     
 }
 

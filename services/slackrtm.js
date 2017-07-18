@@ -1,7 +1,6 @@
 const { RtmClient, WebClient, CLIENT_EVENTS, RTM_EVENTS } = require('@slack/client');
 const { sendQuery } = require('./nlp');
 const slackConfig = require('../config/slack');
-const { RtmClient, WebClient, CLIENT_EVENTS, RTM_EVENTS } = require('@slack/client');
 
 const bot_token = slackConfig.SLACK_BOT_TOKEN || '';
 

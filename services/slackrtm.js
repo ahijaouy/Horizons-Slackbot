@@ -19,4 +19,4 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
     }
 });
 
-modules.export = { rtm, web };
+module.exports = { rtm, web };

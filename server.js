@@ -13,7 +13,8 @@ const bodyParser = require('body-parser');
 // Local Imports
 const { rtm, web } = require('./services/slackrtm');
 const routes = require('./routes/routes');
-  
+// const cronJob = require()
+
 // Global Variables
 const app = express();
 const port = process.env.PORT || 3000
@@ -34,4 +35,4 @@ app.listen(port, function() {
 });
 
 // Start Slack Websockets
-// rtm.start();
+rtm.start();

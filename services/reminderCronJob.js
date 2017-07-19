@@ -136,20 +136,23 @@ reminderFinder(Reminder)
         return {today: todaySort, tomorrow: tomorrowSort}
     })
     .then(resp3 => {
+        if (! resp3 || !resp3.today || !resp3.tomorrow) {
+            console.log('ERROR');
+            return;
+        }
         console.log('resp 3 today', resp3.today)
         resp3.today.forEach((user) => {
-            rtm.sendMessage('reminders for today:')
+            rtm.sendMessage('reminders for today:');
             resp3.today[user].forEach((task) => {
                 rtm.sendMessage(task, user);
-            })
+            });
         })
         console.log('resp 3 tomorrow', resp3.tomorrow)
         resp3.tomorrow.forEach((user) => {
-            rtm.sendMessage('reminders for tomorrow:')
+            rtm.sendMessage('reminders for tomorrow:');
             resp3.tomorrow[user].forEach((task) => {
                 rtm.sendMessage(task, user);
-            })
+            });
         })
     });
 
-    rtm.start();

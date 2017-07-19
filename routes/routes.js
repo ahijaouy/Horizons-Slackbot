@@ -32,7 +32,7 @@ router.post('/slack/create_event', (req, res) => {
   console.log('payload actions:', payload.actions, payload.actions[0]);
   
 
-  User.findById(payload.user.id, (user, err) => {
+  User.findOne({slackId: payload.user.id}, (user, err) => {
     console.log('BP, FOUND USER', user);
 
     if (payload.actions[0].value === 'true') {

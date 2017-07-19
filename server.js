@@ -13,7 +13,7 @@ const bodyParser = require('body-parser');
 
 // Local Imports
 const { rtm, web } = require('./services/slackrtm');
-const dbconfig = require('./config/database');
+// const dbconfig = require('./config/database');
 const routes = require('./routes/routes');
 
 // Global Variables
@@ -23,11 +23,7 @@ const port = process.env.PORT || 3000
 // Routes
 app.use('/', routes);
 
-<<<<<<< HEAD
-
-=======
 // Database Connection
->>>>>>> development
 mongoose.connect(dbconfig.url);
 
 

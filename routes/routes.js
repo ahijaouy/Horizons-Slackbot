@@ -24,11 +24,14 @@ router.post('/slack/create_event', (req, res) => {
   console.log('****************************');
 
   User.findById(payload.user.id, (user, err) => {
+    console.log('BP, FOUND USER', user);
 
     if (payload.actions[0].value === 'true') {
         if (err) {
             console.log('ERROR: ',err);
         } else {
+            console.log('BP, CLICKED CONFIRM');
+            
             const eventInfo = JSON.parse(authUser.pending);
 
             if (eventInfo.type === 'reminder.add') {
@@ -38,39 +41,52 @@ router.post('/slack/create_event', (req, res) => {
                     user_id: user._id
                 });
 
+                console.log('BP, CREATED REMINDER ', newReminder);
+                
+
                 newReminder.save((err) => {
                     if (err) {
                         console.log('ERROR HERE: ',err);
                     } else {
+                        console.log('BP, SAVED REMINDER ');
+                            
                         user.pending = JSON.stringify({});
 
                         user.save((err) => {
                             if (err) {
                                 console.log('ERROR THERE: ',err);
                             } else {
-                            res.send('Event created! :white_check_mark:');
+                                console.log('BP, SAVED NEW USER ', user);
+                                
+                                res.send('Event created! :white_check_mark:');
                             }
                         });  // close user save
                     }
                 });  // close reminder save
             } else {
                 user.pending = JSON.stringify({});
-                console.log('NEW USER: ', user);
+                console.log('MEETING, NEW USER: ', user);
                 user.save((err) => {
                     if (err) {
                         console.log('ERROR THERE: ',err);
                     } else {
+                        console.log('BP, MEETING, SAVED USER ', user);
+                        
                         res.send('Event created! :white_check_mark:');
                     }
                 });  // close user save
             } 
         }  
     } else {
+        console.log('BP, PRESSED CANCEL')
         user.pending = JSON.stringify({});
+        console.log('BP, NEW USER ', user);
+        
         user.save((err) => {
             if (err) {
                 console.log('ERROR THERE: ',err);
             } else {
+                console.log('BP, CANCEL, SAVED USER');
                 res.send('Canceled! :x:');
             } 
         }); // close user save

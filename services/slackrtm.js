@@ -39,18 +39,14 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
     // }
 
     else if (message.text) {
-        console.log('message: ',message);
-
         //process message has slack user ids
         if (message.text.indexOf('<@') >= 0) {
-            let userIds = message.text.match(/<@\w+>/g);
-            console.log('*************** userIds:', userIds,'***************');
-            userIds.forEach(id => {
-                message.text = message.text.replace(id, rtm.dataStore.getUserById(id.substring(2,id.length-1)).profile.real_name)+', ';
+            message.text = message.text.replace(/<@(\w+)>/g, function(match, userId) { 
+                console.log('MATCH:', match, userId);
+                return  rtm.dataStore.getUserById(userId).profile.real_name+', ';
             });
-            
-            // message.text = 'REPLACED USER IDS TO BE: '+userIds.join(', ');
         }
+
         //INSERT PENDING PART :: DON'T SEND QUERY IF PENDING
         console.log('message: ',message);
         

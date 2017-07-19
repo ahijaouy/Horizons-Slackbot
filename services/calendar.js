@@ -1,49 +1,57 @@
-// var google = require('googleapis');
-// var calendar = google.calendar('v3');
-// var OAuth2 = google.auth.OAuth2;
-// var oauth2Client = new OAuth2();
 const auth = require('./authentication');
 
-function createReminder(day, subject) {
-
+//Generates a meeting event object
+function generateReminder(date, subject) {
+  return {
+    'summary': subject,
+    'start': {
+      'date': date.toISOString().substring(0,10)
+    },
+    'end': {
+      'date': date.toISOString().substring(0,10)
+    }
+  };
 }
 
-function createMeeting(people, date, time, subject)
+//Generates a meeting event object
+function generateMeeting(start, end, subject, attendees) {
+  return {
+    'summary': subject,
+    'start': {
+      'dateTime': start.toISOString()
+    },
+    'end': {
+      'dateTime': end.toISOString()
+    },'attendees': attendees.map(email => ({'email': email}))
+  };
+}
 
 
+function createReminder(slackId, date, subject) {
+  auth.getGoogleCalendar(slackId)
+    .then(calendar => {
+      calendar.events.insert({
+        calendarId: 'primary',
+        resource: generateReminder(date, subject)
+      })
+    })
+    .catch(err => console.log('ERROR: ', err));
+}
 
-var event = {
-  'summary': 'Tutoring',
-  'description': 'Tutor Me Now',
-  'anyoneCanAddSelf': true,
-  'visibility': 'public',
-  'hangoutLink': 'https://hangouts.google.com/hangouts/_/ylkydvhwyre7bghuoi5xkvj7fye',
-  'start': {
-    'dateTime': time
-  },
-  'end': {
-    'dateTime': time2
-  },
-  'attendees': [
-    {'email': 'hijaouyaaaa@gmail.com'}
-  ],
-  'reminders': {
-    'useDefault': true
-  }
-};
+function createMeeting(slackId, start, end, subject, attendees) {
+  auth.getGoogleCalendar(slackId)
+    .then(calendar => {
+      calendar.events.insert({
+        calendarId: 'primary',
+        resource: generateMeeting(start, end, subject, attendees)
+      })
+    })
+    .catch(err => console.log('ERROR: ', err));
+}
 
-
-calendar.events.insert({
-    auth: oauth2Client,
-    calendarId: 'primary',
-    resource: event,
-  }, function(err, event) {
-    
-    callback(err, event.hangoutLink)
-    //console.log(event.hangoutLink);
-  });
 
 
 module.exports = {
-
+  createReminder,
+  createMeeting
 }

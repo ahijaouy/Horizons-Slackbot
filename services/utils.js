@@ -9,20 +9,22 @@ const User = require('../models/user.js');
 //    notFound contains the Ids for which no match was found.
 //  - Returns: {found: [], notFound: []}
 const linkEmails = (idArray) => {
-  let found = [];
-  let notFound = [];
-  idArray.forEach((slackId) => {
-    User.findOne({slackId:slackId})
-      .then( userObject => {
-        if(userObject){
-          found.push(userObject.email)
-        } else{
-          notFound.push(slackId)
-        }
-      })
-      .catch(err => console.log('error', err))
-  });
-  return {found, notFound};
+  return new Promise((resolve, reject) => {
+    let found = [];
+    let notFound = [];
+    idArray.forEach((slackId) => {
+      User.findOne({slackId:slackId})
+        .then( userObject => {
+          if(userObject){
+            found.push(userObject.email)
+          } else{
+            notFound.push(slackId)
+          }
+        })
+        .catch(err => console.log('error', err))
+    })
+    resolve({found, notFound});
+  }
 }
 
 // utils.getEndDate(date, duration) 

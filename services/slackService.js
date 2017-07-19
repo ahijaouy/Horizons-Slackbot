@@ -2,6 +2,8 @@ const { sendQuery } = require('./nlp');
 const auth = require('./authentication');
 const AUTH_PREFIX = 'https://jarvis-horizons.herokuapp.com/';
 
+let SLACK_IDS = [];
+
 const responseJSON = {
     // "text": "*optional add text here*",
     "attachments": [
@@ -68,10 +70,8 @@ getSlackEditableDate = (messageDate, messageTime) => {
 // method that takes a message and returns objects with results from AI api
 // return: object with SEND key if rtm.sendMessage is to be used, and the message as its value
 // return: object with POST key if web.chat.postMessage is to be used, and msg + json as value object
-getApiResponse = (message, authUser, slackIds) => {
-    // console.log('get api response');
-    console.log('gar received slack ids: ', slackIds);
-    
+getApiResponse = (message, authUser) => {
+    // console.log('get api response');    
 
     return sendQuery(message.text, authUser._id)
         .then((response) => {
@@ -98,8 +98,8 @@ getApiResponse = (message, authUser, slackIds) => {
             } else {
                 // console.log('ACTION IS COMPLETE', data.result.parameters);
                 const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
-                console.log('gar sending slackIds: ', slackIds)
-                return { post: { msg: responseMsg, json: responseJSON, data: data.result, slackIds: slackIds } };
+                console.log('gar sending slackIds: ', SLACK_IDS)
+                return { post: { msg: responseMsg, json: responseJSON, data: data.result, slackIds: SLACK_IDS } };
             }
         })
         .then((obj) => {
@@ -120,6 +120,9 @@ getApiResponse = (message, authUser, slackIds) => {
 // or returns promise chain of processing a message
 processMessage = (message, slackIds) => {
     console.log('pm received slack ids: ', slackIds);
+    if (slackIds && slackIds[0]) {
+        SLACK_IDS = slackIds;
+    }
     return new Promise((resolve, reject) => {
         // console.log('bp 1: ', message.user);
         auth.checkUser(message.user)
@@ -130,10 +133,8 @@ processMessage = (message, slackIds) => {
 
                 if (authUser.pending && JSON.parse(authUser.pending).type) {
                     resolve({pending: true});                    
-                } else {
-                    console.log('pm sending slack ids: ', slackIds);
-                    
-                    resolve(getApiResponse(message, authUser, slackIds));
+                } else {                    
+                    resolve(getApiResponse(message, authUser));
                 }
 
             } else {

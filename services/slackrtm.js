@@ -23,7 +23,7 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
 // When bot loads and opens connection to channel(s), send message to general that bot has started 
 rtm.on(CLIENT_EVENTS.RTM.RTM_CONNECTION_OPENED, () => {
     rtm.sendMessage("Hello Mr. Stark. I'm ready for you ;)", channel);
-    console.log('JARVIS started!');
+    console.log('JARVIS started!'); 
 });
 
 // When bot receives a message:  filter to only receive DMs, filter to replace slack ids in code, 

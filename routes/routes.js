@@ -53,7 +53,15 @@ router.post('/slack/create_event', (req, res) => {
             });
 
             console.log('BP, CREATED REMINDER ', newReminder);
-            
+            // calendar.createReminder(slackId, date, subject)
+            //  - Param: slackId -> String
+            //           date    -> Date
+            //           subject -> String
+            //  - Description: Adds a Reminder event to the Google Calendars
+            //    for the user specified by the slackId for the date
+            //    specified with the subject specified
+
+            calendar.createReminder(payload.user.id, eventInfo.date, eventInfo.subject);
 
             newReminder.save((err) => {
                 if (err) {
@@ -71,7 +79,7 @@ router.post('/slack/create_event', (req, res) => {
                             
                             res.send('Event created! :white_check_mark:');
                         }
-                    });  // close user save
+                    });   // close user save
                 }
             });  // close reminder save
         } else {

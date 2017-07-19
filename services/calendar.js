@@ -3,7 +3,7 @@ const auth = require('./authentication');
 
 /************************* Exported Methods *************************/
 
-// calendar.craeteReminder(slackId, date, subject)
+// calendar.createReminder(slackId, date, subject)
 //  - Param: slackId -> String
 //           date    -> Date
 //           subject -> String

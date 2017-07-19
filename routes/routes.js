@@ -53,13 +53,6 @@ router.post('/slack/create_event', (req, res) => {
             });
 
             console.log('BP, CREATED REMINDER ', newReminder);
-            // calendar.createReminder(slackId, date, subject)
-            //  - Param: slackId -> String
-            //           date    -> Date
-            //           subject -> String
-            //  - Description: Adds a Reminder event to the Google Calendars
-            //    for the user specified by the slackId for the date
-            //    specified with the subject specified
 
             console.log('creating google reminder with: ',payload.user.id, new Date(eventInfo.date), eventInfo.subject);
             calendar.createReminder(payload.user.id, new Date(eventInfo.date), eventInfo.subject);
@@ -85,6 +78,23 @@ router.post('/slack/create_event', (req, res) => {
             });  // close reminder save
         } else {
             user.pending = JSON.stringify({});
+            console.log('creating google reminder with: ',payload.user.id, new Date(eventInfo.date), eventInfo.subject);
+
+            const startDate = (user.pending.date + " " + payload.user.time);
+            const endDate = (user.pending.duration) ? utils.getEndDate(startDate,user.pending.duration) : utils.getEndDate(startDate);
+            const attendees = 
+            // calendar.createMeeting(slackId, start, end, subject, attendees)
+            //  - Param: slackId   -> String
+            //           start     -> Date
+            //           end       -> Date
+            //           subject   -> String
+            //           attendees -> Date
+            //  - Description: Adds a Meeting event to the Google Calendars
+            //    for the user aspecified by the slackId and the attendees specified
+            //    for the start and end dates (with times) specified 
+            //    and with the subject specified
+            calendar.createMeeting(payload.user.id, startDate, endDate, user.pending.subject, )
+
             console.log('MEETING, NEW USER: ', user);
             user.save((err) => {
                 if (err) {

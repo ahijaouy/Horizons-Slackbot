@@ -51,7 +51,7 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
         // either chat.postMessage with confirmation/cancel interactive messages 
         // or rtm.sendMessage with static message
         // or do nothing 
-        slackService.processMessage(message)
+        slackService.processMessage(message, slackIds)
         .then((logic) => {
             console.log("logic", logic)
             if (logic.post) { 

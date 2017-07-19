@@ -68,7 +68,7 @@ getSlackEditableDate = (messageDate, messageTime) => {
 // method that takes a message and returns objects with results from AI api
 // return: object with SEND key if rtm.sendMessage is to be used, and the message as its value
 // return: object with POST key if web.chat.postMessage is to be used, and msg + json as value object
-getApiResponse = (message, authUser) => {
+getApiResponse = (message, authUser, slackIds) => {
     console.log('get api response');
 
     return sendQuery(message.text, authUser._id)
@@ -96,7 +96,7 @@ getApiResponse = (message, authUser) => {
             } else {
                 console.log('ACTION IS COMPLETE', data.result.parameters);
                 const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
-                return { post: { msg: responseMsg, json: responseJSON, data: data.result } };
+                return { post: { msg: responseMsg, json: responseJSON, data: data.result, slackIds: slackIds } };
             }
         })
         .then((obj) => {
@@ -115,7 +115,7 @@ getApiResponse = (message, authUser) => {
 // main method called by slackrtm.js
 // receives a message, checks authorization, returns sendMessage with link if user not authorized
 // or returns promise chain of processing a message
-processMessage = (message) => {
+processMessage = (message, slackIds) => {
 
     return new Promise((resolve, reject) => {
         console.log('bp 1: ', message.user);
@@ -128,7 +128,7 @@ processMessage = (message) => {
                 if (authUser.pending && JSON.parse(authUser.pending).type) {
                     resolve({pending: true});                    
                 } else {
-                    resolve(getApiResponse(message, authUser));
+                    resolve(getApiResponse(message, authUser, slackIds));
                 }
 
             } else {

@@ -5,7 +5,7 @@ const mongoose = require('mongoose')
 const _ = require('underscore')
 
 ////
-const { rtm } = require('./services/slackrtm');
+const { rtm } = require('./slackrtm');
 ///
 
 mongoose.Promise = global.Promise;

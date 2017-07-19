@@ -80,8 +80,8 @@ router.post('/slack/create_event', (req, res) => {
             user.pending = JSON.stringify({});
             console.log('creating google reminder with: ',payload.user.id, new Date(eventInfo.date), eventInfo.subject);
 
-            const startDate = (user.pending.date + " " + payload.user.time);
-            const endDate = (user.pending.duration) ? utils.getEndDate(startDate,user.pending.duration) : utils.getEndDate(startDate);
+            const startDate = new Date(user.pending.date + " " + payload.user.time);
+            const endDate = (user.pending.duration) ? utils.getEndDate(startDate, user.pending.duration) : utils.getEndDate(startDate);
             const attendees = utils.linkEmails(user.pending.slackIds).found;
             
             calendar.createMeeting(payload.user.id, startDate, endDate, user.pending.subject, attendees);

@@ -1,3 +1,6 @@
 const reminderFinder = require('./reminderCronJob');
 
-console.log(reminderFinder)
+
+// reminderFinder
+// reminderFinder
+// console.log('remindFind', reminderFinder)

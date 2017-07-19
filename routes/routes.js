@@ -55,11 +55,12 @@ router.post('/slack/create_event', (req, res) => {
                 });  // close reminder save
             } else {
                 user.pending = JSON.stringify({});
+                console.log('NEW USER: ', user);
                 user.save((err) => {
                     if (err) {
                         console.log('ERROR THERE: ',err);
                     } else {
-                    res.send('Event created! :white_check_mark:');
+                        res.send('Event created! :white_check_mark:');
                     }
                 });  // close user save
             } 

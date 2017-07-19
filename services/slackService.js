@@ -96,6 +96,7 @@ getApiResponse = (message, authUser, slackIds) => {
             } else {
                 console.log('ACTION IS COMPLETE', data.result.parameters);
                 const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
+                console.log('going to save slack ids in pending: ', slackIds)
                 return { post: { msg: responseMsg, json: responseJSON, data: data.result, slackIds: slackIds } };
             }
         })

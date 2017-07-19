@@ -40,7 +40,7 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
         // process message has slack user ids: save to array, and replae with real names in text
         if (message.text.indexOf('<@') >= 0) {
             message.text = message.text.replace(/<@(\w+)>/g, function(match, userId) { 
-                console.log('MATCH:', match, userId);
+                // console.log('MATCH:', match, userId);
                 slackIds.push(userId);
                 return  rtm.dataStore.getUserById(userId).profile.real_name+', ';
             });
@@ -55,13 +55,13 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
         console.log('passing in slack ids: ', slackIds);
         slackService.processMessage(message, slackIds)
         .then((logic) => {
-            console.log("logic", logic)
+            // console.log("logic", logic)
             if (logic.post) { 
                 web.chat.postMessage(message.channel, logic.post.msg, logic.post.json, function(err, res) {
                     if (err) {
                         console.log('Error:', err);
                     } else {
-                        console.log('Message sent: ', res);
+                        // console.log('Message sent: ', res);
                         
                     }
                 });
@@ -71,7 +71,7 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
             } else if (logic.pending) {
                 rtm.sendMessage('You are in a pending state! Confirm or cancel above event to continue.', message.channel);
             } else {
-                console.log('reached unspecified');
+                // console.log('reached unspecified');
             }
         })
         .catch((err) => {

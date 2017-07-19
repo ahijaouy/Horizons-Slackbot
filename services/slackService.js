@@ -52,12 +52,12 @@ getResponseMessage = (action, parameters) => {
 
 // method that takes a date from AI api and converts it to a Slack formatted date (and time)   
 getSlackEditableDate = (messageDate, messageTime) => {
-    console.log('received date: ', messageDate);
+    // console.log('received date: ', messageDate);
     let date;
 
     if (messageTime) {
         date = new Date(messageDate+' '+messageTime) / 1000;
-        console.log('received time: ',messageTime);
+        // console.log('received time: ',messageTime);
         return "<!date^"+date+"^ on {date_short} at {time}|Default date: 2000-01-01 1:11:11 AM>";
     } else {
         date = new Date(messageDate) / 1000 + 86400; 
@@ -69,7 +69,7 @@ getSlackEditableDate = (messageDate, messageTime) => {
 // return: object with SEND key if rtm.sendMessage is to be used, and the message as its value
 // return: object with POST key if web.chat.postMessage is to be used, and msg + json as value object
 getApiResponse = (message, authUser, slackIds) => {
-    console.log('get api response');
+    // console.log('get api response');
     console.log('gar received slack ids: ', slackIds);
     
 
@@ -77,33 +77,33 @@ getApiResponse = (message, authUser, slackIds) => {
         .then((response) => {
             let data = response.data;
 
-            console.log(data);
+            // console.log(data);
 
             if (data.result.action.startsWith('smalltalk') || data.result.action.startsWith('profanity')) {
-                console.log('responding to '+data.result.action);
+                // console.log('responding to '+data.result.action);
 
                 const msg = response.data.result.fulfillment.speech;
                 return { send: msg };
 
             } else if (data.result.action !== 'reminder.add' && data.result.action !== 'meeting.add') {
-                console.log('UNSPECIFIED intents');
+                // console.log('UNSPECIFIED intents');
 
                 return {} ;
 
             } else if (data.result.actionIncomplete) {
-                console.log('action INCOMPLETE');
+                // console.log('action INCOMPLETE');
                 const msg =  response.data.result.fulfillment.speech;
                 return { send: msg };
 
             } else {
-                console.log('ACTION IS COMPLETE', data.result.parameters);
+                // console.log('ACTION IS COMPLETE', data.result.parameters);
                 const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
                 console.log('gar sending slackIds: ', slackIds)
                 return { post: { msg: responseMsg, json: responseJSON, data: data.result, slackIds: slackIds } };
             }
         })
         .then((obj) => {
-            console.log('OBJ: ', obj);
+            // console.log('OBJ: ', obj);
             return new Promise(function(resolve, reject) {
                 if (obj.post) {
                     authUser.pending = JSON.stringify(Object.assign({}, obj.post.data.parameters, {type: obj.post.data.action} ))
@@ -121,10 +121,10 @@ getApiResponse = (message, authUser, slackIds) => {
 processMessage = (message, slackIds) => {
     console.log('pm received slack ids: ', slackIds);
     return new Promise((resolve, reject) => {
-        console.log('bp 1: ', message.user);
+        // console.log('bp 1: ', message.user);
         auth.checkUser(message.user)
         .then((authUser) => {            
-            console.log('bp 2');
+            // console.log('bp 2');
             if (authUser.authenticated) {
                 console.log('authenticated route');
 
@@ -137,7 +137,7 @@ processMessage = (message, slackIds) => {
                 }
 
             } else {
-                console.log('unauthenticated route');
+                // console.log('unauthenticated route');
                 const msg = 'Click this link before continuing! '+AUTH_PREFIX+'connect?auth_id='+authUser._id;
                 resolve({ send: msg });
             }

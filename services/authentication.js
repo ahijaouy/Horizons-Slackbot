@@ -19,9 +19,9 @@ const oauth2Client = new OAuth2(authConfig.clientID,authConfig.clientSecret, aut
 //  - Param: slackId -> String
 //  - Description: Generate a Google Auth URL 
 //    for a user given their SlackId
-function generateAuthUrl(slackId) {
+function generateAuthUrl(id) {
     return new Promise(function(resolve, reject) {
-        User.findOne({slackId})
+        User.findById(id)
             .then(user => {
                 const url = oauth2Client.generateAuthUrl({
                     access_type: 'offline',
@@ -30,7 +30,7 @@ function generateAuthUrl(slackId) {
                         'https://www.googleapis.com/auth/userinfo.email',
                         'https://www.googleapis.com/auth/calendar'
                     ],
-                    state: encodeURIComponent(JSON.stringify({auth_id:user.id}))
+                    state: encodeURIComponent(JSON.stringify({auth_id:user._id}))
                 });
                 resolve(url)
             });
@@ -71,8 +71,8 @@ function checkUser(slackId) {
 }
 
 // Authentication.generateAuthTokens(code, id)
-//  - Param: id    -> String
-//           code  -> String
+//  - Param: id   -> String
+//           code -> String
 //  - Description: Generates Google Tokens 
 //    for a user given the Google Code & SlackID.
 //    Then saves tokens & email in MongoDB

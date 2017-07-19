@@ -4,7 +4,8 @@ var userSchema = new mongoose.Schema({
     slackId: String,
     authenticated: Boolean,
     google: Object,
-    email: String
+    email: String,
+    pending: String
 });
 
 module.exports = mongoose.model('User', userSchema);

@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
 
-const reminderSchema = mongoose.Schema({
-  subject: String,
-  date: Date,
-  user_id: {
-    type: Schema.Types.ObjectId, 
-    ref: 'User'  //CHECK THAT THIS IS RIGHT
-  }
+const pendingSchema = new mongoose.Schema({
+  action: String,     // reminder.add OR meeting.add
+  subject: String,  
+  date: Date,         // for meeting, this is the start time with both Date and Time included
+  slackUser: String,
+  attendees: Array,   // only for meeting
+  duration: Number    // optional for meeting
 });
 
-export default mongoose.model('Reminder', reminderSchema);
+module.exports = mongoose.model('Pending', pendingSchema);

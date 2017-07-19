@@ -20,15 +20,21 @@ const oauth2Client = new OAuth2(authConfig.clientID,authConfig.clientSecret, aut
 //  - Description: Generate a Google Auth URL 
 //    for a user given their SlackId
 function generateAuthUrl(slackId) {
-    return oauth2Client.generateAuthUrl({
-        access_type: 'offline',
-        prompt: 'consent',
-        scope: [
-            'https://www.googleapis.com/auth/userinfo.email',
-            'https://www.googleapis.com/auth/calendar'
-        ],
-        state: encodeURIComponent(JSON.stringify({auth_id:slackId}))
-    });
+    return new Promise(function(resolve, reject) {
+        User.findOne({slackId})
+            .then(user => {
+                const url = oauth2Client.generateAuthUrl({
+                    access_type: 'offline',
+                    prompt: 'consent',
+                    scope: [
+                        'https://www.googleapis.com/auth/userinfo.email',
+                        'https://www.googleapis.com/auth/calendar'
+                    ],
+                    state: encodeURIComponent(JSON.stringify({auth_id:user.id}))
+                });
+                resolve(url)
+            });
+    })
 }
 
 // Authentication.getGoogleCalendar(slackId)
@@ -70,7 +76,7 @@ function checkUser(slackId) {
 //  - Description: Generates Google Tokens 
 //    for a user given the Google Code & SlackID.
 //    Then saves tokens & email in MongoDB
-function generateAuthTokens(code, slackId) {
+function generateAuthTokens(code, id) {
     oauth2Client.getToken(code, function (err, tokens) {
         if (err) {
             console.log(err);
@@ -80,7 +86,7 @@ function generateAuthTokens(code, slackId) {
             plus.people.get({auth: oauth2Client, userId: 'me'}, function(err, resp) {
                 const email2 = resp.emails[0].value;
                 //Update the user profile with their email & google tokens
-                User.findOneAndUpdate({slackId}, {google: tokens, authenticated: true, email: email2}, function(err, result) {
+                User.findByIdAndUpdate(id, {google: tokens, authenticated: true, email: email2}, function(err, result) {
                     if (err) console.log(err);
                 });
             })

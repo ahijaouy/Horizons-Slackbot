@@ -4,6 +4,10 @@ const mongoose = require('mongoose')
 
 const _ = require('underscore')
 
+////
+const { rtm } = require('./services/slackrtm');
+///
+
 mongoose.Promise = global.Promise;
 
 function finalList(model, reminders){
@@ -14,25 +18,26 @@ function finalList(model, reminders){
             users.forEach( (user) => {
                 const slackId = user.slackId
                 if(!finalObj[slackId]) {
-                    finalObj[slackId] = { today: [], tomorrow: []}
+                    // finalObj[slackId] = { today: [], tomorrow: []}
+                    finalObj[slackId] = {}
                 }
             })
-            const final = appendRemind(finalObj, reminders)
-            resolve(final);
+            const today = appendRemind(finalObj, reminders, 'today')
+            const tomorrow = appendRemind(today, reminders, 'tomorrow')
+            resolve(tomorrow);
         })
     })
 }
 
-function appendRemind(obj, reminder){
-    const today = reminder['today'];
-    const tomorrow = reminder['tomorrow'];
+function appendRemind(obj, reminder, current){
+    const day = reminder[current];
     for(var key in obj){
-        for(var key2 in today){
-            for(var key3 in tomorrow){
-                if(key === key2){
-                    obj[key].today = today[key2]
-                }else if( key === key3){
-                    obj[key].tomorrow = tomorrow[key3]
+        for(var key2 in day){
+            if(key === key2){
+                if(current === 'today'){
+                    obj[key].today = day[key2]
+                }else{
+                    obj[key].tomorrow = day[key2]
                 }
             }
         }
@@ -87,6 +92,32 @@ function reminderGrouper(response){
     return groupObj
 }
 
+function daySort(obj, day){
+    let dayArray = []
+    for(var key in obj){
+        const current = obj[key]
+        const currentDay = current[day]
+        let dayObj = {}
+        let tempArray = []
+        if(currentDay){
+            currentDay.forEach((reminder) => {
+                const SlackId = reminder.user_id.slackId;
+                tempArray.push(reminder.subject);
+                dayObj[SlackId] = tempArray
+            })
+        }
+        if(!_.isEmpty(dayObj)){
+            dayArray.push(dayObj)
+        }
+    }
+    return dayArray;
+}
+
+function emitReminders(){
+
+}
+
+
 reminderFinder(Reminder)
     .then(result => {
         return result
@@ -95,13 +126,28 @@ reminderFinder(Reminder)
         return reminderGrouper(response)
     })
     .then(resp => {
+        console.log('aaa');
         return finalList(User, resp)
     })
     .then(resp2 => {
-        /// final list USE THIS !!!!!
-        return resp2
+        // console.log('resp 2', resp2)
+        const todaySort =  daySort(resp2, 'today')
+        const tomorrowSort = daySort(resp2, 'tomorrow')
+        return {today: todaySort, tomorrow: tomorrowSort}
+    })
+    .then(resp3 => {
+        console.log('resp 3 today', resp3.today)
+        resp3.today.forEach((user) => {
+            rtm.sendMessage('reminders for today:')
+            resp3.today[user].forEach((task) => {
+                rtm.sendMessage(task, user);
+            })
+        })
+        console.log('resp 3 tomorrow', resp3.tomorrow)
+        resp3.tomorrow.forEach((user) => {
+            rtm.sendMessage('reminders for tomorrow:')
+            resp3.tomorrow[user].forEach((task) => {
+                rtm.sendMessage(task, user);
+            })
+        })
     });
-
-console.log('123')
-
-// console.log('############',reminderObject)

@@ -20,13 +20,15 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
     console.log(`Logged in as ${rtmStartData.self.name} of team ${rtmStartData.team.name}, but not yet connected to a channel`);
 });
 
-// When bot loads and opens connection to channel(s), send message to general that bot has started 
+// When bot loads and opens connection to channel(s), send message to general that bot has started
 rtm.on(CLIENT_EVENTS.RTM.RTM_CONNECTION_OPENED, () => {
-    rtm.sendMessage("Hello Mr. Stark. I'm ready for you ;)", channel);
-    console.log('JARVIS started!'); 
+    const feelings = ['horny ;)', 'ready for you ;)', 'slack', 'ready to fight Amanda', 'ready to eat a watermelon']
+    const item = feelings[Math.floor(Math.random()*feelings.length)];
+    rtm.sendMessage('Hello Mr Stark, I am ' + item, channel);
+    console.log('JARVIS started!');
 });
 
-// When bot receives a message:  filter to only receive DMs, filter to replace slack ids in code, 
+// When bot receives a message:  filter to only receive DMs, filter to replace slack ids in code,
 rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
 
     const dm = rtm.dataStore.getDMByUserId(message.user);
@@ -47,8 +49,8 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
         }
         console.log('message: ',message);
 
-        // process message with slackService message 
-        // either chat.postMessage with confirmation/cancel interactive messages 
+        // process message with slackService message
+        // either chat.postMessage with confirmation/cancel interactive messages
         // or rtm.sendMessage with static message
         // or do nothing 
 
@@ -81,4 +83,3 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
 });
 
 module.exports = { web, rtm };
-

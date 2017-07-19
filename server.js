@@ -2,9 +2,10 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dbconfig = require('./config/database');
 /// added by dom///
-const {Reminder} = require('./models/reminder')
+const Reminder = require('./models/reminder')
+const User = require('./models/user')
+const remindFinder = require('./services/reminderCronJob')
 const _ = require('underscore')
-// console.log(Reminder)
 ///
 
 const app = express();
@@ -16,43 +17,20 @@ const nlp = require('./services/nlp');
 //handle all the routes
 app.use('/', routes);
 
+remindFinder
 
 mongoose.connect(dbconfig.url);
 
+///Amanda needs to user this to make new reminders
+// const newReminder = new Reminder ({
+//     subject: "eat me",
+//     date: new Date(),
+//     user_id: "596e83742e70284cc0ff8b2f"
+// })
+// newReminder.save((err) => {
+//     if(err){console.log(err)}
+// })
 
-/// added by dom //
-function findReminder(){
-    Reminder.find().exec((err,reminders) => {
-        let remindTodayArray = [];
-        let remindTomorrowArray = [];
-        const today = new Date()
-        reminders.forEach( (task) => {
-            // console.log('task date', task.date)
-            const taskDate = task.date
-            if(taskDate.getYear() === today.getYear() && taskDate.getMonth() === today.getMonth()){
-                if(task.date.getDay() === today.getDay() + 1){
-                    task.remind2 = true;
-                    remindTomorrowArray.push(task)
-                }
-                else if(task.date.getDay() === today.getDay() ){
-                    task.remind = true;
-                    task.remind2 = false;
-                    remindTodayArray.push(task)
-                }else{
-                    task.remind = false;
-                    task.remind2 = false;
-                }
-            }
-        })
-        if(err){
-            console.log('error', err)
-        }
-        const returnObj = {today: remindTodayArray, tomorrow: remindTomorrowArray}
-        return returnObj
-    })
-}
-///
-console.log('abc', findReminder())
 
 
 // const auth = require('./services/authentication');

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const User = require('./user')
 const Schema = mongoose.Schema
 
 
@@ -11,8 +12,4 @@ const reminderSchema = new Schema({
   }
 });
 
-const Reminder = mongoose.model('Reminder', reminderSchema)
-
-module.exports = {
-    Reminder: Reminder
-}
+module.exports = mongoose.model('Reminder', reminderSchema)

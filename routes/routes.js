@@ -88,10 +88,10 @@ router.post('/slack/create_event', (req, res) => {
                     console.log(err);
                 }
 
-                console.log('attendees: ', attendees);
-                console.log('creating google meeting with: ',payload.user.id, startDate, endDate, attendees.found);
+                console.log('attendees: ', attendeesObj);
+                console.log('creating google meeting with: ',payload.user.id, startDate, endDate, attendeesObj.found);
                 
-                calendar.createMeeting(payload.user.id, startDate, endDate, eventInfo.subject, attendees.found);
+                calendar.createMeeting(payload.user.id, startDate, endDate, eventInfo.subject, attendeesObj.found);
 
                 console.log('MEETING, NEW USER: ', user);
                 user.pending = JSON.stringify({});

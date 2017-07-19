@@ -83,16 +83,7 @@ router.post('/slack/create_event', (req, res) => {
             const startDate = (user.pending.date + " " + payload.user.time);
             const endDate = (user.pending.duration) ? utils.getEndDate(startDate,user.pending.duration) : utils.getEndDate(startDate);
             const attendees = utils.linkEmails(user.pending.slackIds).found;
-            // calendar.createMeeting(slackId, start, end, subject, attendees)
-            //  - Param: slackId   -> String
-            //           start     -> Date
-            //           end       -> Date
-            //           subject   -> String
-            //           attendees -> Date
-            //  - Description: Adds a Meeting event to the Google Calendars
-            //    for the user aspecified by the slackId and the attendees specified
-            //    for the start and end dates (with times) specified 
-            //    and with the subject specified
+            
             calendar.createMeeting(payload.user.id, startDate, endDate, user.pending.subject, attendees);
 
             console.log('MEETING, NEW USER: ', user);

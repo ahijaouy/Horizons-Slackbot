@@ -151,3 +151,5 @@ reminderFinder(Reminder)
             })
         })
     });
+
+    rtm.start();

@@ -13,10 +13,12 @@ const auth = require('./authentication');
 function createReminder(slackId, date, subject) {
   auth.getGoogleCalendar(slackId)
     .then(calendar => {
+      console.log("andre's bp 1");
       calendar.events.insert({
         calendarId: 'primary',
         resource: generateReminder(date, subject)
       })
+      console.log("andre's bp 1");      
     })
     .catch(err => console.log('ERROR: ', err));
 }
@@ -34,10 +36,12 @@ function createReminder(slackId, date, subject) {
 function createMeeting(slackId, start, end, subject, attendees) {
   auth.getGoogleCalendar(slackId)
     .then(calendar => {
+      console.log("andre's bp 3");      
       calendar.events.insert({
         calendarId: 'primary',
         resource: generateMeeting(start, end, subject, attendees)
       })
+      console.log("andre's bp 4");      
     })
     .catch(err => console.log('ERROR: ', err));
 }

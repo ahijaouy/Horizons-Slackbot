@@ -61,6 +61,7 @@ router.post('/slack/create_event', (req, res) => {
             //    for the user specified by the slackId for the date
             //    specified with the subject specified
 
+            console.log('creating google reminder with: ',payload.user.id, eventInfo.date, eventInfo.subject);
             calendar.createReminder(payload.user.id, eventInfo.date, eventInfo.subject);
 
             newReminder.save((err) => {

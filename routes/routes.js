@@ -85,9 +85,9 @@ router.post('/slack/create_event', (req, res) => {
             const endDate = (eventInfo.duration) ? utils.getEndDate(startDate, eventInfo.duration) : utils.getEndDate(startDate);
             console.log('creating google meeting with: ',payload.user.id, startDate, endDate);
             
-            // const attendees = utils.linkEmails(user.pending.slackIds).found;
+            const attendees = utils.linkEmails(eventInfo.slackIds).found;
             
-            calendar.createMeeting(payload.user.id, startDate, endDate, eventInfo.subject, ['dchan331@gmail.com']);
+            calendar.createMeeting(payload.user.id, startDate, endDate, eventInfo.subject, attendees);
 
             console.log('MEETING, NEW USER: ', user);
             user.pending = JSON.stringify({}); //<<<<<<--- Should Be Here

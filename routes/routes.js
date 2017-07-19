@@ -77,7 +77,7 @@ router.post('/slack/create_event', (req, res) => {
                 }
             });  // close reminder save
         } else {
-            user.pending = JSON.stringify({});
+            //user.pending = JSON.stringify({}); // <<----- Why are we doing this here.
 
             console.log(user,'USER DATE: ', user.pending.date, 'USER TIME: ',user.pending.time);
 
@@ -90,6 +90,7 @@ router.post('/slack/create_event', (req, res) => {
             calendar.createMeeting(payload.user.id, startDate, endDate, user.pending.subject, ['dchan331@gmail.com']);
 
             console.log('MEETING, NEW USER: ', user);
+            user.pending = JSON.stringify({}); //<<<<<<--- Should Be Here
             user.save((err) => {
                 if (err) {
                     console.log('ERROR THERE: ',err);

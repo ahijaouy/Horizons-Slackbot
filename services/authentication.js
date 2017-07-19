@@ -71,19 +71,20 @@ function checkUser(slackId) {
 }
 
 // Authentication.generateAuthTokens(code, id)
-//  - Param: id -> String
-//           code    -> String
+//  - Param: id   -> String
+//           code -> String
 //  - Description: Generates Google Tokens 
 //    for a user given the Google Code & SlackID.
 //    Then saves tokens & email in MongoDB
 function generateAuthTokens(code, id) {
-    oauth2Client.getToken(code, function (err, tokens) {
+    const localoAuth2Client = getoAuthClient();
+    localoAuth2Client.getToken(code, function (err, tokens) {
         if (err) {
             console.log(err);
         } else {
-            oauth2Client.setCredentials(tokens);
+            localoAuth2Client.setCredentials(tokens);
             //Get the user's email 
-            plus.people.get({auth: oauth2Client, userId: 'me'}, function(err, resp) {
+            plus.people.get({auth: localoAuth2Client, userId: 'me'}, function(err, resp) {
                 const email2 = resp.emails[0].value;
                 //Update the user profile with their email & google tokens
                 User.findByIdAndUpdate(id, {google: tokens, authenticated: true, email: email2}, function(err, result) {
@@ -100,32 +101,27 @@ function generateAuthTokens(code, id) {
 // Configures the 0Auth Client for an authenticated User 
 // given  a SlackID. Also ensures the token is active.
 function getAuthClient(slackId) {
-    return new Promise(function(resolve, reject) {
-        User.findOne({slackId}, (err, user) => {
-            if (err) console.log('Error: ', err);
-            axios.get('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=' + user.google.access_token)
-                .then(resp => {
-                    oauth2Client.setCredentials(user.google);
-                    if (resp.expires_in < 50) {
-                        oauth2Client.refreshAccessToken(function(err, tokens) {
-                            User.findByIdAndUpdate(user.id, {google: tokens, authenticated: true })
-                        });
-                    } 
-                    resolve(oauth2Client);
-                })
-                .catch(err => {
-                    if (err.response.data.error === 'invalid_token') {
-                        oauth2Client.setCredentials(user.google);
-                        oauth2Client.refreshAccessToken(function(err, newTokens) {
-                            User.findByIdAndUpdate(user.id, { google: newTokens, authenticated: true })
-                        });
-                        resolve(oauth2Client);
-                    } else {
-                        reject(err);
-                    }
-                })
-        });
-    });
+    return User.findOne({slackId})
+        .then(user => {
+            const localoAuth2Client = getoAuthClient();
+            localoAuth2Client.setCredentials(user.google);
+
+            const expiryDate = new Date(user.expiry_date);
+            if (expiryDate < new Date()) {
+                localoAuth2Client.refreshAccessToken(function(err, tokens) {
+                    localoAuth2Client.setCredentials(tokens);
+                    user.google = tokens;
+                    user.authenticated = true;   
+                    return user.save().then(() => localoAuth2Client);    
+                });
+            } else {
+                return localoAuth2Client;
+            }
+        }).catch(console.log)
+}
+
+function getoAuthClient() {
+    return new OAuth2(authConfig.clientID,authConfig.clientSecret, authConfig.callbackURL);
 }
 
 module.exports = {

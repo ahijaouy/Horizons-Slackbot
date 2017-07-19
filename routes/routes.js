@@ -20,13 +20,16 @@ router.get('/connect/callback', (req, res) => {
 });
 
 router.post('/slack/create_event', (req, res) => { 
-  console.log('REQ', req);
+//   console.log('REQ', req);
 
   const payload = req.body.payload;
 
   console.log('****************************')
-  console.log('THIS IS PAYLOAD!!! ',payload); 
+//   console.log('THIS IS PAYLOAD!!! ',payload); 
   console.log('****************************');
+  console.log('payload user:', payload.user, payload.user.id);
+  console.log('payload actions:', payload.actions, payload.actions[0]);
+  
 
   User.findById(payload.user.id, (user, err) => {
     console.log('BP, FOUND USER', user);

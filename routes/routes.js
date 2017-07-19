@@ -6,6 +6,9 @@ var bodyParser = require('body-parser');
 const calendar = require('../services/calendar');
 const utils = require('../services/utils');
 
+const User = require('../models/user');
+const Reminder = require('../models/reminder');
+
 router.get('/connect', (req, res) => {
     auth.generateAuthUrl(req.query.auth_id).then(url => res.redirect(url));
 });

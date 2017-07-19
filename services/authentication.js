@@ -11,8 +11,13 @@ const oauth2Client = new OAuth2(authConfig.clientID,authConfig.clientSecret, aut
 //Post-condition: The user will exist in the DB
 //Returns: n/a
 function userRegistered(slackId) {
+    console.log('bp 3.5:', slackId);
+    
     return new Promise(function(resolve, reject) {
-        User.findOne({slackId}, (err, user) =>{
+        console.log('between')
+        User.findOne({slackId}, (err, user) => {
+            console.log('ERROR: ', err);
+            console.log('USER: ', user);
             if (err) reject(err);
             if (!user) {
                 const newUser = new User({slackId: slackId, authenticated: false});
@@ -28,6 +33,8 @@ function userRegistered(slackId) {
 //Determine if the user has already been authenticated with Google
 //Returns: a PROMISE that will resolve to a user's authentication status w/ google
 function userAuthenticated(slackId) {
+    console.log('bp 4:', slackId);
+    
     return new Promise (function(resolve, reject) {
         User.findOne({slackId}, (err, user) => {
             if (err) reject(err);
@@ -43,7 +50,7 @@ function userAuthenticated(slackId) {
 // and then returns their authentication status
 function checkUser(slackId) {
     return new Promise(function(resolve, reject) {
-        console.log('Test:');
+        console.log('bp 3:', slackId);
         userRegistered(slackId)
             .then(() => userAuthenticated(slackId))
             .then(resolve)

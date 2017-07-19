@@ -15,6 +15,7 @@ app.use('/', routes);
 
 mongoose.connect(dbconfig.url);
 
+
 //start the server
 app.listen(3000, function() {
     console.log('Server Listening on port 3000');

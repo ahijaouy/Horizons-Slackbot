@@ -1,4 +1,6 @@
 const { sendQuery } = require('./nlp');
+const auth = require('./authentication');
+const AUTH_PREFIX = 'http://localhost:3000/';
 
 getResponseMessage = (action, parameters) => {
     let returnMsg;
@@ -63,6 +65,8 @@ getApiResponse = (message, rtm, web) => {
         ]
     };
 
+    console.log('get api response');
+
     return sendQuery(message.text, message.user)
         .then((response) => {
             let data = response.data;
@@ -71,41 +75,63 @@ getApiResponse = (message, rtm, web) => {
 
             if (data.result.action.startsWith('smalltalk')) {
                 console.log('responding to SMALL TALK');
-                const msg = response.data.result.fulfillment.speech;
 
+                const msg = response.data.result.fulfillment.speech;
                 return { send: msg };
 
-                // rtm.sendMessage(response.data.result.fulfillment.speech, message.channel);
             } else if (data.result.action !== 'reminder.add' && data.result.action !== 'meeting.add') {
-                // unspecified intents
-                console.log('UNSPECIFIED');
+                console.log('UNSPECIFIED intents');
 
                 return {} ;
 
-                // return;
             } else if (data.result.actionIncomplete) {
                 console.log('action INCOMPLETE');
                 const msg =  response.data.result.fulfillment.speech;
                 return { send: msg };
 
-                // rtm.sendMessage(response.data.result.fulfillment.speech, message.channel);
             } else {
                 console.log('ACTION IS COMPLETE', data.result.parameters);
 
                 const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
                 return { post: { msg: responseMsg, json: responseJSON } };
-
-                // // const {channel, msg, json} = slackService.getApiResponse(/*Params*/);
-                // web.chat.postMessage(message.channel, responseMsg, responseJSON, function(err, res) {
-                //     if (err) {
-                //         console.log('Error:', err);
-                //     } else {
-                //         console.log('Message sent: ', res);
-                //         needToRespond = false;
-                //     }
-                // });
             }
         })
 }
 
-module.exports = { getApiResponse };
+processMessage = (message) => {
+    return new Promise((resolve, reject) => {
+        console.log('bp 1: ', message.user);
+        auth.checkUser(message.user)
+        .then((isAuthUser) => {            
+            console.log('bp 2');
+            if (isAuthUser) {
+                console.log('authenticated route');
+                resolve(getApiResponse(message));
+            } else {
+                console.log('unauthenticated route');
+                const msg = AUTH_PREFIX+'connect?auth_id='+message.user;
+                resolve({ send: msg });
+            }
+        });
+        
+    });
+} 
+
+module.exports = { getApiResponse, processMessage };
+
+/* //Process if input is Slack user id
+
+if (message.text.indexOf('<@') >= 0) {
+    console.log('recognizing user id input');
+    axios.get('https://slack.com/api/users.list?token=xoxp-214075203605-214001278996-215348011622-6220a67bf54d0165d770c06e356c255a&pretty=1')
+    .then((response) =>{
+        console.log('*****************************************');
+        console.log('axios response', response.data);
+
+        // GET USERNAME FROM ID
+        return message.text;
+    })
+    .then((resp) => {
+        getApiResponse(message);
+    });
+} else { */

@@ -5,7 +5,7 @@ var userSchema = new mongoose.Schema({
     authenticated: Boolean,
     google: Object,
     email: String,
-    pending: String
+    pending: String,
 });
 
 module.exports = mongoose.model('User', userSchema);

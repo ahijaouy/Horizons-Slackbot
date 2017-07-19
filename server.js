@@ -1,7 +1,6 @@
 // NPM Packages
 const express = require('express');
 const mongoose = require('mongoose');
-const dbconfig = require('./config/database');
 const bodyParser = require('body-parser');
 
 // Local Imports

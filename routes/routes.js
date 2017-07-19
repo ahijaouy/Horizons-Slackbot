@@ -36,7 +36,7 @@ router.post('/slack/create_event', (req, res) => {
     console.log('BP, FOUND USER', user);
     if (err) {
         console.log('ERROR: ', err);
-        return;
+        // return;
     } 
 
     // user clicked confirm

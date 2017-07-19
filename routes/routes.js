@@ -7,7 +7,9 @@ const calendar = require('../services/calendar');
 const utils = require('../services/utils');
 
 router.get('/connect', (req, res) => {
-    res.redirect(auth.generateAuthUrl(req.query.auth_id));
+    auth.generateAuthUrl(req.query.auth_id).then(url => {
+        res.redirect(url)
+    });
 });
 
 router.get('/connect/callback', (req, res) => {

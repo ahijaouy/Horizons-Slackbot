@@ -6,7 +6,7 @@ const axios = require('axios');
 const slackService = require('./slackService');
 
 const rtm = new RtmClient(bot_token);
-var web = new WebClient(bot_token);
+var web = new WebClient(slack_verification);
 
 
 let channel;

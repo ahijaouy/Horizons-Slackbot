@@ -1,6 +1,6 @@
 const { sendQuery } = require('./nlp');
 const auth = require('./authentication');
-const AUTH_PREFIX = 'http://localhost:3000/';
+const AUTH_PREFIX = 'https://jarvis-horizons.herokuapp.com/';
 
 const responseJSON = {
     // "text": "*optional add text here*",

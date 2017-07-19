@@ -75,6 +75,8 @@ getApiResponse = (message, authUser) => {
         .then((response) => {
             let data = response.data;
 
+            console.log(data);
+
             if (data.result.action.startsWith('smalltalk')) {
                 console.log('responding to SMALL TALK');
 
@@ -88,28 +90,21 @@ getApiResponse = (message, authUser) => {
 
             } else if (data.result.actionIncomplete) {
                 console.log('action INCOMPLETE');
-
-                // INSERT CHANGE OR ADDITION OF PENDING OBJECT
-
                 const msg =  response.data.result.fulfillment.speech;
                 return { send: msg };
 
             } else {
                 console.log('ACTION IS COMPLETE', data.result.parameters);
-
-                // INSERT CHANGE OR ADDITION OF PENDING OBJECT         
-
                 const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
                 return { post: { msg: responseMsg, json: responseJSON, data: data.result } };
             }
         })
         .then((obj) => {
+            console.log('OBJ: ', obj);
             return new Promise(function(resolve, reject) {
                 if (obj.post) {
-                    authUser.pending = JSON.stringify(Object.assign({}, obj.data.parameters, {type: obj.data.result.action} ))
-                    authUser.save(() => {
-                        resolve(obj);
-                    });
+                    authUser.pending = JSON.stringify(Object.assign({}, obj.post.data.parameters, {type: obj.post.data.action} ))
+                    authUser.save(() => resolve(obj));
                 } else {
                     resolve(obj);
                 }
@@ -122,17 +117,20 @@ getApiResponse = (message, authUser) => {
 // or returns promise chain of processing a message
 processMessage = (message) => {
 
-    /* ****** INSERT PENDING PART :: DON'T SEND QUERY IF PENDING ****** */
-
-
     return new Promise((resolve, reject) => {
         console.log('bp 1: ', message.user);
         auth.checkUser(message.user)
         .then((authUser) => {            
             console.log('bp 2');
             if (authUser.authenticated) {
-                console.log('authenticated route');
-                resolve(getApiResponse(message, authUser));
+                console.log('authenticated route', JSON.parse(authUser.pending));
+
+                if (JSON.parse(authUser.pending).type) {
+                    resolve({pending: true});                    
+                } else {
+                    resolve(getApiResponse(message, authUser));
+                }
+
             } else {
                 console.log('unauthenticated route');
                 const msg = 'Click this link before continuing! '+AUTH_PREFIX+'connect?auth_id='+message.user;

@@ -26,6 +26,7 @@ router.post('/slack/create_event', (req, res) => {
   if (payload.actions[0].value === 'true') {
 
     // INSERT CREATION OF REMINDER OBJECT
+    // find user by slack id and change pending to be empty object
 
     res.send('Event created! :white_check_mark:');
   } else {

@@ -1,29 +1,24 @@
+// NPM Packages
 const express = require('express');
 const mongoose = require('mongoose');
-const dbconfig = require('./config/database');
-
-
 const app = express();
+
+// Local Imports
 const { rtm, web } = require('./services/slackrtm');
+const dbconfig = require('./config/database');
 const routes = require('./routes/routes');
 
 
-const nlp = require('./services/nlp');
-//handle all the routes
+// Routes
 app.use('/', routes);
 
-
+// Database Connection
 mongoose.connect(dbconfig.url);
 
-const calendar = require('./services/calendar');
-const auth = require('./services/authentication');
-auth.checkUser('ANDREH');
-let myDate = new Date();
-//console.log('My Date: ', myDate);
-//calendar.createReminder('ANDREH', myDate, 'TESTING :D');
-
-//start the server
+// Start Server
 app.listen(3000, function() {
     console.log('Server Listening on port 3000');
-})
+});
+
+// Start Slack Websockets
 //rtm.start();

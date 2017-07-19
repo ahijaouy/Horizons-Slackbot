@@ -21,7 +21,7 @@ function generateMeeting(start, end, subject, attendees) {
       'dateTime': start.toISOString()
     },
     'end': {
-      'date': end.toISOString()
+      'dateTime': end.toISOString()
     },'attendees': attendees.map(email => ({'email': email}))
   };
 }
@@ -38,12 +38,12 @@ function createReminder(slackId, date, subject) {
     .catch(err => console.log('ERROR: ', err));
 }
 
-function createMeeting(slackId, people, date, time, subject) {
+function createMeeting(slackId, start, end, subject, attendees) {
   auth.getGoogleCalendar(slackId)
     .then(calendar => {
       calendar.events.insert({
         calendarId: 'primary',
-        resource: generateMeeting(date, subject)
+        resource: generateMeeting(start, end, subject, attendees)
       })
     })
     .catch(err => console.log('ERROR: ', err));

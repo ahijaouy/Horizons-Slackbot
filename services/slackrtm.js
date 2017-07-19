@@ -1,7 +1,7 @@
 const { RtmClient, WebClient, CLIENT_EVENTS, RTM_EVENTS } = require('@slack/client');
 const slackConfig = require('../config/slack');
 const bot_token = slackConfig.SLACK_BOT_TOKEN || '';
-const slack_verification = slackConfig.PRADY_TOKEN || '';
+const slack_verification = slackConfig.AMANDA_BOT_TOKEN || '';
 const axios = require('axios');
 const slackService = require('./slackService');
 
@@ -54,7 +54,7 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
         slackService.processMessage(message)
         .then((logic) => {
             if (logic.post) { 
-                web.chat.postMessage(message.channel, logic.post.msg, logic.post.json, function(err, res) {
+                web.chat.postMessage(slack_verification,message.channel, logic.post.msg, logic.post.json, function(err, res) {
                     if (err) {
                         console.log('Error:', err);
                     } else {

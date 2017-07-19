@@ -1,8 +1,10 @@
 const Reminder = require('../models/reminder')
 const User = require('../models/user')
+const mongoose = require('mongoose')
 
 const _ = require('underscore')
-// console.log('Im here')
+
+mongoose.Promise = global.Promise;
 
 function finalList(model, reminders){
     return new Promise(function(resolve, reject) {
@@ -22,7 +24,6 @@ function finalList(model, reminders){
 }
 
 function appendRemind(obj, reminder){
-    console.log('Im here')
     const today = reminder['today'];
     const tomorrow = reminder['tomorrow'];
     for(var key in obj){
@@ -55,10 +56,8 @@ function findDateMatches(date, array) {
 
 function reminderFinder(model){
     return new Promise(function(resolve, reject) {
-        model
-        .find()
+        model.find({})
         .populate('user_id')
-        .exec()
         .then((reminders, err) => {
             if (err) reject(err);
             const toReturn = {};
@@ -68,6 +67,9 @@ function reminderFinder(model){
             toReturn.today = findDateMatches(today, reminders)
             toReturn.tomorrow = findDateMatches(tomorrow, reminders);
             resolve(toReturn);
+        })
+        .catch((err) => {
+            console.log('error', err)
         })
     })
 }
@@ -86,14 +88,20 @@ function reminderGrouper(response){
 }
 
 reminderFinder(Reminder)
-    .then(result => (result))
+    .then(result => {
+        return result
+    })
     .then(response => {
         return reminderGrouper(response)
     })
     .then(resp => {
         return finalList(User, resp)
     })
-    .then( resp2 => {
+    .then(resp2 => {
         /// final list USE THIS !!!!!
-        console.log('***', resp2)
+        return resp2
     });
+
+console.log('123')
+
+// console.log('############',reminderObject)

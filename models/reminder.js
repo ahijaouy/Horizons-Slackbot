@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const User = require('./user');
+const User = require('./user')
 
 const reminderSchema = new mongoose.Schema({
   subject: String,
@@ -10,5 +10,4 @@ const reminderSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('Reminder', reminderSchema);
-
+module.exports = mongoose.model('Reminder', reminderSchema)

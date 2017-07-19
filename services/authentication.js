@@ -43,22 +43,24 @@ function getGoogleCalendar(slackId) {
             .then(client => resolve(google.calendar({version: 'v3',auth: client})))
             .catch(reject)
     })
-    
 }
 
 // Authentication.checkUser(slackId)
 //  - Param: slackId -> String
 //  - Description: Ensures the user exists in DB and 
-//    checks if they have been authenticated with Google.
-//  - Returns: True  -> User is authenticated by Google.
-//             False -> User is not authenticated by Google.
+//    creates it if it doesn't
+//  - Returns: the User Model associated with the SlackId
 function checkUser(slackId) {
     return new Promise(function(resolve, reject) {
-        console.log('bp 3:', slackId);
-        userRegistered(slackId)
-            .then(() => userAuthenticated(slackId))
-            .then(resolve)
-            .catch(reject)
+        User.findOne({slackId}, (err, user) =>{
+            if (err) reject(err);
+            if (!user) {
+                const newUser = new User({slackId: slackId, authenticated: false});
+                newUser.save().then(resolve)
+            } else {
+                resolve(user);
+            }
+        });
     });
 }
 
@@ -71,55 +73,22 @@ function checkUser(slackId) {
 function generateAuthTokens(code, slackId) {
     oauth2Client.getToken(code, function (err, tokens) {
         if (err) {
-            console.log(err) 
+            console.log(err);
         } else {
             oauth2Client.setCredentials(tokens);
             //Get the user's email 
             plus.people.get({auth: oauth2Client, userId: 'me'}, function(err, resp) {
-                const userEmail = resp.emails[0].value;
+                const email2 = resp.emails[0].value;
                 //Update the user profile with their email & google tokens
-                User.findOneAndUpdate({slackId}, { 
-                    google: tokens, 
-                    authenticated: true,
-                    email: userEmail }, function(err, result) {
-                        if (err) console.log(err);
-                    });
-                })
+                User.findOneAndUpdate({slackId}, {google: tokens, authenticated: true, email: email2}, function(err, result) {
+                    if (err) console.log(err);
+                });
+            })
         }
     });
 }
 
 /************************* Local Methods *************************/
-
-// Local Helper Function
-// Checks to see if a user exists in DB
-// If a user does not exist in DB creates a record in DB
-function userRegistered(slackId) {
-    return new Promise(function(resolve, reject) {
-        User.findOne({slackId}, (err, user) =>{
-            if (err) reject(err);
-            if (!user) {
-                const newUser = new User({slackId: slackId, authenticated: false});
-                newUser.save(resolve());
-            } else {
-                resolve();
-            }
-        });
-    });
-}
-
-// Local Helper Function
-// Determine if the user has already been authenticated with Google
-function userAuthenticated(slackId) {
-    return new Promise (function(resolve, reject) {
-        User.findOne({slackId}, (err, user) => {
-            if (err) reject(err);
-            resolve(user.authenticated);
-            
-        });
-    })
-    
-}
 
 // Local Helper Function
 // Configures the 0Auth Client for an authenticated User 
@@ -157,5 +126,5 @@ module.exports = {
     generateAuthUrl,
     generateAuthTokens,
     getGoogleCalendar,
-    checkUser,
+    checkUser
 }

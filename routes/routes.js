@@ -27,7 +27,8 @@ router.post('/slack/create_event', (req, res) => {
   console.log('****************************')
 //   console.log('THIS IS PAYLOAD!!! ',payload); 
   console.log('****************************');
-  console.log('payload user:', payload.user, payload.user.id);
+  console.log('payload user:', payload.user);
+  if (payload.user) {console.log( payload.user.id ); }
   console.log('payload actions:', payload.actions, payload.actions[0]);
   
 

@@ -24,7 +24,7 @@ const linkEmails = (idArray) => {
         .catch(err => console.log('error', err))
     })
     resolve({found, notFound});
-  }
+  });
 }
 
 // utils.getEndDate(date, duration) 

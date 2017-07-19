@@ -18,6 +18,7 @@ exports.helloWorld = function helloWorld (event, callback) {
 
 exports.testBody = function testBody(req, res) {
   const payload = JSON.parse(req.body.payload);
+  console.log(payload);
   if (payload.actions[0].value === 'true') {
       res.send('Created reminder! :white_check_mark:');
   } else {

@@ -106,7 +106,7 @@ getApiResponse = (message, authUser) => {
             // console.log('OBJ: ', obj);
             return new Promise(function(resolve, reject) {
                 if (obj.post) {
-                    authUser.pending = JSON.stringify(Object.assign({}, obj.post.data.parameters, obj.post.slackIds {type: obj.post.data.action} ))
+                    authUser.pending = JSON.stringify(Object.assign({}, obj.post.data.parameters, obj.post.slackIds, {type: obj.post.data.action} ))
                     authUser.save(() => resolve(obj));
                 } else {
                     resolve(obj);

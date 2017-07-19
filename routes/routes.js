@@ -83,7 +83,11 @@ router.post('/slack/create_event', (req, res) => {
             // const attendees = utils.linkEmails(eventInfo.slackIds).found;     
             
             utils.linkEmails(eventInfo.slackIds)
-            .then((attendeesObj, err) => {
+            .then((attendeesObj) => {
+                if (err) {
+                    console.log(err);
+                }
+
                 console.log('attendees: ', attendees);
                 console.log('creating google meeting with: ',payload.user.id, startDate, endDate, attendees.found);
                 

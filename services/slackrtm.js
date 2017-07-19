@@ -59,6 +59,7 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
                         console.log('Error:', err);
                     } else {
                         console.log('Message sent: ', res);
+                        
                     }
                 });
             } else if (logic.send) {

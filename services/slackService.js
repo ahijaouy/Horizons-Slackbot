@@ -68,7 +68,7 @@ getSlackEditableDate = (messageDate, messageTime) => {
 // method that takes a message and returns objects with results from AI api
 // return: object with SEND key if rtm.sendMessage is to be used, and the message as its value
 // return: object with POST key if web.chat.postMessage is to be used, and msg + json as value object
-getApiResponse = (message) => {
+getApiResponse = (message, authUser) => {
     console.log('get api response');
 
     return sendQuery(message.text, message.user)
@@ -97,11 +97,23 @@ getApiResponse = (message) => {
             } else {
                 console.log('ACTION IS COMPLETE', data.result.parameters);
 
-                // INSERT CHANGE OR ADDITION OF PENDING OBJECT                
+                // INSERT CHANGE OR ADDITION OF PENDING OBJECT         
 
                 const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
-                return { post: { msg: responseMsg, json: responseJSON } };
+                return { post: { msg: responseMsg, json: responseJSON, data: data.result } };
             }
+        })
+        .then((obj) => {
+            return new Promise(function(resolve, reject) {
+                if (obj.post) {
+                    authUser.pending = JSON.stringify(Object.assign({}, obj.data.parameters, {type: obj.data.result.action} ))
+                    authUser.save(() => {
+                        resolve(obj);
+                    });
+                } else {
+                    resolve(obj);
+                }
+            })
         })
 }
 
@@ -116,11 +128,11 @@ processMessage = (message) => {
     return new Promise((resolve, reject) => {
         console.log('bp 1: ', message.user);
         auth.checkUser(message.user)
-        .then((isAuthUser) => {            
+        .then((authUser) => {            
             console.log('bp 2');
-            if (isAuthUser) {
+            if (authUser.authenticated) {
                 console.log('authenticated route');
-                resolve(getApiResponse(message));
+                resolve(getApiResponse(message, authUser));
             } else {
                 console.log('unauthenticated route');
                 const msg = 'Click this link before continuing! '+AUTH_PREFIX+'connect?auth_id='+message.user;

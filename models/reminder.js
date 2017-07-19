@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
-const User = require('./user')
-const Schema = mongoose.Schema
+const User = require('./user');
 
-const reminderSchema = new Schema({
+const reminderSchema = new mongoose.Schema({
   subject: String,
   date: Date,
   user_id: {

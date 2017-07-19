@@ -24,9 +24,12 @@ router.post('/slack/create_event', (req, res) => {
   console.log('****************************');
 
   if (payload.actions[0].value === 'true') {
-      res.send('Event created! :white_check_mark:');
+
+    // INSERT CREATION OF REMINDER OBJECT
+
+    res.send('Event created! :white_check_mark:');
   } else {
-      res.send('Canceled! :x:');
+    res.send('Canceled! :x:');
   }
 });
 

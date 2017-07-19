@@ -19,11 +19,7 @@ app.use('/', routes);
 mongoose.connect(dbconfig.url);
 
 
-// TESTING
-const andre = 'U6AQMP8B0';
-const calendar = require('./services/calendar');
-calendar.checkFreeBusy(andre, 'hijaouya@gmail.com', "2017-07-19T07:00:00.000Z", "2017-07-22T07:00:00.000Z" )
-    .then(console.log);
+
 // Start Server
 app.listen(port, function() {
     console.log('Server Listening on port ' + port);

@@ -1,3 +1,4 @@
+// NPM Packages
 const express = require('express');
 const mongoose = require('mongoose');
 const dbconfig = require('./config/database');
@@ -6,39 +7,34 @@ const Reminder = require('./models/reminder')
 const User = require('./models/user')
 const remindFinder = require('./services/reminderFinder')
 const _ = require('underscore')
+const bodyParser = require('body-parser');
+
 ///
 
-const app = express();
+// Local Imports
 const { rtm, web } = require('./services/slackrtm');
+const dbconfig = require('./config/database');
 const routes = require('./routes/routes');
 
+// Global Variables
+const app = express();
+const port = process.env.PORT || 3000
 
-const nlp = require('./services/nlp');
-//handle all the routes
+// Routes
 app.use('/', routes);
 
+<<<<<<< HEAD
 
+=======
+// Database Connection
+>>>>>>> development
 mongoose.connect(dbconfig.url);
 
-///Amanda needs to user this to make new reminders
-// const newReminder = new Reminder ({
-//     subject: "eat me",
-//     date: new Date(),
-//     user_id: "596e83742e70284cc0ff8b2f"
-// })
-// newReminder.save((err) => {
-//     if(err){console.log(err)}
-// })
 
+// Start Server
+app.listen(port, function() {
+    console.log('Server Listening on port ' + port);
+});
 
-
-// const auth = require('./services/authentication');
-//auth.userRegistered('ANDREH').then(console.log).catch(console.log);
-// auth.checkUser('ANDREH1').then(resp => console.log(resp)).catch(err => console.log('ERROR: ', err));
-// auth.userAuthenticated('ANDREH1').then(resp => console.log(resp));
-
-//start the server
-app.listen(3000, function() {
-    console.log('Server Listening on port 3000');
-})
-//rtm.start();`
+// Start Slack Websockets
+rtm.start();

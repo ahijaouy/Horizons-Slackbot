@@ -1,9 +1,5 @@
 module.exports = {
-
     'SLACK_BOT_TOKEN' : 'xoxb-215048601639-kLgSGQWQzdxVSjlV9rdp1G2w',
     'WEBHOOK_URL_GENERAL': 'https://hooks.slack.com/services/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',
-    'SLACK_VERIFICATION_TOKEN': 'https://us-central1-horizonshackathon.cloudfunctions.net/helloHttp',
-    // 'AMANDA_SLACK_TOKEN': 'xoxp-214075203605-214001278996-215348011622-6220a67bf54d0165d770c06e356c255a',
-    // 'OAUTH_ACCESS': 'xoxp-214075203605-214001278996-213949916338-6f1a733402dba928d440940a64d5156c',
-    // 'PRADY_TOKEN': 'xoxp-214075203605-214008582772-215549904087-8c7d73a95b0727fbe97fac74613bc1e5'
+    'SLACK_VERIFICATION_TOKEN': 'https://jarvis-horizons.herokuapp.com/slack/create_event'
 };

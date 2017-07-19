@@ -93,7 +93,7 @@ router.post('/slack/create_event', (req, res) => {
             console.log('MEETING, NEW USER: ', user);
             user.pending = JSON.stringify({}); //<<<<<<--- Should Be Here
             user.save((err) => {
-                if (err) {
+                if (err) { 
                     console.log('ERROR THERE: ',err);
                 } else {
                     console.log('BP, MEETING, SAVED USER ', user);

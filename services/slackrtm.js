@@ -54,7 +54,7 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
         slackService.processMessage(message)
         .then((logic) => {
             if (logic.post) { 
-                web.chat.postMessage(slack_verification,message.channel, logic.post.msg, logic.post.json, function(err, res) {
+                web.chat.postMessage(message.channel, logic.post.msg, logic.post.json, function(err, res) {
                     if (err) {
                         console.log('Error:', err);
                     } else {

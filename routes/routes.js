@@ -77,11 +77,12 @@ router.post('/slack/create_event', (req, res) => {
                 }
             });  // close reminder save
         } else {
+            console.log('EVENT INFO IN MEETING: ',eventInfo)
             const startDate = new Date(eventInfo.date + " " + eventInfo.time);
             const endDate = (eventInfo.duration) ? utils.getEndDate(startDate, eventInfo.duration) : utils.getEndDate(startDate);
             // const attendees = utils.linkEmails(eventInfo.slackIds).found;     
             const attendees = ['dchan331@gmail.com'];       
-            console.log('attendees: ',utils.linkEmails(eventInfo.slackIds));
+            console.log('attendees: ',eventInfo.slackIds, utils.linkEmails(eventInfo.slackIds));
             console.log('creating google meeting with: ',payload.user.id, startDate, endDate, attendees);
             
             calendar.createMeeting(payload.user.id, startDate, endDate, eventInfo.subject, attendees);

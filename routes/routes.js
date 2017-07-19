@@ -17,9 +17,9 @@ router.get('/connect/callback', (req, res) => {
 });
 
 router.post('/slack/create_event', (req, res) => { 
-  console.log(req)
+  console.log('REQ', req);
 
-  const payload = JSON.parse(req.body.payload);
+  const payload = req.body.payload;
 
   console.log('****************************')
   console.log('THIS IS PAYLOAD!!! ',payload); 

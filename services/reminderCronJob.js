@@ -5,8 +5,10 @@ const mongoose = require('mongoose')
 const _ = require('underscore')
 
 ////
-const { rtm } = require('./slackrtm');
+// const { rtm } = require('./slackrtm');
 ///
+
+console.log('this ran!!!');
 
 mongoose.Promise = global.Promise;
 
@@ -60,10 +62,14 @@ function findDateMatches(date, array) {
 }
 
 function reminderFinder(model){
-    return new Promise(function(resolve, reject) {
+    console.log('RF ran!!! with model: ', model);
+    
+    return new Promise(function(resolve, reject) {        
         model.find({})
         .populate('user_id')
         .then((reminders, err) => {
+            console.log('reminders ran!!!');           
+
             if (err) reject(err);
             const toReturn = {};
             const today = new Date();
@@ -113,46 +119,48 @@ function daySort(obj, day){
     return dayArray;
 }
 
-function emitReminders(){
-
-}
-
-
+console.log('reminder schema', Reminder)
 reminderFinder(Reminder)
     .then(result => {
+        console.log('1 ran!!!');
+        
         return result
     })
     .then(response => {
+
+        console.log('2 ran!!!');
+        
         return reminderGrouper(response)
     })
     .then(resp => {
-        console.log('aaa');
+        console.log('3 ran!!!');
         return finalList(User, resp)
     })
     .then(resp2 => {
-        // console.log('resp 2', resp2)
+        console.log('resp 2', resp2)
+
         const todaySort =  daySort(resp2, 'today')
         const tomorrowSort = daySort(resp2, 'tomorrow')
         return {today: todaySort, tomorrow: tomorrowSort}
     })
     .then(resp3 => {
-        if (! resp3 || !resp3.today || !resp3.tomorrow) {
-            console.log('ERROR');
-            return;
-        }
-        console.log('resp 3 today', resp3.today)
-        resp3.today.forEach((user) => {
-            rtm.sendMessage('reminders for today:');
-            resp3.today[user].forEach((task) => {
-                rtm.sendMessage(task, user);
-            });
-        })
-        console.log('resp 3 tomorrow', resp3.tomorrow)
-        resp3.tomorrow.forEach((user) => {
-            rtm.sendMessage('reminders for tomorrow:');
-            resp3.tomorrow[user].forEach((task) => {
-                rtm.sendMessage(task, user);
-            });
-        })
+        // if (! resp3 || !resp3.today || !resp3.tomorrow) {
+        //     console.log('ERROR');
+        //     return;
+        // }
+        // console.log('resp 3 today', resp3.today)
+        // resp3.today.forEach((user) => {
+        //     rtm.sendMessage('reminders for today:');
+        //     resp3.today[user].forEach((task) => {
+        //         rtm.sendMessage(task, user);
+        //     });
+        // })
+        // console.log('resp 3 tomorrow', resp3.tomorrow)
+        // resp3.tomorrow.forEach((user) => {
+        //     rtm.sendMessage('reminders for tomorrow:');
+        //     resp3.tomorrow[user].forEach((task) => {
+        //         rtm.sendMessage(task, user);
+        //     });
+        // })
     });
 

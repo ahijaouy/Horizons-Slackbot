@@ -34,6 +34,7 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
     const dm = rtm.dataStore.getDMByUserId(message.user);
     if (!dm || dm.id !== message.channel || message.type !== 'message') {
         // do nothing if message is not DM
+        rtm.sendMessage("Hi. You're a dummy. Talk to me in DM.")
         return;
 
     } else if (message.text) {

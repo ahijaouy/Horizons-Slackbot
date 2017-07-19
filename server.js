@@ -5,7 +5,7 @@ const dbconfig = require('./config/database');
 /// added by dom///
 const Reminder = require('./models/reminder')
 const User = require('./models/user')
-const remindFinder = require('./services/reminderFinder')
+// const remindFinder = require('./services/reminderFinder')
 const _ = require('underscore')
 ///
 const bodyParser = require('body-parser');

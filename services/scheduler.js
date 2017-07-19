@@ -1,1 +1,1 @@
-const remindFinder = require('./services/reminderFinder');
+const remindFinder = require('./reminderFinder');

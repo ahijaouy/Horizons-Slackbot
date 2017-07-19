@@ -79,7 +79,7 @@ router.post('/slack/create_event', (req, res) => {
         } else {
             user.pending = JSON.stringify({});
 
-            console.log('USER DATE: ', user.pending.date, 'USER TIME: ',user.pending.time);
+            console.log(user,'USER DATE: ', user.pending.date, 'USER TIME: ',user.pending.time);
 
             const startDate = new Date(user.pending.date + " " + payload.user.time);
             const endDate = (user.pending.duration) ? utils.getEndDate(startDate, user.pending.duration) : utils.getEndDate(startDate);

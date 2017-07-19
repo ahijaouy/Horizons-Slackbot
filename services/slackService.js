@@ -70,6 +70,8 @@ getSlackEditableDate = (messageDate, messageTime) => {
 // return: object with POST key if web.chat.postMessage is to be used, and msg + json as value object
 getApiResponse = (message, authUser, slackIds) => {
     console.log('get api response');
+    console.log('gar received slack ids: ', slackIds);
+    
 
     return sendQuery(message.text, authUser._id)
         .then((response) => {
@@ -96,7 +98,7 @@ getApiResponse = (message, authUser, slackIds) => {
             } else {
                 console.log('ACTION IS COMPLETE', data.result.parameters);
                 const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
-                console.log('going to save slack ids in pending: ', slackIds)
+                console.log('gar sending slackIds: ', slackIds)
                 return { post: { msg: responseMsg, json: responseJSON, data: data.result, slackIds: slackIds } };
             }
         })
@@ -117,7 +119,7 @@ getApiResponse = (message, authUser, slackIds) => {
 // receives a message, checks authorization, returns sendMessage with link if user not authorized
 // or returns promise chain of processing a message
 processMessage = (message, slackIds) => {
-
+    console.log('pm received slack ids: ', slackIds);
     return new Promise((resolve, reject) => {
         console.log('bp 1: ', message.user);
         auth.checkUser(message.user)
@@ -129,6 +131,8 @@ processMessage = (message, slackIds) => {
                 if (authUser.pending && JSON.parse(authUser.pending).type) {
                     resolve({pending: true});                    
                 } else {
+                    console.log('pm sending slack ids: ', slackIds);
+                    
                     resolve(getApiResponse(message, authUser, slackIds));
                 }
 

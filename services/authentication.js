@@ -48,16 +48,19 @@ function getGoogleCalendar(slackId) {
 // Authentication.checkUser(slackId)
 //  - Param: slackId -> String
 //  - Description: Ensures the user exists in DB and 
-//    checks if they have been authenticated with Google.
-//  - Returns: True  -> User is authenticated by Google.
-//             False -> User is not authenticated by Google.
+//    creates it if it doesn't
+//  - Returns: the User Model associated with the SlackId
 function checkUser(slackId) {
     return new Promise(function(resolve, reject) {
-        console.log('bp 3:', slackId);
-        userRegistered(slackId)
-            .then(() => userAuthenticated(slackId))
-            .then(resolve)
-            .catch(reject)
+        User.findOne({slackId}, (err, user) =>{
+            if (err) reject(err);
+            if (!user) {
+                const newUser = new User({slackId: slackId, authenticated: false});
+                newUser.save().then(resolve)
+            } else {
+                resolve(user);
+            }
+        });
     });
 }
 
@@ -86,34 +89,6 @@ function generateAuthTokens(code, slackId) {
 }
 
 /************************* Local Methods *************************/
-
-// Local Helper Function
-// Checks to see if a user exists in DB
-// If a user does not exist in DB creates a record in DB
-function userRegistered(slackId) {
-    return new Promise(function(resolve, reject) {
-        User.findOne({slackId}, (err, user) =>{
-            if (err) reject(err);
-            if (!user) {
-                const newUser = new User({slackId: slackId, authenticated: false});
-                newUser.save(resolve());
-            } else {
-                resolve();
-            }
-        });
-    });
-}
-
-// Local Helper Function
-// Determine if the user has already been authenticated with Google
-function userAuthenticated(slackId) {
-    return new Promise (function(resolve, reject) {
-        User.findOne({slackId}, (err, user) => {
-            if (err) reject(err);
-            resolve(user.authenticated);
-        });
-    })
-}
 
 // Local Helper Function
 // Configures the 0Auth Client for an authenticated User 

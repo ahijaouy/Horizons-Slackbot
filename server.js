@@ -2,6 +2,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
+const port = process.env.PORT || 3000
 
 // Local Imports
 const { rtm, web } = require('./services/slackrtm');
@@ -16,9 +17,9 @@ app.use('/', routes);
 mongoose.connect(dbconfig.url);
 
 // Start Server
-app.listen(3000, function() {
-    console.log('Server Listening on port 3000');
+app.listen(port, function() {
+    console.log('Server Listening on port ' + port);
 });
 
 // Start Slack Websockets
-//rtm.start();
+rtm.start();

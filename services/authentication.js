@@ -43,7 +43,6 @@ function getGoogleCalendar(slackId) {
             .then(client => resolve(google.calendar({version: 'v3',auth: client})))
             .catch(reject)
     })
-    
 }
 
 // Authentication.checkUser(slackId)
@@ -71,20 +70,17 @@ function checkUser(slackId) {
 function generateAuthTokens(code, slackId) {
     oauth2Client.getToken(code, function (err, tokens) {
         if (err) {
-            console.log(err) 
+            console.log(err);
         } else {
             oauth2Client.setCredentials(tokens);
             //Get the user's email 
             plus.people.get({auth: oauth2Client, userId: 'me'}, function(err, resp) {
-                const userEmail = resp.emails[0].value;
+                const email2 = resp.emails[0].value;
                 //Update the user profile with their email & google tokens
-                User.findOneAndUpdate({slackId}, { 
-                    google: tokens, 
-                    authenticated: true,
-                    email: userEmail }, function(err, result) {
-                        if (err) console.log(err);
-                    });
-                })
+                User.findOneAndUpdate({slackId}, {google: tokens, authenticated: true, email: email2}, function(err, result) {
+                    if (err) console.log(err);
+                });
+            })
         }
     });
 }
@@ -115,10 +111,8 @@ function userAuthenticated(slackId) {
         User.findOne({slackId}, (err, user) => {
             if (err) reject(err);
             resolve(user.authenticated);
-            
         });
     })
-    
 }
 
 // Local Helper Function
@@ -157,5 +151,5 @@ module.exports = {
     generateAuthUrl,
     generateAuthTokens,
     getGoogleCalendar,
-    checkUser,
+    checkUser
 }

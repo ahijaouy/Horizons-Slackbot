@@ -3,13 +3,12 @@ const User = require('../models/user')
 const mongoose = require('mongoose')
 
 const _ = require('underscore')
-
-////
-// const { rtm } = require('./slackrtm');
-///
+const { rtm } = require('./slackrtm');
+const { CLIENT_EVENTS } = require('@slack/client');
 
 console.log('this ran!!!');
 
+mongoose.connect(require('../config/database').url);
 mongoose.Promise = global.Promise;
 
 function finalList(model, reminders){
@@ -120,47 +119,79 @@ function daySort(obj, day){
 }
 
 console.log('reminder schema', Reminder)
-reminderFinder(Reminder)
-    .then(result => {
-        console.log('1 ran!!!');
-        
-        return result
-    })
-    .then(response => {
 
-        console.log('2 ran!!!');
-        
-        return reminderGrouper(response)
-    })
-    .then(resp => {
-        console.log('3 ran!!!');
-        return finalList(User, resp)
-    })
-    .then(resp2 => {
-        console.log('resp 2', resp2)
+rtm.on(CLIENT_EVENTS.RTM.RTM_CONNECTION_OPENED, function () {
+    // rtm.sendMessage('hello 1', 'D6A07ERGU');
+    // rtm.sendMessage('hello 2', 'D6A07ERGU');
+    reminderFinder(Reminder)
+        .then(result => {
+            console.log('1 ran!!!');
+            
+            return result
+        })
+        .then(response => {
 
-        const todaySort =  daySort(resp2, 'today')
-        const tomorrowSort = daySort(resp2, 'tomorrow')
-        return {today: todaySort, tomorrow: tomorrowSort}
-    })
-    .then(resp3 => {
-        // if (! resp3 || !resp3.today || !resp3.tomorrow) {
-        //     console.log('ERROR');
-        //     return;
-        // }
-        // console.log('resp 3 today', resp3.today)
-        // resp3.today.forEach((user) => {
-        //     rtm.sendMessage('reminders for today:');
-        //     resp3.today[user].forEach((task) => {
-        //         rtm.sendMessage(task, user);
-        //     });
-        // })
-        // console.log('resp 3 tomorrow', resp3.tomorrow)
-        // resp3.tomorrow.forEach((user) => {
-        //     rtm.sendMessage('reminders for tomorrow:');
-        //     resp3.tomorrow[user].forEach((task) => {
-        //         rtm.sendMessage(task, user);
-        //     });
-        // })
-    });
+            console.log('2 ran!!!');
+            
+            return reminderGrouper(response)
+        })
+        .then(resp => {
+            console.log('3 ran!!!');
+            return finalList(User, resp)
+        })
+        .then(resp2 => {
+            console.log('resp 2', resp2)
 
+            const todaySort =  daySort(resp2, 'today')
+            const tomorrowSort = daySort(resp2, 'tomorrow')
+            return {today: todaySort, tomorrow: tomorrowSort}
+        })
+        .then(resp3 => {
+            if (! resp3 || !resp3.today || !resp3.tomorrow) {
+                console.log('ERROR');
+                return;
+            }
+            var arr = [];
+            console.log('resp 3 today', resp3.today)
+            resp3.today.forEach((user, index) => {
+                console.log(user);
+                for (var id in user) {
+                    var dm = rtm.dataStore.getDMByUserId(id);
+                    arr.push(rtm.sendMessage('reminders for today:', dm.id));
+                    user[id].forEach((task) => {
+                        console.log(task)
+                        console.log(String(dm.id) ==='D6A07ERGU' );
+                        // 'D6A07ERGU'
+                        // D6A07ERGU
+                        // rtm.sendMessage(task, rtm.dataStore.getDMByUserId(id).id);
+                        arr.push(rtm.sendMessage('* '+task, dm.id));
+                    });
+                }
+                // rtm.sendMessage('reminders for today:');
+                // user.forEach((task) => {
+                    // rtm.sendMessage(task, user);
+                // });
+            })
+            
+            console.log('resp 3 tomorrow', resp3.tomorrow)
+            resp3.tomorrow.forEach((user) => {
+                console.log(resp3.tomorrow);
+                for (var id in user) {
+                    var dm = rtm.dataStore.getDMByUserId(id);
+                    arr.push(rtm.sendMessage('reminders for tomorrow:', dm.id));
+                    user[id].forEach((task) => {
+                        console.log(task)
+                        // rtm.sendMessage(task, rtm.dataStore.getDMByUserId(id).id);
+                        arr.push(rtm.sendMessage('* '+task, dm.id));
+                    });
+                }
+            })
+            return Promise.all(arr);
+        })
+        .then(function() {
+            console.log('we are done');
+            process.exit(1);
+        })
+});
+
+rtm.start();

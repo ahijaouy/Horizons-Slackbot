@@ -53,7 +53,7 @@ function getGoogleCalendar(slackId) {
 //             False -> User is not authenticated by Google.
 function checkUser(slackId) {
     return new Promise(function(resolve, reject) {
-        console.log('Test:');
+        console.log('bp 3:', slackId);
         userRegistered(slackId)
             .then(() => userAuthenticated(slackId))
             .then(resolve)

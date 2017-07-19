@@ -7,9 +7,7 @@ const calendar = require('../services/calendar');
 const utils = require('../services/utils');
 
 router.get('/connect', (req, res) => {
-    auth.generateAuthUrl(req.query.auth_id).then(url => {
-        res.redirect(url)
-    });
+    auth.generateAuthUrl(req.query.auth_id).then(url => res.redirect(url));
 });
 
 router.get('/connect/callback', (req, res) => {
@@ -25,16 +23,59 @@ router.post('/slack/create_event', (req, res) => {
   console.log('THIS IS PAYLOAD!!! ',payload); 
   console.log('****************************');
 
-  if (payload.actions[0].value === 'true') {
+  User.findById(payload.user.id, (user, err) => {
 
-    // INSERT CREATION OF REMINDER OBJECT
-    // find user by slack id and change pending to be empty object
+    if (payload.actions[0].value === 'true') {
+        if (err) {
+            console.log('ERROR: ',err);
+        } else {
+            const eventInfo = JSON.parse(authUser.pending);
 
-    res.send('Event created! :white_check_mark:');
-  } else {
-    res.send('Canceled! :x:');
-  }
-});
+            if (eventInfo.type === 'reminder.add') {
+                const newReminder = new Reminder({
+                    subject: eventInfo.subject,
+                    date: eventInfo.date,
+                    user_id: user._id
+                });
+
+                newReminder.save((err) => {
+                    if (err) {
+                        console.log('ERROR HERE: ',err);
+                    } else {
+                        user.pending = JSON.stringify({});
+
+                        user.save((err) => {
+                            if (err) {
+                                console.log('ERROR THERE: ',err);
+                            } else {
+                            res.send('Event created! :white_check_mark:');
+                            }
+                        });  // close user save
+                    }
+                });  // close reminder save
+            } else {
+                user.pending = JSON.stringify({});
+                user.save((err) => {
+                    if (err) {
+                        console.log('ERROR THERE: ',err);
+                    } else {
+                    res.send('Event created! :white_check_mark:');
+                    }
+                });  // close user save
+            } 
+        }  
+    } else {
+        user.pending = JSON.stringify({});
+        user.save((err) => {
+            if (err) {
+                console.log('ERROR THERE: ',err);
+            } else {
+                res.send('Canceled! :x:');
+            } 
+        }); // close user save
+    }
+  });  // close find User by id
+});  //close router post
 
 
 module.exports = router;

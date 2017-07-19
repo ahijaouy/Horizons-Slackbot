@@ -71,7 +71,7 @@ getSlackEditableDate = (messageDate, messageTime) => {
 getApiResponse = (message, authUser) => {
     console.log('get api response');
 
-    return sendQuery(message.text, message.user)
+    return sendQuery(message.text, authUser._id)
         .then((response) => {
             let data = response.data;
 
@@ -123,9 +123,9 @@ processMessage = (message) => {
         .then((authUser) => {            
             console.log('bp 2');
             if (authUser.authenticated) {
-                console.log('authenticated route', JSON.parse(authUser.pending));
+                console.log('authenticated route');
 
-                if (JSON.parse(authUser.pending).type) {
+                if (authUser.pending && JSON.parse(authUser.pending).type) {
                     resolve({pending: true});                    
                 } else {
                     resolve(getApiResponse(message, authUser));
@@ -133,7 +133,7 @@ processMessage = (message) => {
 
             } else {
                 console.log('unauthenticated route');
-                const msg = 'Click this link before continuing! '+AUTH_PREFIX+'connect?auth_id='+message.user;
+                const msg = 'Click this link before continuing! '+AUTH_PREFIX+'connect?auth_id='+authUser._id;
                 resolve({ send: msg });
             }
         });

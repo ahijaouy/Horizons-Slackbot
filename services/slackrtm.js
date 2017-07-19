@@ -63,6 +63,7 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
                     }
                 });
             } else if (logic.send) {
+                console.log('check me', logic.send)
                 rtm.sendMessage(logic.send, message.channel);
             } else if (logic.pending) {
                 rtm.sendMessage('You are in a pending state! Confirm or cancel above event to continue.', message.channel);

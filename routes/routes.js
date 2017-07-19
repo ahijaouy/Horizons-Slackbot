@@ -16,7 +16,9 @@ router.get('/connect/callback', (req, res) => {
     res.send('Successfully Authenticated with Google!');
 });
 
-router.post('/slack/create_event', (req, res) => {
+router.post('/slack/create_event', (req, res) => { 
+  console.log(req)
+
   const payload = JSON.parse(req.body.payload);
 
   console.log('****************************')

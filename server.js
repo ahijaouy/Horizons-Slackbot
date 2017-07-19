@@ -20,6 +20,9 @@ const routes = require('./routes/routes');
 const app = express();
 const port = process.env.PORT || 3000
 
+// Middleware
+app.use(bodyParser.json({ type: 'application/*+json' }))
+
 // Routes
 app.use('/', routes);
 

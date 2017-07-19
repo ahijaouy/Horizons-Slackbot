@@ -77,7 +77,7 @@ router.post('/slack/create_event', (req, res) => {
                 }
             });  // close reminder save
         } else {
-            console.log('EVENT INFO IN MEETING: ',eventInfo)
+            console.log('EVENT INFO IN MEETING: ',eventInfo);
             const startDate = new Date(eventInfo.date + " " + eventInfo.time);
             const endDate = (eventInfo.duration) ? utils.getEndDate(startDate, eventInfo.duration) : utils.getEndDate(startDate);
             // const attendees = utils.linkEmails(eventInfo.slackIds).found;     

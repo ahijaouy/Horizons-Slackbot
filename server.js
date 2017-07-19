@@ -2,12 +2,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
+var bodyParser = require('body-parser');
 
 // Local Imports
 const { rtm, web } = require('./services/slackrtm');
 const dbconfig = require('./config/database');
 const routes = require('./routes/routes');
-
+var bodyParser = require('body-parser');
 
 // Routes
 app.use('/', routes);

@@ -2,6 +2,35 @@ const { sendQuery } = require('./nlp');
 const auth = require('./authentication');
 const AUTH_PREFIX = 'http://localhost:3000/';
 
+const responseJSON = {
+    // "text": "*optional add text here*",
+    "attachments": [
+        {
+            // "text": "Click to *Confirm* or *Cancel*!",
+            "fallback": "[insert confirm and cancel buttons]",
+            "callback_id": "something",
+            "color": "#3AA3E3",
+            "attachment_type": "default",
+            "actions": [
+                {
+                    "name": "confirm",
+                    "text": "Confirm",
+                    "type": "button",
+                    "value": "true"
+                },
+                {
+                    "name": "confirm",
+                    "text": "Cancel",
+                    "type": "button",
+                    "value": "false"
+                }
+            ]
+        }
+    ]
+};
+
+// method that receives an action and its parameters
+// returns the return message to show in slack message about confirming reminder or meeting
 getResponseMessage = (action, parameters) => {
     let returnMsg;
     if (action === 'reminder.add') {
@@ -20,13 +49,12 @@ getResponseMessage = (action, parameters) => {
     returnMsg += getSlackEditableDate(parameters.date, parameters.time); 
     return returnMsg       
 }
-    
+
+// method that takes a date from AI api and converts it to a Slack formatted date (and time)   
 getSlackEditableDate = (messageDate, messageTime) => {
     console.log('received date: ', messageDate);
     let date;
-    // if (! parseInt(date) ) {
-    //     date = new Date('2000-01-01 1:11:11 AM') / 1000;
-    // }
+
     if (messageTime) {
         date = new Date(messageDate+' '+messageTime) / 1000;
         console.log('received time: ',messageTime);
@@ -37,41 +65,15 @@ getSlackEditableDate = (messageDate, messageTime) => {
     }
 }
 
-getApiResponse = (message, rtm, web) => {
-    const responseJSON = {
-        // "text": "*optional add text here*",
-        "attachments": [
-            {
-                "text": "Click the button!",
-                "fallback": "Supposed to show the button",
-                "callback_id": "something",
-                "color": "#3AA3E3",
-                "attachment_type": "default",
-                "actions": [
-                    {
-                        "name": "confirm",
-                        "text": "Confirm",
-                        "type": "button",
-                        "value": "true"
-                    },
-                    {
-                        "name": "confirm",
-                        "text": "Cancel",
-                        "type": "button",
-                        "value": "false"
-                    }
-                ]
-            }
-        ]
-    };
-
+// method that takes a message and returns objects with results from AI api
+// return: object with SEND key if rtm.sendMessage is to be used, and the message as its value
+// return: object with POST key if web.chat.postMessage is to be used, and msg + json as value object
+getApiResponse = (message) => {
     console.log('get api response');
 
     return sendQuery(message.text, message.user)
         .then((response) => {
             let data = response.data;
-
-            // console.log('DATA RESPONSE:', data.result);
 
             if (data.result.action.startsWith('smalltalk')) {
                 console.log('responding to SMALL TALK');
@@ -86,11 +88,16 @@ getApiResponse = (message, rtm, web) => {
 
             } else if (data.result.actionIncomplete) {
                 console.log('action INCOMPLETE');
+
+                // INSERT CHANGE OR ADDITION OF PENDING OBJECT
+
                 const msg =  response.data.result.fulfillment.speech;
                 return { send: msg };
 
             } else {
                 console.log('ACTION IS COMPLETE', data.result.parameters);
+
+                // INSERT CHANGE OR ADDITION OF PENDING OBJECT                
 
                 const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
                 return { post: { msg: responseMsg, json: responseJSON } };
@@ -98,7 +105,14 @@ getApiResponse = (message, rtm, web) => {
         })
 }
 
+// main method called by slackrtm.js
+// receives a message, checks authorization, returns sendMessage with link if user not authorized
+// or returns promise chain of processing a message
 processMessage = (message) => {
+
+    /* ****** INSERT PENDING PART :: DON'T SEND QUERY IF PENDING ****** */
+
+
     return new Promise((resolve, reject) => {
         console.log('bp 1: ', message.user);
         auth.checkUser(message.user)
@@ -109,7 +123,7 @@ processMessage = (message) => {
                 resolve(getApiResponse(message));
             } else {
                 console.log('unauthenticated route');
-                const msg = AUTH_PREFIX+'connect?auth_id='+message.user;
+                const msg = 'Click this link before continuing! '+AUTH_PREFIX+'connect?auth_id='+message.user;
                 resolve({ send: msg });
             }
         });

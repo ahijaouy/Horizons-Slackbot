@@ -12,10 +12,13 @@
  * @param {function} callback The callback function.
  */
 
+const calendar = require('../services/calendar');
+const utils = require('../services/utils');
+
 exports.testBody = function testBody(req, res) {
   const payload = JSON.parse(req.body.payload);
   if (payload.actions[0].value === 'true') {
-      res.send('Created reminder! :white_check_mark:');
+      res.send('Event created! :white_check_mark:');
   } else {
       res.send('Canceled! :x:');
   }

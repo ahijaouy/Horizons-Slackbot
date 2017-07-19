@@ -1,11 +1,11 @@
 const User = require('../models/user.js');
 
-let emailArray = [];
-let unfoundArray = [];
-function linkEmails(idArray){
+linkEmails = (idArray) => {
+  let emailArray = [];
+  let unfoundArray = [];
   idArray.forEach((slackId) => {
     User.findOne({slackId:slackId})
-    .then((userObject) => {
+    .then((userObject)=>{
       if(userObject){
         emailArray.push(userObject.email)
       }else{
@@ -14,8 +14,20 @@ function linkEmails(idArray){
     })
     .catch((err) => {
       console.log('error', err)
-    });
+    })
   });
+
+  let emailObject = {found: emailArray, notFound: unfoundArray}
+  return emailObject;
 }
-let emailObject = {found: emailArray, notFound: unfoundArray}
-export default emailObject;
+
+getEndDate = (date, duration = 30) => {
+  let startDate = date.getTime();
+  let durationInMs = duration * 1000 *60
+  return new Date(startDate+durationInMs);
+}
+
+module.exports = {
+  linkEmails: linkEmails,
+  getEndDate: getEndDate
+}

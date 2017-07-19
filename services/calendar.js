@@ -1,7 +1,27 @@
 // Local Import
 const auth = require('./authentication');
-
 /************************* Exported Methods *************************/
+
+function checkFreeBusy(slackId, email, start, end) {
+  return new Promise(function(resolve, reject) {
+    auth.getGoogleCalendar(slackId)
+      .then(calendar => {
+        calendar.freebusy.query({
+          resource: {
+            timeMin: start,
+            timeMax: end,
+            items: [{
+              id: email
+            }]
+          } 
+        }, (err, resp) => {
+          if (err) reject(err);
+          resolve(resp.calendars);
+        } )
+    })
+  });
+  
+}
 
 // calendar.craeteReminder(slackId, date, subject)
 //  - Param: slackId -> String
@@ -75,5 +95,6 @@ function generateMeeting(start, end, subject, attendees) {
 
 module.exports = {
   createReminder,
-  createMeeting
+  createMeeting,
+  checkFreeBusy
 }

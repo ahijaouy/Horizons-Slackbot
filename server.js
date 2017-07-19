@@ -1,15 +1,7 @@
 // NPM Packages
 const express = require('express');
 const mongoose = require('mongoose');
-const dbconfig = require('./config/database');
-/// added by dom///
-const Reminder = require('./models/reminder')
-const User = require('./models/user')
-const remindFinder = require('./services/reminderFinder')
-const _ = require('underscore')
 const bodyParser = require('body-parser');
-
-///
 
 // Local Imports
 const { rtm, web } = require('./services/slackrtm');
@@ -23,18 +15,19 @@ const port = process.env.PORT || 3000
 // Routes
 app.use('/', routes);
 
-<<<<<<< HEAD
-
-=======
 // Database Connection
->>>>>>> development
 mongoose.connect(dbconfig.url);
 
 
+// TESTING
+const andre = 'U6AQMP8B0';
+const calendar = require('./services/calendar');
+calendar.checkFreeBusy(andre, 'hijaouya@gmail.com', "2017-07-19T07:00:00.000Z", "2017-07-22T07:00:00.000Z" )
+    .then(console.log);
 // Start Server
 app.listen(port, function() {
     console.log('Server Listening on port ' + port);
 });
 
 // Start Slack Websockets
-rtm.start();
+//rtm.start();

@@ -1,6 +1,15 @@
 // NPM Packages
 const express = require('express');
 const mongoose = require('mongoose');
+const dbconfig = require('./config/database');
+
+// /// added by dom///
+// const Reminder = require('./models/reminder')
+// const User = require('./models/user')
+// const remindFinder = require('./services/reminderCronJob')
+// const _ = require('underscore')
+// ///
+
 const app = express();
 var bodyParser = require('body-parser');
 

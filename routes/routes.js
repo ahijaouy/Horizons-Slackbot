@@ -3,6 +3,9 @@ const router = express.Router();
 const auth = require('../services/authentication');
 var bodyParser = require('body-parser');
 
+const calendar = require('../services/calendar');
+const utils = require('../services/utils');
+
 router.get('/connect', (req, res) => {
     res.redirect(auth.generateAuthUrl(req.query.auth_id));
 });

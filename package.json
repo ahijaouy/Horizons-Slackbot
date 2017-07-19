@@ -26,6 +26,7 @@
     "googleapis": "^20.1.0",
     "mongoose": "^4.11.3",
     "nodemon": "^1.11.0",
+    "underscore": "^1.8.3",
     "uuid": "^3.1.0"
   },
   "devDependencies": {

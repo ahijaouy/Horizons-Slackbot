@@ -43,7 +43,7 @@ router.post('/slack/create_event', (req, res) => {
     if (payload.actions[0].value === 'true') {
         console.log('BP, CLICKED CONFIRM');
         
-        const eventInfo = JSON.parse(authUser.pending);
+        const eventInfo = JSON.parse(user.pending);
 
         if (eventInfo.type === 'reminder.add') {
             const newReminder = new Reminder({

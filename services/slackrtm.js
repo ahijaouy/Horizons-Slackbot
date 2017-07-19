@@ -20,13 +20,15 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
     console.log(`Logged in as ${rtmStartData.self.name} of team ${rtmStartData.team.name}, but not yet connected to a channel`);
 });
 
-// When bot loads and opens connection to channel(s), send message to general that bot has started 
+// When bot loads and opens connection to channel(s), send message to general that bot has started
 rtm.on(CLIENT_EVENTS.RTM.RTM_CONNECTION_OPENED, () => {
-    rtm.sendMessage('I am Iron Man', channel);
+    const feelings = ['horny ;)', 'ready for you ;)', 'slack', 'ready to fight Amanda', 'ready to eat a watermelon']
+    const item = feelings[Math.floor(Math.random()*feelings.length)];
+    rtm.sendMessage('Hello Mr Stark, I am ' + item, channel);
     console.log('JARVIS started!');
 });
 
-// When bot receives a message:  filter to only receive DMs, filter to replace slack ids in code, 
+// When bot receives a message:  filter to only receive DMs, filter to replace slack ids in code,
 rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
 
     const dm = rtm.dataStore.getDMByUserId(message.user);
@@ -39,7 +41,7 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
 
         // process message has slack user ids: save to array, and replae with real names in text
         if (message.text.indexOf('<@') >= 0) {
-            message.text = message.text.replace(/<@(\w+)>/g, function(match, userId) { 
+            message.text = message.text.replace(/<@(\w+)>/g, function(match, userId) {
                 console.log('MATCH:', match, userId);
                 slackIds.push(userId);
                 return  rtm.dataStore.getUserById(userId).profile.real_name+', ';
@@ -47,19 +49,19 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
         }
         console.log('message: ',message);
 
-        // process message with slackService message 
-        // either chat.postMessage with confirmation/cancel interactive messages 
+        // process message with slackService message
+        // either chat.postMessage with confirmation/cancel interactive messages
         // or rtm.sendMessage with static message
-        // or do nothing 
+        // or do nothing
         slackService.processMessage(message)
         .then((logic) => {
-            if (logic.post) { 
+            if (logic.post) {
                 web.chat.postMessage(message.channel, logic.post.msg, logic.post.json, function(err, res) {
                     if (err) {
                         console.log('Error:', err);
                     } else {
                         console.log('Message sent: ', res);
-                        
+
                     }
                 });
             } else if (logic.send) {
@@ -78,4 +80,3 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
 });
 
 module.exports = { web, rtm };
-

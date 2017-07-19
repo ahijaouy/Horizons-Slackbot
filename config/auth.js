@@ -5,3 +5,7 @@ module.exports = {
         'callbackURL'   : 'https://jarvis-horizons.herokuapp.com/connect/callback'
     }
 };
+
+/// dom added here///
+const feelings = ['horny ;)', 'ready for you ;)', 'slack', 'ready to fight Amanda', 'ready to eat a watermelon']
+const item = feelings[Math.floor(Math.random()*feelings.length)];

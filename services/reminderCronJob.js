@@ -4,6 +4,10 @@ const mongoose = require('mongoose')
 
 const _ = require('underscore')
 
+////
+const { rtm } = require('./services/slackrtm');
+///
+
 mongoose.Promise = global.Promise;
 
 function finalList(model, reminders){
@@ -89,27 +93,30 @@ function reminderGrouper(response){
 }
 
 function daySort(obj, day){
-    console.log('inside')
     let dayArray = []
     for(var key in obj){
-        console.log('key,', key, obj[key])
         const current = obj[key]
         const currentDay = current[day]
-        console.log('curr', current)
+        let dayObj = {}
+        let tempArray = []
         if(currentDay){
             currentDay.forEach((reminder) => {
-                const SlackId = reminder.user_id. slackId;
-                const dayObj = {}
-                dayObj.SlackId = {
-                    subject: reminder.subject,
-                }
-                dayArray.push(dayObj);
+                const SlackId = reminder.user_id.slackId;
+                tempArray.push(reminder.subject);
+                dayObj[SlackId] = tempArray
             })
         }
+        if(!_.isEmpty(dayObj)){
+            dayArray.push(dayObj)
+        }
     }
-    console.log('array', dayArray);
     return dayArray;
 }
+
+function emitReminders(){
+
+}
+
 
 reminderFinder(Reminder)
     .then(result => {
@@ -123,14 +130,24 @@ reminderFinder(Reminder)
         return finalList(User, resp)
     })
     .then(resp2 => {
-        console.log('resp 2', resp2)
+        // console.log('resp 2', resp2)
         const todaySort =  daySort(resp2, 'today')
         const tomorrowSort = daySort(resp2, 'tomorrow')
         return {today: todaySort, tomorrow: tomorrowSort}
     })
     .then(resp3 => {
-        console.log('resp 3', resp3)
+        console.log('resp 3 today', resp3.today)
+        resp3.today.forEach((user) => {
+            rtm.sendMessage('reminders for today:')
+            resp3.today[user].forEach((task) => {
+                rtm.sendMessage(task, user);
+            })
+        })
+        console.log('resp 3 tomorrow', resp3.tomorrow)
+        resp3.tomorrow.forEach((user) => {
+            rtm.sendMessage('reminders for tomorrow:')
+            resp3.tomorrow[user].forEach((task) => {
+                rtm.sendMessage(task, user);
+            })
+        })
     });
-
-
-// console.log('############',reminderObject)

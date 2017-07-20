@@ -100,12 +100,13 @@ getApiResponse = (message, authUser, rtm) => {
           
           // const conflict = true
           if(!conflict){
+            console.log('no conflict');
             return { post: { msg: responseMsg, json: responseJSON, data: data.result} };
             
           } else {
             return findFreeTimes(SLACK_IDS, start, end, duration)
             .then(freeTimes => {
-              console.log('free', freeTimes);
+              console.log('REACHES free', freeTimes);
               return { post: { msg: responseMsg, json: getDropdownJson(freeTimes), data: data.result, slackIds: SLACK_IDS } };
             });
           }
@@ -134,6 +135,7 @@ getApiResponse = (message, authUser, rtm) => {
   })
   .then((obj) => {
     return new Promise(function(resolve, reject) {
+      console.log('REACHES THEN 1');
       if (obj.post) {
         let userPending;
         if (SLACK_IDS) {

@@ -43,6 +43,7 @@ router.post('/slack/create_event', (req, res) => {
         createGoogleReminder(res, eventInfo, user);
         // type is meeting
       } else {
+        console.log('REACHES creating meeting')
         createGoogleMeeting(res, eventInfo, user);
       } 
       
@@ -72,6 +73,8 @@ createGoogleReminder = (res, eventInfo, user) => {
 
 // create Google meeting with attendees, start date, end date, and subject
 createGoogleMeeting = (res, eventInfo, user) => {
+  console.log('REACHES creating meeting method')
+  
   let startDate = new Date(eventInfo.date + " " + eventInfo.time);
   // HARD CODE IN ADDITION OF SEVEN HOURS
   startDate.setHours(startDate.getHours() + 7);
@@ -80,6 +83,8 @@ createGoogleMeeting = (res, eventInfo, user) => {
   
   utils.linkEmails(eventInfo.slackIds)
   .then((attendeesObj) => {
+    console.log('REACHES getting emails for calendar')
+    
     calendar.createMeeting(user.slackId, startDate, endDate, eventInfo.subject, attendeesObj.found);
     // should chain these two once create meeting is a promise *****
     updateAndSaveUser(res, user, false);

@@ -34,19 +34,6 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
         return;
 
     } 
-    
-    let slackIds = [];  // array with all slack user ids in message
-
-    // MIDDLEWARE for messages: 
-    // replace message's slack user ids with usernames; store ids into array; 
-    if (message.text.indexOf('<@') >= 0) {
-        message.text = message.text.replace(/<@(\w+)>/g, function(match, userId) { 
-            console.log('MATCH:', match, userId);
-            slackIds.push(userId);
-            return  rtm.dataStore.getUserById(userId).profile.real_name+', ';
-        });
-    }
-    console.log('message: ',message);
 
     // process message with slackService.processMessage which returns a logic object
     // either chat.postMessage with confirmation/cancel interactive messages 

@@ -66,18 +66,21 @@ getApiResponse = (message, authUser, rtm) => {
 
                 return {} ;
 
+            // handle reminder.add or meeting.add in progress
             } else if (data.result.actionIncomplete) {
                 // console.log('action INCOMPLETE');
                 const msg =  response.data.result.fulfillment.speech;
                 return { send: msg };
 
+            // handle complete reminder.add
             } else if (data.result.action === 'reminder.add') {
                 // console.log('ACTION IS COMPLETE: REMINDER', data.result.parameters);
                 const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
                 return { post: { msg: responseMsg, json: responseJSON, data: data.result } };
+            
+            // handle complete meeting.add
             } else {
-                console.log('ACTION IS COMPLETE: MEETING', data.result);
-                console.log('slack ids put into link emails', SLACK_IDS);
+                console.log('ACTION IS COMPLETE: MEETING ... slack ids put into link emails', SLACK_IDS);
 
                 return utils.linkEmails(SLACK_IDS)
                 .then((attendeesObj) => {

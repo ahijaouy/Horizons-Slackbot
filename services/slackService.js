@@ -82,7 +82,7 @@ getApiResponse = (message, authUser) => {
             } else {
                 console.log('ACTION IS COMPLETE: MEETING', data.result);
 
-                utils.linkEmails(SLACK_IDS)
+                return utils.linkEmails(SLACK_IDS)
                 .then((attendeesObj) => {
 
                     // all attendees have authed with google

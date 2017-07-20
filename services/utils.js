@@ -41,6 +41,11 @@ const getEndDate = (date, duration = 30) => {
   return new Date(startDate+durationInMs);
 }
 
+// utils.fourHourCheck(date)
+//  - Param: date     -> Date of start date
+//  - Description: Generates a boolean value true if the 
+//    start date is before 4 hours from now, false otherwise
+//  - Returns: boolean
 const fourHourCheck = (date) =>{
   const difference = new Date(date) - new Date();
   if(0< difference && difference < 14400000){

@@ -82,19 +82,19 @@ getApiResponse = (message, authUser, rtm) => {
             } else {
                 console.log('ACTION IS COMPLETE: MEETING ... slack ids put into link emails', SLACK_IDS);
 
+                const start = new Date(data.result.parameters.date + ' ' + data.result.parameters.time);
+                /// 777600000 is 9 days in miliseconds
+                const end = new Date(start.getTime() + 777600000)
+                console.log('start date 1', start, 'end date 1', end);
+                const duration = data.result.parameters.duration ? data.result.parameters.duration : 30
+                
                 return utils.linkEmails(SLACK_IDS)
                 .then((attendeesObj) => {
-                    console.log('attendees!! found:', attendeesObj.found, 'not found:', attendeesObj.notFound);
+                    console.log('attendees!!', attendeesObj, 'found:', attendeesObj.found, 'not found:', attendeesObj.notFound);
 
                     // all attendees have authed with google
                     if (attendeesObj.notFound.length) {
                         const emails = attendeesObj.found;
-
-                        const start = new Date(data.result.parameters.date + ' ' + data.result.parameters.time);
-                        /// 777600000 is 9 days in miliseconds
-                        const end = new Date(start.getTime() + 777600000)
-                        console.log('start date 1', start, 'end date 1', end);
-
                         const conflict = checkForConflicts(SLACK_IDS, emails, start, end)
 
                         // const conflict = true
@@ -103,12 +103,6 @@ getApiResponse = (message, authUser, rtm) => {
                             return { post: { msg: responseMsg, json: responseJSON, data: data.result} };
 
                         }else{
-                            const start = new Date(data.result.parameters.date + ' ' + data.result.parameters.time);
-                            /// 777600000 is 9 days in miliseconds
-                            const end = new Date(start.getTime() + 777600000)
-                            console.log('start date', start, 'end date', end);
-                            const duration = data.result.parameters.duration ? data.result.parameters.duration : 30
-                            console.log(duration)
                             const freeTimes = findFreeTimes(SLACK_IDS, start, end, duration)
                             console.log('free', freeTimes)
                             return { post: { msg: responseMsg, json: getDropdownJson(freeTimes), data: data.result, slackIds: SLACK_IDS } };
@@ -119,6 +113,8 @@ getApiResponse = (message, authUser, rtm) => {
                     } else {
                         // CHECK 4 HOURS
                         console.log('REACHED UNAUTH ATTENDEES');
+                        const isWithinFour = utils.fourHourCheck(start);
+
                     }
                 });
 

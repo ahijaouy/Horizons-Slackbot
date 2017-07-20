@@ -17,16 +17,18 @@ router.get('/connect', (req, res) => {
 
 router.get('/connect/callback', (req, res) => {
     const id = JSON.parse(decodeURIComponent(req.query.state)).auth_id;
-    auth.generateAuthTokens(req.query.code, id);
-    res.send('Successfully Authenticated with Google!');
+    auth.generateAuthTokens(req.query.code, id)
+    .then(() => res.send('Successfully Authenticated with Google! =D'))
+    .catch(() => res.send('Authentication with Google Failed! =('));
+
 });
 
-router.post('/slack/create_event', (req, res) => { 
+router.post('/slack/create_event', (req, res) => {
     const payload = JSON.parse(req.body.payload);
     const slackId = payload.user.id;
 
     console.log('REACHES ROUTE CREATE', req.body.payload);
-  
+
     // find user in order to get info abotu current event
     User.findOne({ slackId }, (err, user) => {
         console.log('BP, FOUND USER', user);
@@ -35,7 +37,7 @@ router.post('/slack/create_event', (req, res) => {
         }
 
         // user clicked confirm
-        if (payload.actions[0].value === 'true') {        
+        if (payload.actions[0].value === 'true') {
             const eventInfo = JSON.parse(user.pending);
 
             // type is reminder
@@ -44,7 +46,7 @@ router.post('/slack/create_event', (req, res) => {
             // type is meeting
             } else {
                 createGoogleMeeting(res, eventInfo, user);
-            } 
+            }
 
         // user clicked cancel
         } else {
@@ -74,7 +76,7 @@ createGoogleReminder = (res, eventInfo, user) => {
 createGoogleMeeting = (res, eventInfo, user) => {
     const startDate = new Date(eventInfo.date + " " + eventInfo.time);
     const endDate = (eventInfo.duration) ? utils.getEndDate(startDate, eventInfo.duration) : utils.getEndDate(startDate);
-    
+
     utils.linkEmails(eventInfo.slackIds)
     .then((attendeesObj) => {
         calendar.createMeeting(user.slackId, startDate, endDate, eventInfo.subject, attendeesObj.found);
@@ -89,7 +91,7 @@ saveReminderAndUser = (res, newReminder, user) => {
         if (err) {
             console.log('ERROR HERE: ',err);
         } else {
-            console.log('BP, SAVED REMINDER ');   
+            console.log('BP, SAVED REMINDER ');
             updateAndSaveUser(user, false);
         }
     });
@@ -98,7 +100,7 @@ saveReminderAndUser = (res, newReminder, user) => {
 // set user pending state to empty object and then save updated user to mongoDb
 updateAndSaveUser = (res, user, canceled) => {
     user.pending = JSON.stringify({});
-    
+
     user.save((err) => {
         if (err) {
             console.log('ERROR THERE: ',err);
@@ -107,9 +109,9 @@ updateAndSaveUser = (res, user, canceled) => {
             if (canceled) {
                 res.send('Canceled! :x:');
             } else {
-                res.send('Event created! :white_check_mark:');                
+                res.send('Event created! :white_check_mark:');
             }
-        } 
+        }
     }); // close user save
 }
 
@@ -126,12 +128,12 @@ module.exports = router;
 //     if (err) {
 //         console.log('ERROR: ', err);
 //         // return;
-//     } 
+//     }
 
 //     // user clicked confirm
 //     if (payload.actions[0].value === 'true') {
 //         console.log('BP, CLICKED CONFIRM');
-        
+
 //         const eventInfo = JSON.parse(user.pending);
 
 //         if (eventInfo.type === 'reminder.add') {
@@ -142,14 +144,14 @@ module.exports = router;
 //             });
 
 //             console.log('BP, CREATED REMINDER ', newReminder);
-            
+
 
 //             newReminder.save((err) => {
 //                 if (err) {
 //                     console.log('ERROR HERE: ',err);
 //                 } else {
 //                     console.log('BP, SAVED REMINDER ');
-                        
+
 //                     user.pending = JSON.stringify({});
 
 //                     user.save((err) => {
@@ -157,7 +159,7 @@ module.exports = router;
 //                             console.log('ERROR THERE: ',err);
 //                         } else {
 //                             console.log('BP, SAVED NEW USER ', user);
-                            
+
 //                             res.send('Event created! :white_check_mark:');
 //                         }
 //                     });  // close user save
@@ -171,25 +173,25 @@ module.exports = router;
 //                     console.log('ERROR THERE: ',err);
 //                 } else {
 //                     console.log('BP, MEETING, SAVED USER ', user);
-                    
+
 //                     res.send('Event created! :white_check_mark:');
 //                 }
 //             });  // close user save
-//         } 
+//         }
 
 //     //user clicked cancel
 //     } else {
 //         console.log('BP, PRESSED CANCEL')
 //         user.pending = JSON.stringify({});
 //         console.log('BP, NEW USER ', user);
-        
+
 //         user.save((err) => {
 //             if (err) {
 //                 console.log('ERROR THERE: ',err);
 //             } else {
 //                 console.log('BP, CANCEL, SAVED USER');
 //                 res.send('Canceled! :x:');
-//             } 
+//             }
 //         }); // close user save
 //     }
 //   });  // close find User by id

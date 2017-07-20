@@ -1,25 +1,27 @@
 // Local Import
 const auth = require('./authentication');
+
+
 /************************* Exported Methods *************************/
 
 function checkFreeBusy(slackId, email, start, end) {
-  return new Promise(function(resolve, reject) {
+  return new Promise((resolve, reject) => {
     auth.getGoogleCalendar(slackId)
-      .then(calendar => {
-        calendar.freebusy.query({
-          resource: {
-            timeMin: start,
-            timeMax: end,
-            items: [{
-              id: email
-            }]
-          }
-        }, (err, resp) => {
-          if (err) reject(err);
-          const busy = resp.calendars[email].busy
-          resolve({slackId, email, busy});
-        } )
-    })
+    .then(calendar => {
+      calendar.freebusy.query({
+        resource: {
+          timeMin: start,
+          timeMax: end,
+          items: [{
+            id: email
+          }]
+        }
+      }, (err, resp) => {
+        if (err) reject(err);
+        const busy = resp.calendars[email].busy
+        resolve({slackId, email, busy});
+      } )
+    }).catch(reject);
   });
 
 }
@@ -32,18 +34,17 @@ function checkFreeBusy(slackId, email, start, end) {
 //    for the user specified by the slackId for the date
 //    specified with the subject specified
 function createReminder(slackId, date, subject) {
-  return new Promise(function(resolve, reject) {
+  return new Promise((resolve, reject) => {
     auth.getGoogleCalendar(slackId)
     .then(calendar => {
-        calendar.events.insert({
-          calendarId: 'primary',
-          resource: generateReminder(date, subject)
-        }, function(err, resp) {
-          if (err) reject(err);
-          resolve(resp);
-        })
+      calendar.events.insert({
+        calendarId: 'primary',
+        resource: generateReminder(date, subject)
+      }, (err, resp) => {
+        if (err) reject(err);
+        resolve(resp);
       })
-      .catch(reject);
+    }).catch(reject);
   })
 }
 
@@ -58,34 +59,22 @@ function createReminder(slackId, date, subject) {
 //    for the start and end dates (with times) specified
 //    and with the subject specified
 function createMeeting(slackId, start, end, subject, attendees) {
-  return new Promise(function(response, reject) {
+  return new Promise((response, reject) => {
     auth.getGoogleCalendar(slackId)
-      .then(calendar => {
-        calendar.events.insert({
-          calendarId: 'primary',
-          resource: generateMeeting(start, end, subject, attendees)
-        }, function(err, resp) {
-          if (err) reject(err);
-          resolve(resp);
-        })
+    .then(calendar => {
+      calendar.events.insert({
+        calendarId: 'primary',
+        resource: generateMeeting(start, end, subject, attendees)
+      }, function(err, resp) {
+        if (err) reject(err);
+        resolve(resp);
       })
-      .catch(reject);
+    })
+    .catch(reject);
   });
 }
-//
-// - Param: timeArray -> Array
-//
-// - Description: Finds and recommends event times to avoid conflict
-//
- function findFreeTime(busyArray) {
-   let freeArray = [];
-   for(let slot = 0; slot < busyArray.length - 1; slot++){
-     if(((busyArray[slot+1].start-busyArray[slot].end) > 1800000)
-     &&(busyArray[slot+1].start.getDate() === busyArray[slot].end.getDate())){
-       freeArray.push({start:busyArray[slot].end, end:busyArray[slot+1].start})
-     }
-   }
- }
+
+
 /************************* Local Methods *************************/
 
 // Local Helper Function

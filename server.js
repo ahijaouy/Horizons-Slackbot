@@ -22,20 +22,6 @@ app.use('/', routes);
 
 mongoose.connect(dbconfig.url);
 
-// TESTING CONFLICTS
-
-// const conflicts = require('./services/conflicts');
-//const slackIds = ['U6AQMP8B01', 'U6A0186VA'];
-// const emails = ['hijaouya@gmail.com', 'amanda.hansen@yale.edu', ];
-// const start = new Date('2017-07-21T01:00:00Z');
-// const end = new Date('2017-07-21T02:00:00Z');
-// console.log('START TIME: ', start.toLocaleString());
-
-// conflicts.checkForConflicts(slackIds, emails, start, end)
-//     .then(console.log);
-
-// const util  = require('./services/utils');
-// util.linkEmails(slackIds).then(console.log);
 // Start Server
 app.listen(port, function() {
     console.log('Server Listening on port ' + port);

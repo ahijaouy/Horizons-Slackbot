@@ -9,10 +9,10 @@ const _ = require('underscore');
 //    an array of emails that were matched.
 //    notFound contains the Ids for which no match was found.
 //  - Returns: {found: [], notFound: []}
-const linkEmails = (idArray) => {
+function linkEmails(idArray){
   return new Promise((resolve, reject) => {
     Promise.all(idArray.map(slackId => userExists(slackId)))
-      .then((users) => {
+      .then(users => {
         let found = [];
         let notFound = [];
         users.forEach((user) => {
@@ -28,9 +28,11 @@ const linkEmails = (idArray) => {
   });
 }
 
-function userExists(slackId) {
-  return new Promise(function(resolve, reject) {
-    User.findOne({slackId}, function(err, user) {
+// Local Helper function that checks if a given slackId
+// exists in the Database
+function userExists(slackId){
+  return new Promise((resolve, reject) => {
+    User.findOne({slackId}, (err, user) => {
       if (err) reject(err);
       if (user) {
         resolve({
@@ -39,10 +41,7 @@ function userExists(slackId) {
           email: user.email
         });
       } else {
-        resolve({
-          exists: false,
-          slackId: slackId
-        })
+        resolve({ exists: false, slackId: slackId})
       }
     })
   })
@@ -55,15 +54,16 @@ function userExists(slackId) {
 //    specified duration after the specified date.
 //    The default duration is 30 minutes.
 //  - Returns: a new Date object
-const getEndDate = (date, duration = 30) => {
+function getEndDate(date, duration = 30){
   const startDate = date.getTime();
   const durationInMs = duration * 1000 *60
   return new Date(startDate+durationInMs);
 }
 
-const fourHourCheck = (date) =>{
+function fourHourCheck(date){
   const difference = new Date(date) - new Date();
-  if(0< difference && difference < 14400000){
+  const fourHours = 4*60*60*1000;
+  if(0< difference && difference < fourHours){
     return true;
   }else{
     return false;

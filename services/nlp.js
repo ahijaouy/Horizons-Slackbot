@@ -13,7 +13,7 @@ const api_ai = axios.create({
 // Local Helper Function
 // Generates the url to sent to API.AI
 function generateQueryString(query, id) {
-    return '/query?v=20150910&lang=en&sessionId=' + id + '&query=' + encodeURIComponent(query);
+  return '/query?v=20150910&lang=en&sessionId=' + id + '&query=' + encodeURIComponent(query);
 }
 
 // nlp.sendQuery(query, slackId)
@@ -22,9 +22,9 @@ function generateQueryString(query, id) {
 //  - Description: Send an API call to API.AI
 //    using the query string and slackId specified
 function sendQuery(query, slackId) {
-    return api_ai.get(generateQueryString(query, slackId))
+  return api_ai.get(generateQueryString(query, slackId))
 }
-    
+
 module.exports = {
-    sendQuery
+  sendQuery
 }

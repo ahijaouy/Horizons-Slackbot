@@ -51,5 +51,6 @@ const fourHourCheck = (date) =>{
 
 module.exports = {
   linkEmails,
-  getEndDate
+  getEndDate,
+  fourHourCheck
 }

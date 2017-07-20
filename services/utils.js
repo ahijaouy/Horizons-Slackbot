@@ -28,6 +28,7 @@ const linkEmails = (idArray) => {
   });
 }
 
+// Local helper function that checks if user in database
 function userExists(slackId) {
   return new Promise(function(resolve, reject) {
     User.findOne({slackId}, function(err, user) {

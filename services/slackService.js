@@ -115,6 +115,12 @@ getApiResponse = (message, authUser, rtm) => {
                         console.log('REACHED UNAUTH ATTENDEES');
                         const isWithinFour = utils.fourHourCheck(start);
 
+                        if (isWithinFour) {
+                            const returnMsg = 'Cannot schedule! Event too soon!'
+                            return { send: returnMsg };
+                        } else {
+                            return { send: 'here is where events 4+ hours later from now will be handled' };
+                        }
                     }
                 });
 

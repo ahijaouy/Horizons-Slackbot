@@ -15,6 +15,14 @@ const port = process.env.PORT || 3000
 // Routes
 app.use('/', routes);
 
+// TESTING
+const conflicts = require('./services/conflicts');
+
+const slackIds = ['U6A0186VA','U6AQMP8B0'];
+const start = '2017-07-20T15:30:00';
+const end = '2017-07-29T15:30:00';
+conflicts.findFreeTimes(slackIds, start, end)
+  .then(console.log)
 
 // Database Connection
 mongoose.connect(dbconfig.url);
@@ -25,4 +33,4 @@ app.listen(port, function() {
 });
 
 // Start Slack Websockets
-rtm.start();
+// rtm.start();

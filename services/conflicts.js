@@ -6,13 +6,15 @@ const calendar = require('./calendar');
 const User = require('../models/user');
 const util = require('./utils')
 /************************* Exported Methods *************************/
-function findFreeTime(slackIds, start, end, duration = 30){
+function findFreeTimes(slackIds, start, end, duration = 30){
   return new Promise((resolve)=> {
     const durationInMs = duration * 60 * 1000;
     let freeArray = [];
     let optionArray = [];
+    console.log('about to enter Andre');
     generateFreeTimes(slackIds, start,end)
     .then( allFreeArray => {
+      console.log('just left andre');
       allFreeArray.forEach( slot => {
         if((new Date(slot.end)- new Date(slot.start)) > durationInMs){
           freeArray.push({
@@ -164,5 +166,6 @@ function checkForOverlap(first, second) {
 }
 
 module.exports = {
-  generateFreeTimes
+  generateFreeTimes,
+  findFreeTimes
 }

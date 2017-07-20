@@ -11,21 +11,41 @@ const _ = require('underscore');
 //  - Returns: {found: [], notFound: []}
 const linkEmails = (idArray) => {
   return new Promise((resolve, reject) => {
-    let found = [];
-    let notFound = [];
-    idArray.forEach((slackId) => {
-      User.findOne({slackId:slackId})
-        .then( userObject => {
-          if(userObject){
-            found.push(userObject.email)
-          } else{
-            notFound.push(slackId)
+    Promise.all(idArray.map(slackId => userExists(slackId)))
+      .then((users) => {
+        let found = [];
+        let notFound = [];
+        users.forEach((user) => {
+          if (user.exists) {
+            found.push(user.email);
+          } else {
+            notFound.push(user.slackId);
           }
-        })
-        .catch(err => console.log('error', err))
-    })
-    resolve({found, notFound});
+        });
+        resolve( {found, notFound});
+      })
+      .catch(reject);
   });
+}
+
+function userExists(slackId) {
+  return new Promise(function(resolve, reject) {
+    User.findOne({slackId}, function(err, user) {
+      if (err) reject(err);
+      if (user) {
+        resolve({
+          exists: true,
+          slackId: slackId,
+          email: user.email
+        });
+      } else {
+        resolve({
+          exists: false,
+          slackId: slackId
+        })
+      }
+    })
+  })
 }
 
 // utils.getEndDate(date, duration)

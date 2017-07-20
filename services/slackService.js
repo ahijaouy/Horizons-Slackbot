@@ -45,7 +45,17 @@ processMessage = (message, slackIds) => {
 // return: object with SEND key if rtm.sendMessage is to be used, and the message as its value
 // return: object with POST key if web.chat.postMessage is to be used, and msg + json as value object
 getApiResponse = (message, authUser) => {
-    // console.log('get api response');
+    // MIDDLEWARE for messages: 
+    // replace message's slack user ids with usernames; store ids into array; 
+    if (message.text.indexOf('<@') >= 0) {
+        message.text = message.text.replace(/<@(\w+)>/g, function(match, userId) { 
+            console.log('MATCH:', match, userId);
+            SLACK_IDS.push(userId);
+            return  rtm.dataStore.getUserById(userId).profile.real_name+', ';
+        });
+    }
+    console.log('message: ',message);
+
 
     return sendQuery(message.text, authUser._id)
         .then((response) => {
@@ -107,7 +117,7 @@ getApiResponse = (message, authUser) => {
                     // not all attendees have authed with google
                     } else {
                         // CHECK 4 HOURS
-                        
+                        console.log('REACHED UNAUTH ATTENDEES');
                     }
                 });
 

@@ -12,7 +12,7 @@ let SLACK_IDS = [];
 // main message processing method called by slackrtm.js
 // receives a message, checks authorization, returns sendMessage with link if user not authorized
 // or returns promise chain of processing a message
-processMessage = (message) => {
+processMessage = (message, rtm) => {
     return new Promise((resolve, reject) => {
         console.log('bp 1: ', message.user);
         auth.checkUser(message.user)
@@ -24,7 +24,7 @@ processMessage = (message) => {
                 if (authUser.pending && JSON.parse(authUser.pending).type) {
                     resolve({pending: true});
                 } else {
-                    resolve(getApiResponse(message, authUser));
+                    resolve(getApiResponse(message, authUser, rtm));
                 }
 
             } else {
@@ -40,7 +40,7 @@ processMessage = (message) => {
 // method that takes a message and returns objects with results from AI api
 // return: object with SEND key if rtm.sendMessage is to be used, and the message as its value
 // return: object with POST key if web.chat.postMessage is to be used, and msg + json as value object
-getApiResponse = (message, authUser) => {
+getApiResponse = (message, authUser, rtm) => {
     // MIDDLEWARE for messages: 
     // replace message's slack user ids with usernames; store ids into array; 
     if (message.text.indexOf('<@') >= 0) {

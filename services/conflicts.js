@@ -30,11 +30,11 @@ function checkForConflicts(slackIds, emails, start, end) {
   if ((end instanceof Date) !== true) {
     throw new Error(`Expected param end to be a Date object. Instead it was type ${typeof end}`);
   }
-  if (typeof emails !== 'string') {
-    throw new Error(`Expected param emails to be a string. Instead it was type ${typeof subject}`);
+  if ((emails instanceof Array) !== true) {
+    throw new Error(`Expected param slackIds to be a Array object. Instead it was type ${typeof emails}`);
   }
   if ((slackIds instanceof Array) !== true) {
-    throw new Error(`Expected param slackIds to be a Array object. Instead it was type ${typeof attendees}`);
+    throw new Error(`Expected param slackIds to be a Array object. Instead it was type ${typeof slackIds}`);
   }
 
   return new Promise((resolve, reject) => {
@@ -72,7 +72,7 @@ function findFreeTimes(slackIds, start, end, duration = 30){
     throw new Error(`Expected param end to be a Date object. Instead it was type ${typeof end}`);
   }
   if ((slackIds instanceof Array) !== true) {
-    throw new Error(`Expected param slackIds to be a Array object. Instead it was type ${typeof attendees}`);
+    throw new Error(`Expected param slackIds to be a Array object. Instead it was type ${typeof slackIds}`);
   }
 
   return new Promise((resolve, reject)=> {

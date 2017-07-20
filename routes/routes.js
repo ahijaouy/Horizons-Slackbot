@@ -23,11 +23,12 @@ router.get('/connect/callback', (req, res) => {
 
 router.post('/slack/create_event', (req, res) => { 
     const payload = JSON.parse(req.body.payload);
+    const slackId = payload.user.id;
 
     console.log('REACHES ROUTE CREATE', req.body.payload);
   
     // find user in order to get info abotu current event
-    User.findOne({slackId: payload.user.id}, (err, user) => {
+    User.findOne({ slackId }, (err, user) => {
         console.log('BP, FOUND USER', user);
         if (err) {
             console.log('ERROR: ', err);
@@ -64,7 +65,7 @@ createGoogleReminder = (res, eventInfo, user) => {
         user_id: user._id
     });
 
-    calendar.createReminder(payload.user.id, new Date(eventInfo.date), eventInfo.subject);
+    calendar.createReminder(user.slackId, new Date(eventInfo.date), eventInfo.subject);
     // should chain these two once create meeting is a promise *****
     saveReminderAndUser(res, newReminder, user);
 }
@@ -76,7 +77,7 @@ createGoogleMeeting = (res, eventInfo, user) => {
     
     utils.linkEmails(eventInfo.slackIds)
     .then((attendeesObj) => {
-        calendar.createMeeting(payload.user.id, startDate, endDate, eventInfo.subject, attendeesObj.found);
+        calendar.createMeeting(user.slackId, startDate, endDate, eventInfo.subject, attendeesObj.found);
         // should chain these two once create meeting is a promise *****
         updateAndSaveUser(res, user, false);
     });

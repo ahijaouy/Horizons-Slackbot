@@ -5,10 +5,15 @@ const AUTH_PREFIX = 'https://jarvis-horizons.herokuapp.com/';
 const { getResponseMessage } = require('./slackUtils');
 const { responseJSON } = require('./slackInteractiveMessages');
 
+let SLACK_IDS;
+
 // main message processing method called by slackrtm.js
 // receives a message, checks authorization, returns sendMessage with link if user not authorized
 // or returns promise chain of processing a message
-processMessage = (message) => { 
+processMessage = (message, slackIds) => { 
+    if (slackIds) {
+        SLACK_IDS = slackIds;
+    }
 
     return new Promise((resolve, reject) => {
         console.log('bp 1: ', message.user);

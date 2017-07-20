@@ -91,49 +91,8 @@ const getEndDate = (date, duration = 30) => {
 //   return freeArray;
 //  }
 
-function findFreeTime(){
-  let duration = 30;
-  const durationInMs = duration * 60 * 1000;
-  let freeArray = [];
-  let optionArray = [];
-  allFreeArray = [ { start: '2017-07-20T15:30:00', end: '2017-07-20T16:00:00' },
-  { start: '2017-07-20T17:00:00', end: '2017-07-20T17:30:00' },
-  { start: '2017-07-20T18:00:00', end: '2017-07-20T18:30:00' },
-  { start: '2017-07-20T19:00:00', end: '2017-07-20T20:00:00' },
-  { start: '2017-07-21T00:30:00', end: '2017-07-21T02:00:00' },
-  { start: '2017-07-21T17:00:00', end: '2017-07-21T18:00:00' } ]
-  allFreeArray.forEach((slot)=>{
-    if((new Date(slot.end)- new Date(slot.start)) > durationInMs){
-      freeArray.push({
-        start: new Date(slot.start),
-        end: getEndDate(new Date(slot.start), duration)
-      })
-    }
-  })
-  let count = 1;
-  optionArray.push(freeArray[0]);
-  for(var slot = 0; slot < freeArray.length; slot ++){
-    let currDate = optionArray[optionArray.length-1].start.getDate();
-    if(optionArray.length < 11 ){
-      if(freeArray[slot].start.getDate()===currDate){
-        if(count < 4){
-          optionArray.push(freeArray[slot]);
-          count ++;
-        }else{
-          continue;
-        }
-      }else{
-        currDate = freeArray[slot].start.getDate()
-        count = 1
-        optionArray.push(freeArray[slot])
-      }
-    }else{
-      break;
-    }
-  }
-  return optionArray;
-}
-console.log(findFreeTime())
+
+
 module.exports = {
   linkEmails,
   getEndDate

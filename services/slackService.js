@@ -78,8 +78,7 @@ getApiResponse = (message, authUser) => {
                 const conflict = true
                 if(!conflict){
                     const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
-                    console.log('gar sending slackIds: ', SLACK_IDS)
-                    return { post: { msg: responseMsg, json: responseJSON, data: data.result, slackIds: SLACK_IDS } };
+                    return { post: { msg: responseMsg, json: responseJSON, data: data.result} };
 
                 }else{
                     const start = new Date(data.result.parameters.date + ' ' + data.result.parameters.time);
@@ -102,10 +101,10 @@ getApiResponse = (message, authUser) => {
             return new Promise(function(resolve, reject) {
                 if (obj.post) {
                     let userPending;
-                    if (obj.post.slackIds) {
-                        Object.assign({}, obj.post.data.parameters, {slackIds: obj.post.slackIds}, {type: obj.post.data.action} );
+                    if (SLACK_IDS) {
+                        userPending = Object.assign({}, obj.post.data.parameters, {slackIds: SLACK_IDS}, {type: obj.post.data.action} );
                     } else {
-                        Object.assign({}, obj.post.data.parameters, {type: obj.post.data.action} );
+                        userPending = Object.assign({}, obj.post.data.parameters, {type: obj.post.data.action} );
                     }
                     authUser.pending = JSON.stringify(userPending);
                     authUser.save(() => resolve(obj));

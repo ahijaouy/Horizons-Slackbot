@@ -34,33 +34,20 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
         return;
 
     } 
-    
-    let slackIds = [];  // array with all slack user ids in message
-
-    // MIDDLEWARE for messages: 
-    // replace message's slack user ids with usernames; store ids into array; 
-    if (message.text.indexOf('<@') >= 0) {
-        message.text = message.text.replace(/<@(\w+)>/g, function(match, userId) { 
-            console.log('MATCH:', match, userId);
-            slackIds.push(userId);
-            return  rtm.dataStore.getUserById(userId).profile.real_name+', ';
-        });
-    }
-    console.log('message: ',message);
 
     // process message with slackService.processMessage which returns a logic object
     // either chat.postMessage with confirmation/cancel interactive messages 
     // or rtm.sendMessage with static message
     // or do nothing 
-    slackService.processMessage(message, slackIds)
+    slackService.processMessage(message, rtm)
     .then((logic) => {
         if (logic.post) { 
+            // rtm.sendMessage('YO THE RESPONSE IS BEING SENT', message.channel);
             web.chat.postMessage(message.channel, logic.post.msg, logic.post.json, function(err, res) {
                 if (err) {
                     console.log('Error:', err);
                 } else {
-                    console.log('Message sent: ', res);
-                    
+                    console.log('Message SENT: ', res);
                 }
             });
 

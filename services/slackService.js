@@ -80,7 +80,8 @@ getApiResponse = (message, authUser, rtm) => {
 
                 return utils.linkEmails(SLACK_IDS)
                 .then((attendeesObj) => {
-
+                    console.log('attendees!! found:', attendeesObj.found, 'not found:', attendeesObj.notFound);
+                    
                     // all attendees have authed with google
                     if (attendeesObj.notFound.length) {
                         const emails = attendeesObj.found;

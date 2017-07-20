@@ -34,10 +34,13 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
         // do nothing if message is not DM
         return;
 
-    } else if (message.text) {
+    } 
+    
+    // if (message.text) {
         let slackIds = [];  // array with all slack user ids in message
 
-        // process message has slack user ids: save to array, and replae with real names in text
+        // MIDDLEWARE for messages: 
+        // replace message's slack user ids with usernames; store ids into array; 
         if (message.text.indexOf('<@') >= 0) {
             message.text = message.text.replace(/<@(\w+)>/g, function(match, userId) { 
                 console.log('MATCH:', match, userId);
@@ -53,7 +56,6 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
         // or do nothing 
         slackService.processMessage(message)
         .then((logic) => {
-            console.log("logic", logic)
             if (logic.post) { 
                 web.chat.postMessage(message.channel, logic.post.msg, logic.post.json, function(err, res) {
                     if (err) {
@@ -63,19 +65,21 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
                         
                     }
                 });
+
             } else if (logic.send) {
-                console.log('check me', logic.send)
                 rtm.sendMessage(logic.send, message.channel);
+
             } else if (logic.pending) {
                 rtm.sendMessage('You are in a pending state! Confirm or cancel above event to continue.', message.channel);
+            
             } else {
                 console.log('reached unspecified');
             }
         })
         .catch((err) => {
-            console.log('error: ', err);
+            console.log('Error: ', err);
         });
-    }
+    // }
 });
 
 module.exports = { web, rtm };

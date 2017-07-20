@@ -9,8 +9,6 @@ const util = require('./utils')
 
 /************************* Exported Methods *************************/
 
-
-
 function findFreeTimes(slackIds, start, end, duration = 30){
   return new Promise((resolve)=> {
     const durationInMs = duration * 60 * 1000;

@@ -23,6 +23,20 @@ const util = require('./utils')
 //  - Returns: a PROMISE that will resolve to an object
 //    with a key 'conflicts' which points to a boolean
 function checkForConflicts(slackIds, emails, start, end) {
+  //Check Params for Errors
+  if ((start instanceof Date) !== true) {
+    throw new Error(`Expected param start to be a Date object. Instead it was type ${typeof start}`);
+  }
+  if ((end instanceof Date) !== true) {
+    throw new Error(`Expected param end to be a Date object. Instead it was type ${typeof end}`);
+  }
+  if (typeof emails !== 'string') {
+    throw new Error(`Expected param emails to be a string. Instead it was type ${typeof subject}`);
+  }
+  if ((slackIds instanceof Array) !== true) {
+    throw new Error(`Expected param slackIds to be a Array object. Instead it was type ${typeof attendees}`);
+  }
+
   return new Promise((resolve, reject) => {
     if (slackIds.length !== emails.length) {
       reject(new Error("The array of SlackIds and emails should be the same length"));
@@ -50,6 +64,17 @@ function checkForConflicts(slackIds, emails, start, end) {
 //  - Returns: a PROMISE that will resolve to an array
 //    of objects with a keys 'start' and 'end' which point to Date objects
 function findFreeTimes(slackIds, start, end, duration = 30){
+  //Check Params for Errors
+  if ((start instanceof Date) !== true) {
+    throw new Error(`Expected param start to be a Date object. Instead it was type ${typeof start}`);
+  }
+  if ((end instanceof Date) !== true) {
+    throw new Error(`Expected param end to be a Date object. Instead it was type ${typeof end}`);
+  }
+  if ((slackIds instanceof Array) !== true) {
+    throw new Error(`Expected param slackIds to be a Array object. Instead it was type ${typeof attendees}`);
+  }
+
   return new Promise((resolve, reject)=> {
     const durationInMs = duration * 60 * 1000;
     let freeArray = [];

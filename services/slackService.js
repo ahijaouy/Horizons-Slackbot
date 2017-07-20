@@ -60,12 +60,14 @@ getSlackEditableDate = (messageDate, messageTime) => {
 
     //handle meeting with date and time
     if (messageTime) {
-        date = new Date(messageDate+' '+messageTime) / 1000;
+        date = new Date(messageDate+' '+messageTime);
         console.log('YOOOOOOOOOOOOOOOOOOOOOOOOO')
         console.log('received time: ',messageTime);
         console.log('new date with time: ',date.getHours()+':'+date.getMinutes());
         console.log('YOOOOOOOOOOOOOOOOOOOOOOOOO')
         
+        date = date / 1000;
+
         return "<!date^"+date+"^ on {date_short} at {time}|Default date: 2000-01-01 1:11:11 AM>";
 
     //handle reminder or meeting with just date

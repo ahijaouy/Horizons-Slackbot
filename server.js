@@ -23,11 +23,6 @@ const port = process.env.PORT || 3000
 // Routes
 app.use('/', routes);
 
-<<<<<<< HEAD
-
-=======
-// Database Connection
->>>>>>> development
 mongoose.connect(dbconfig.url);
 
 

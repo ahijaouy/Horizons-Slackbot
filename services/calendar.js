@@ -32,14 +32,20 @@ function checkFreeBusy(slackId, email, start, end) {
 //    for the user specified by the slackId for the date
 //    specified with the subject specified
 function createReminder(slackId, date, subject) {
-  auth.getGoogleCalendar(slackId)
+  return new Promise(function(resolve, reject) {
+    auth.getGoogleCalendar(slackId)
     .then(calendar => {
-      calendar.events.insert({
-        calendarId: 'primary',
-        resource: generateReminder(date, subject)
+        calendar.events.insert({
+          calendarId: 'primary',
+          resource: generateReminder(date, subject)
+        }, function(err, resp) {
+          if (err) reject(err);
+          resolve(resp);
+        })
       })
-    })
-    .catch(err => console.log('ERROR: ', err));
+      .catch(reject);
+  })
+
 }
 
 // calendar.createMeeting(slackId, start, end, subject, attendees)
@@ -53,14 +59,21 @@ function createReminder(slackId, date, subject) {
 //    for the start and end dates (with times) specified
 //    and with the subject specified
 function createMeeting(slackId, start, end, subject, attendees) {
-  auth.getGoogleCalendar(slackId)
-    .then(calendar => {
-      calendar.events.insert({
-        calendarId: 'primary',
-        resource: generateMeeting(start, end, subject, attendees)
+  return new Promise(function(response, reject) {
+    auth.getGoogleCalendar(slackId)
+      .then(calendar => {
+        calendar.events.insert({
+          calendarId: 'primary',
+          resource: generateMeeting(start, end, subject, attendees)
+        }, function(err, resp) {
+          if (err) reject(err);
+          resolve(resp);
+        })
       })
-    })
-    .catch(err => console.log('ERROR: ', err));
+      .catch(reject));
+
+  });
+
 }
 //
 // - Param: timeArray -> Array

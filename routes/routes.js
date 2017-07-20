@@ -9,6 +9,8 @@ const utils = require('../services/utils');
 const User = require('../models/user');
 const Reminder = require('../models/reminder');
 
+/***************************** Routes *****************************/
+
 router.get('/connect', (req, res) => {
     auth.generateAuthUrl(req.query.auth_id).then(url => res.redirect(url));
 });
@@ -50,7 +52,7 @@ router.post('/slack/create_event', (req, res) => {
 
 
 
-/****** Helper Functions ******/
+/************************ Helper Functions ************************/
 
 // create Google reminder with date and subject
 createGoogleReminder = (eventInfo, user) => {
@@ -107,6 +109,14 @@ updateAndSaveUser = (user, canceled) => {
         } 
     }); // close user save
 }
+
+
+
+module.exports = router;
+
+
+
+
 
 
 // OLD MESSY BUT WORKING WAY:
@@ -185,4 +195,3 @@ updateAndSaveUser = (user, canceled) => {
 // });  //close router post
 
 
-module.exports = router;

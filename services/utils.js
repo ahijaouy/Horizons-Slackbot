@@ -12,19 +12,19 @@ const _ = require('underscore');
 const linkEmails = (idArray) => {
   return new Promise((resolve, reject) => {
     Promise.all(idArray.map(slackId => userExists(slackId)))
-      .then((users) => {
-        let found = [];
-        let notFound = [];
-        users.forEach((user) => {
-          if (user.exists) {
-            found.push(user.email);
-          } else {
-            notFound.push(user.slackId);
-          }
-        });
-        resolve( {found, notFound});
-      })
-      .catch(reject);
+    .then((users) => {
+      let found = [];
+      let notFound = [];
+      users.forEach((user) => {
+        if (user.exists) {
+          found.push(user.email);
+        } else {
+          notFound.push(user.slackId);
+        }
+      });
+      resolve( {found, notFound});
+    })
+    .catch(reject);
   });
 }
 

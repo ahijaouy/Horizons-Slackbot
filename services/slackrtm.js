@@ -1,11 +1,9 @@
 const { RtmClient, WebClient, CLIENT_EVENTS, RTM_EVENTS } = require('@slack/client');
-const slackConfig = require('../config/slack');
 const bot_token = require('../config/slack').SLACK_BOT_TOKEN || '';
 const slackService = require('./slackService');
 
 const rtm = new RtmClient(bot_token);
 var web = new WebClient(bot_token);
-
 
 let channel;
 

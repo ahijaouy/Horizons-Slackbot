@@ -89,7 +89,7 @@ getApiResponse = (message, authUser, rtm) => {
             return new Promise(function(resolve, reject) {
                 if (obj.post) {
                     let userPending;
-                    if (obj.post.slackIds) {
+                    if (SLACK_IDS) {
                         userPending = Object.assign({}, obj.post.data.parameters, {slackIds: SLACK_IDS}, {type: obj.post.data.action} );
                     } else {
                         userPending = Object.assign({}, obj.post.data.parameters, {type: obj.post.data.action} );                        

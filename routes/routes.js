@@ -39,15 +39,15 @@ router.post('/slack/create_event', (req, res) => {
 
             // type is reminder
             if (eventInfo.type === 'reminder.add') {
-                createGoogleReminder(eventInfo, user);
+                createGoogleReminder(res, eventInfo, user);
             // type is meeting
             } else {
-                createGoogleMeeting(eventInfo, user);
+                createGoogleMeeting(res, eventInfo, user);
             } 
 
         // user clicked cancel
         } else {
-            updateAndSaveUser(user, true);
+            updateAndSaveUser(res, user, true);
         }
     });  // close find User by id
 });  //close router post
@@ -57,7 +57,7 @@ router.post('/slack/create_event', (req, res) => {
 /************************ Helper Functions ************************/
 
 // create Google reminder with date and subject
-createGoogleReminder = (eventInfo, user) => {
+createGoogleReminder = (res, eventInfo, user) => {
     const newReminder = new Reminder({
         subject: eventInfo.subject,
         date: eventInfo.date,
@@ -66,11 +66,11 @@ createGoogleReminder = (eventInfo, user) => {
 
     calendar.createReminder(payload.user.id, new Date(eventInfo.date), eventInfo.subject);
     // should chain these two once create meeting is a promise *****
-    saveReminderAndUser(newReminder, user);
+    saveReminderAndUser(res, newReminder, user);
 }
 
 // create Google meeting with attendees, start date, end date, and subject
-createGoogleMeeting = (eventInfo, user) => {
+createGoogleMeeting = (res, eventInfo, user) => {
     const startDate = new Date(eventInfo.date + " " + eventInfo.time);
     const endDate = (eventInfo.duration) ? utils.getEndDate(startDate, eventInfo.duration) : utils.getEndDate(startDate);
     
@@ -78,12 +78,12 @@ createGoogleMeeting = (eventInfo, user) => {
     .then((attendeesObj) => {
         calendar.createMeeting(payload.user.id, startDate, endDate, eventInfo.subject, attendeesObj.found);
         // should chain these two once create meeting is a promise *****
-        updateAndSaveUser(user, false);
+        updateAndSaveUser(res, user, false);
     });
 }
 
 // save a new Reminder to mongoDb then call to save user with empty pending state
-saveReminderAndUser = (newReminder, user) => {
+saveReminderAndUser = (res, newReminder, user) => {
     newReminder.save((err) => {
         if (err) {
             console.log('ERROR HERE: ',err);
@@ -95,7 +95,7 @@ saveReminderAndUser = (newReminder, user) => {
 }
 
 // set user pending state to empty object and then save updated user to mongoDb
-updateAndSaveUser = (user, canceled) => {
+updateAndSaveUser = (res, user, canceled) => {
     user.pending = JSON.stringify({});
     
     user.save((err) => {

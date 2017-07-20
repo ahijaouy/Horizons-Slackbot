@@ -103,10 +103,11 @@ getApiResponse = (message, authUser, rtm) => {
                             return { post: { msg: responseMsg, json: responseJSON, data: data.result} };
 
                         } else {
-                            const freeTimes = findFreeTimes(SLACK_IDS, start, end, duration);
-                            console.log('free', freeTimes);
-                            return { post: { msg: responseMsg, json: getDropdownJson(freeTimes), data: data.result, slackIds: SLACK_IDS } };
-
+                            return findFreeTimes(SLACK_IDS, start, end, duration)
+                            .then(freeTimes => {
+                                console.log('free', freeTimes);
+                                return { post: { msg: responseMsg, json: getDropdownJson(freeTimes), data: data.result, slackIds: SLACK_IDS } };
+                            });
                         }
 
                     // not all attendees have authed with google

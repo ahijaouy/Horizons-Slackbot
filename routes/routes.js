@@ -72,7 +72,9 @@ createGoogleReminder = (res, eventInfo, user) => {
 
 // create Google meeting with attendees, start date, end date, and subject
 createGoogleMeeting = (res, eventInfo, user) => {
-    const startDate = new Date(eventInfo.date + " " + eventInfo.time);
+    let startDate = new Date(eventInfo.date + " " + eventInfo.time);
+    // HARD CODE IN ADDITION OF SEVEN HOURS
+    startDate.setHours(startDate.getHours() + 7);
     const endDate = (eventInfo.duration) ? utils.getEndDate(startDate, eventInfo.duration) : utils.getEndDate(startDate);
     
     utils.linkEmails(eventInfo.slackIds)

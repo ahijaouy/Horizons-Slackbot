@@ -77,11 +77,12 @@ getApiResponse = (message, authUser, rtm) => {
                 return { post: { msg: responseMsg, json: responseJSON, data: data.result } };
             } else {
                 console.log('ACTION IS COMPLETE: MEETING', data.result);
+                console.log('slack ids put into link emails', SLACK_IDS);
 
                 return utils.linkEmails(SLACK_IDS)
                 .then((attendeesObj) => {
                     console.log('attendees!! found:', attendeesObj.found, 'not found:', attendeesObj.notFound);
-                    
+
                     // all attendees have authed with google
                     if (attendeesObj.notFound.length) {
                         const emails = attendeesObj.found;

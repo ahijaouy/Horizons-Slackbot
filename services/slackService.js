@@ -12,11 +12,7 @@ let SLACK_IDS = [];
 // main message processing method called by slackrtm.js
 // receives a message, checks authorization, returns sendMessage with link if user not authorized
 // or returns promise chain of processing a message
-processMessage = (message, slackIds) => {
-    if (slackIds) {
-        SLACK_IDS = slackIds;
-    }
-
+processMessage = (message) => {
     return new Promise((resolve, reject) => {
         console.log('bp 1: ', message.user);
         auth.checkUser(message.user)

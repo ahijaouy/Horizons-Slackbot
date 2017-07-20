@@ -76,6 +76,7 @@ getApiResponse = (message, authUser) => {
                 //return { post: { msg: responseMsg, json: responseJSON, data: data.result, slackIds: SLACK_IDS } };
 
                 //// added by dom
+                ////#################### hello Amanda
 
                 const start = new Date(data.result.parameters.date + ' ' + data.result.parameters.time);
                 /// 777600000 is 9 days in miliseconds

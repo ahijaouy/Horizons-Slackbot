@@ -1,25 +1,41 @@
 // Local Import
 const auth = require('./authentication');
+
+
 /************************* Exported Methods *************************/
 
 function checkFreeBusy(slackId, email, start, end) {
-  return new Promise(function(resolve, reject) {
+  //Check Params for Errors
+  if ((start instanceof Date) !== true) {
+    throw new Error(`Expected param start to be a Date object. Instead it was type ${typeof start}`);
+  }
+  if ((end instanceof Date) !== true) {
+    throw new Error(`Expected param end to be a Date object. Instead it was type ${typeof end}`);
+  }
+  if (typeof slackId !== 'string') {
+    throw new Error(`Expected param slackId to be a string. Instead it was type ${typeof slackId}`);
+  }
+  if (typeof email !== 'string') {
+    throw new Error(`Expected param email to be a string. Instead it was type ${typeof email}`);
+  }
+
+  return new Promise((resolve, reject) => {
     auth.getGoogleCalendar(slackId)
-      .then(calendar => {
-        calendar.freebusy.query({
-          resource: {
-            timeMin: start,
-            timeMax: end,
-            items: [{
-              id: email
-            }]
-          }
-        }, (err, resp) => {
-          if (err) reject(err);
-          const busy = resp.calendars[email].busy
-          resolve({slackId, email, busy});
-        } )
-    })
+    .then(calendar => {
+      calendar.freebusy.query({
+        resource: {
+          timeMin: start,
+          timeMax: end,
+          items: [{
+            id: email
+          }]
+        }
+      }, (err, resp) => {
+        if (err) reject(err);
+        const busy = resp.calendars[email].busy
+        resolve({slackId, email, busy});
+      } )
+    }).catch(reject);
   });
 
 }
@@ -32,18 +48,28 @@ function checkFreeBusy(slackId, email, start, end) {
 //    for the user specified by the slackId for the date
 //    specified with the subject specified
 function createReminder(slackId, date, subject) {
-  return new Promise(function(resolve, reject) {
+  //Check Params for Errors
+  if ((date instanceof Date) !== true) {
+    throw new Error(`Expected param date to be a Date object. Instead it was type ${typeof date}`);
+  }
+  if (typeof slackId  !== 'string') {
+    throw new Error(`Expected param slackId to be a string. Instead it was type ${typeof slackId}`);
+  }
+  if (typeof subject  !== 'string') {
+    throw new Error(`Expected param subject to be a string. Instead it was type ${typeof subject}`);
+  }
+
+  return new Promise((resolve, reject) => {
     auth.getGoogleCalendar(slackId)
     .then(calendar => {
-        calendar.events.insert({
-          calendarId: 'primary',
-          resource: generateReminder(date, subject)
-        }, function(err, resp) {
-          if (err) reject(err);
-          resolve(resp);
-        })
+      calendar.events.insert({
+        calendarId: 'primary',
+        resource: generateReminder(date, subject)
+      }, (err, resp) => {
+        if (err) reject(err);
+        resolve(resp);
       })
-      .catch(reject);
+    }).catch(reject);
   })
 }
 
@@ -58,34 +84,39 @@ function createReminder(slackId, date, subject) {
 //    for the start and end dates (with times) specified
 //    and with the subject specified
 function createMeeting(slackId, start, end, subject, attendees) {
-  return new Promise(function(response, reject) {
+  //Check Params for Errors
+  if ((start instanceof Date) !== true) {
+    throw new Error(`Expected param start to be a Date object. Instead it was type ${typeof start}`);
+  }
+  if ((end instanceof Date) !== true) {
+    throw new Error(`Expected param end to be a Date object. Instead it was type ${typeof end}`);
+  }
+  if (typeof slackId !== 'string') {
+    throw new Error(`Expected param slackId to be a string. Instead it was type ${typeof slackId}`);
+  }
+  if (typeof subject !== 'string') {
+    throw new Error(`Expected param subject to be a string. Instead it was type ${typeof subject}`);
+  }
+  if ((attendees instanceof Array) !== true) {
+    throw new Error(`Expected param attendees to be a Array object. Instead it was type ${typeof attendees}`);
+  }
+
+  return new Promise((response, reject) => {
     auth.getGoogleCalendar(slackId)
-      .then(calendar => {
-        calendar.events.insert({
-          calendarId: 'primary',
-          resource: generateMeeting(start, end, subject, attendees)
-        }, function(err, resp) {
-          if (err) reject(err);
-          resolve(resp);
-        })
+    .then(calendar => {
+      calendar.events.insert({
+        calendarId: 'primary',
+        resource: generateMeeting(start, end, subject, attendees)
+      }, function(err, resp) {
+        if (err) reject(err);
+        resolve(resp);
       })
-      .catch(reject);
+    })
+    .catch(reject);
   });
 }
-//
-// - Param: timeArray -> Array
-//
-// - Description: Finds and recommends event times to avoid conflict
-//
- function findFreeTime(busyArray) {
-   let freeArray = [];
-   for(let slot = 0; slot < busyArray.length - 1; slot++){
-     if(((busyArray[slot+1].start-busyArray[slot].end) > 1800000)
-     &&(busyArray[slot+1].start.getDate() === busyArray[slot].end.getDate())){
-       freeArray.push({start:busyArray[slot].end, end:busyArray[slot+1].start})
-     }
-   }
- }
+
+
 /************************* Local Methods *************************/
 
 // Local Helper Function

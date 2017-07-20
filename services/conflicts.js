@@ -23,18 +23,18 @@ const util = require('./utils')
 //  - Returns: a PROMISE that will resolve to an object
 //    with a key 'conflicts' which points to a boolean
 function checkForConflicts(slackIds, emails, start, end) {
-  return new Promise(function(resolve, reject) {
+  return new Promise((resolve, reject) => {
     if (slackIds.length !== emails.length) {
       reject(new Error("The array of SlackIds and emails should be the same length"));
     }
     Promise.all(slackIds.map((id, index) => calendar.checkFreeBusy(id, emails[index], start, end)))
-      .then(responses => {
-        responses.forEach(resp => {
-          if (resp.busy.length !== 0) resolve({conflicts:true});
-        })
-       resolve({conflicts:false});
+    .then(responses => {
+      responses.forEach(resp => {
+        if (resp.busy.length !== 0) resolve({conflicts:true});
       })
-      .catch(reject);
+      resolve({conflicts:false});
+    })
+    .catch(reject);
   });
 };
 
@@ -50,27 +50,28 @@ function checkForConflicts(slackIds, emails, start, end) {
 //  - Returns: a PROMISE that will resolve to an array
 //    of objects with a keys 'start' and 'end' which point to Date objects
 function findFreeTimes(slackIds, start, end, duration = 30){
-  return new Promise((resolve)=> {
+  return new Promise((resolve, reject)=> {
     const durationInMs = duration * 60 * 1000;
     let freeArray = [];
     let optionArray = [];
     generateFreeTimes(slackIds, start,end)
     .then( allFreeArray => {
       allFreeArray.forEach( slot => {
-        if((new Date(slot.end)- new Date(slot.start)) > durationInMs){
-          for(let interval = 0; interval < ((new Date(slot.end)- new Date(slot.start)) % durationInMs); interval++){
+        if((new Date(slot.end) - new Date(slot.start)) > durationInMs){
+          for(let interval = 0; interval < ((new Date(slot.end) - new Date(slot.start)) % durationInMs); interval++){
             freeArray.push({
-            start: util.getEndDate(new Date(slot.start), duration*interval),
-            end: util.getEndDate(new Date(slot.start), duration*(interval + 1))
-          })}
+              start: util.getEndDate(new Date(slot.start), duration * interval),
+              end: util.getEndDate(new Date(slot.start), duration * (interval + 1))
+            })
+          }
         }
       })
       let count = 1;
       optionArray.push(freeArray[0]);
-      for(var slot = 0; slot < freeArray.length; slot ++){
-        let currDate = optionArray[optionArray.length-1].start.getDate();
-        if(optionArray.length < 11 ){
-          if(freeArray[slot].start.getDate()===currDate){
+      for(let slot = 0; slot < freeArray.length; slot++){
+        let currDate = optionArray[optionArray.length - 1].start.getDate();
+        if(optionArray.length < 11 ) {
+          if(freeArray[slot].start.getDate() === currDate){
             if(count < 4){
               optionArray.push(freeArray[slot]);
               count ++;
@@ -88,6 +89,7 @@ function findFreeTimes(slackIds, start, end, duration = 30){
       }
       resolve(optionArray);
     })
+    .catch(reject);
   })
 }
 
@@ -124,7 +126,6 @@ function getTimeConflicts(slackIds, start, end) {
       return calendar.checkFreeBusy(user.slackId, user.email, start, end);
     }));
   })
-  .catch(console.log);
 }
 
 // Local Helper Function
@@ -134,12 +135,12 @@ function getTimeConflicts(slackIds, start, end) {
 // Returns a PROMISE that resolves to a list of sorted
 // times during which the users specified are busy
 function mergeTimeConflicts(conflicts) {
-  return new Promise(function(resolve, reject) {
+  return new Promise((resolve, reject) => {
     const merged = [];
     conflicts.forEach( conflict => {
       conflict.busy.forEach(busy => merged.push(busy))
     })
-    resolve( _.sortBy(merged,first => first.start));
+    resolve( _.sortBy(merged, first => first.start));
   })
 
 }
@@ -150,7 +151,7 @@ function mergeTimeConflicts(conflicts) {
 // Returns a PROMISE which resolves to the array
 // of consolidated busy times.
 function consolidateConflicts(conflicts) {
-  return new Promise(function(resolve, reject) {
+  return new Promise((resolve, reject) => {
     const consolidated = [];
     let i = 0;
     while (i < conflicts.length) {
@@ -158,14 +159,13 @@ function consolidateConflicts(conflicts) {
       const second = conflicts[i + 1];
       if (!second) {
         consolidated.push(first);
-        i++;
       } else if(checkForOverlap(first, second)) {
         consolidated.push(mergeTwoDates(first, second));
-        i += 2;
+        i++;
       } else {
         consolidated.push(first);
-        i++;
       }
+      i++;
     }
     resolve(consolidated);
   })
@@ -178,7 +178,7 @@ function consolidateConflicts(conflicts) {
 // and endAvailability parameters.
 // Returns a PROMISE that resolves into an array of Free times.
 function getAvailabilityFromConflicts(conflicts, startAvailability, endAvailability) {
-  return new Promise(function(resolve) {
+  return new Promise(resolve => {
     const freeTime = [];
     if (conflicts[0].start !== startAvailability) {
       freeTime.push({start: startAvailability, end: conflicts[0].start});
@@ -200,7 +200,7 @@ function getAvailabilityFromConflicts(conflicts, startAvailability, endAvailabil
 // Local Helper Function
 // Merges to objects with 'start' and 'end' keys
 function mergeTwoDates(first, second) {
-  return {start: first.start, end: second.end}
+  return { start: first.start, end: second.end }
 }
 // Local Helper Function
 // Checks to see if the second parameter starts
@@ -209,7 +209,6 @@ function checkForOverlap(first, second) {
   return second.start < first.end;
 }
 
-//hello
 module.exports = {
   findFreeTimes,
   checkForConflicts

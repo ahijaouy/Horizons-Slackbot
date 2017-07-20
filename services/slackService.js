@@ -74,8 +74,18 @@ getApiResponse = (message, authUser) => {
                 //const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
                 //console.log('gar sending slackIds: ', SLACK_IDS)
                 //return { post: { msg: responseMsg, json: responseJSON, data: data.result, slackIds: SLACK_IDS } };
+
                 //// added by dom
-                const conflict = true
+
+                const start = new Date(data.result.parameters.date + ' ' + data.result.parameters.time);
+                /// 777600000 is 9 days in miliseconds
+                const end = new Date(start.getTime() + 777600000)
+                console.log('start date 1', start, 'end date 1', end);
+                const slackIds = SLACK_IDS;
+
+                const conflict = checkForConflicts(slackIds, emails, start, end)
+
+                // const conflict = true
                 if(!conflict){
                     const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
                     return { post: { msg: responseMsg, json: responseJSON, data: data.result} };

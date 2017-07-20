@@ -9,60 +9,21 @@ const util = require('./utils')
 
 /************************* Exported Methods *************************/
 
-// Conflicts.checkForConflicts(slackIds, emails, start, end)
-//  - Param: slackIds -> Array
-//           emails   -> Array
-//           start    -> Date
-//           end      -> Date
-//  - Description: Searches for conflicts
-//    for the users specified by the slackIds & emails
-//    between the start and end dates specified.
-//    NOTE: the SlackIds & Emails should be paired so
-//    that slackIds[0] and emails[0] should correspond
-//    to the same user entity
-//  - Returns: a PROMISE that will resolve to an object
-//    with a key 'conflicts' which points to a boolean
-function checkForConflicts(slackIds, emails, start, end) {
-  return new Promise(function(resolve, reject) {
-    if (slackIds.length !== emails.length) {
-      reject(new Error("The array of SlackIds and emails should be the same length"));
-    }
-    Promise.all(slackIds.map((id, index) => calendar.checkFreeBusy(id, emails[index], start, end)))
-      .then(responses => {
-        responses.forEach(resp => {
-          if (resp.busy.length !== 0) resolve({conflicts:true});
-        })
-       resolve({conflicts:false});
-      })
-      .catch(reject);
-  });
-};
-
-// Conflicts.findFreeTime(slackIds, start, end, duration)
-//  - Param: slackIds -> Array
-//           start    -> Date
-//           end      -> Date
-//           duration -> Number (optional: deafult 30 minutes)
-//  - Description: Finds 10 free times of the duration
-//    specified between the start and end dates.
-//    NOTE: There will be a max of 3 free times suggested
-//    per day in the range.
-//  - Returns: a PROMISE that will resolve to an array
-//    of objects with a keys 'start' and 'end' which point to Date objects
 function findFreeTimes(slackIds, start, end, duration = 30){
   return new Promise((resolve)=> {
     const durationInMs = duration * 60 * 1000;
     let freeArray = [];
     let optionArray = [];
+    console.log('about to enter Andre');
     generateFreeTimes(slackIds, start,end)
     .then( allFreeArray => {
+      console.log('just left andre');
       allFreeArray.forEach( slot => {
         if((new Date(slot.end)- new Date(slot.start)) > durationInMs){
-          for(let interval = 0; interval < ((new Date(slot.end)- new Date(slot.start)) % durationInMs); interval++){
-            freeArray.push({
-            start: util.getEndDate(new Date(slot.start), duration*interval),
-            end: util.getEndDate(new Date(slot.start), duration*(interval + 1))
-          })}
+          freeArray.push({
+            start: new Date(slot.start),
+            end: util.getEndDate(new Date(slot.start), duration)
+          })
         }
       })
       let count = 1;
@@ -96,7 +57,7 @@ function findFreeTimes(slackIds, start, end, duration = 30){
 
 /************************* Local Methods *************************/
 
-// Local Helper Function
+// Authentication.generateAuthUrl(slackId)
 //  - Param: slackIds -> Array
 //           start    -> Date
 //           end      -> Date
@@ -210,6 +171,5 @@ function checkForOverlap(first, second) {
 }
 
 module.exports = {
-  findFreeTimes,
-  checkForConflicts
+  findFreeTimes
 }

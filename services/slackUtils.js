@@ -29,7 +29,7 @@ getSlackEditableDate = (messageDate, messageTime) => {
     let date;
 
     // hard code date fallback
-    if (typeof messageDate !== 'number') {
+    if (typeof messageDate !== 'number' && typeof messageDate !== 'string') {
       messageDate = '2000-01-01';
     }
 

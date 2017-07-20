@@ -5,7 +5,7 @@ const AUTH_PREFIX = 'https://jarvis-horizons.herokuapp.com/';
 // main message processing method called by slackrtm.js
 // receives a message, checks authorization, returns sendMessage with link if user not authorized
 // or returns promise chain of processing a message
-processMessage = (message) => {
+processMessage = (message) => { 
 
     return new Promise((resolve, reject) => {
         console.log('bp 1: ', message.user);

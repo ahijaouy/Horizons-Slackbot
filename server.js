@@ -34,4 +34,4 @@ app.listen(port, function() {
 });
 
 // Start Slack Websockets
-// rtm.start();
+rtm.start();

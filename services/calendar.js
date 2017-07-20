@@ -45,7 +45,6 @@ function createReminder(slackId, date, subject) {
       })
       .catch(reject);
   })
-
 }
 
 // calendar.createMeeting(slackId, start, end, subject, attendees)
@@ -70,7 +69,7 @@ function createMeeting(slackId, start, end, subject, attendees) {
           resolve(resp);
         })
       })
-      .catch(reject));
+      .catch(reject);
 
   });
 

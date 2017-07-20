@@ -81,28 +81,4 @@ getApiResponse = (message, authUser) => {
         })
 }
 
-
-
-
 module.exports = { processMessage };
-
-
-
-
-
-/* //Process if input is Slack user id
-
-if (message.text.indexOf('<@') >= 0) {
-    console.log('recognizing user id input');
-    axios.get('https://slack.com/api/users.list?token=xoxp-214075203605-214001278996-215348011622-6220a67bf54d0165d770c06e356c255a&pretty=1')
-    .then((response) =>{
-        console.log('*****************************************');
-        console.log('axios response', response.data);
-
-        // GET USERNAME FROM ID
-        return message.text;
-    })
-    .then((resp) => {
-        getApiResponse(message);
-    });
-} else { */

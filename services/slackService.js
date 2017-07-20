@@ -80,7 +80,7 @@ getApiResponse = (message, authUser, rtm) => {
                 // INSERT TIME CONFLICTS CHECKS
 
 
-                return { post: { msg: responseMsg, json: responseJSON, data: data.result, slackIds: SLACK_IDS } };
+                return { post: { msg: responseMsg, json: responseJSON, data: data.result /*, slackIds: SLACK_IDS */} };
                 
             }
         })
@@ -90,9 +90,9 @@ getApiResponse = (message, authUser, rtm) => {
                 if (obj.post) {
                     let userPending;
                     if (obj.post.slackIds) {
-                        Object.assign({}, obj.post.data.parameters, {slackIds: obj.post.slackIds}, {type: obj.post.data.action} );
+                        userPending = Object.assign({}, obj.post.data.parameters, {slackIds: SLACK_IDS}, {type: obj.post.data.action} );
                     } else {
-                        Object.assign({}, obj.post.data.parameters, {type: obj.post.data.action} );                        
+                        userPending = Object.assign({}, obj.post.data.parameters, {type: obj.post.data.action} );                        
                     }
                     authUser.pending = JSON.stringify(userPending);
                     authUser.save(() => resolve(obj));

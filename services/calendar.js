@@ -1,7 +1,28 @@
 // Local Import
 const auth = require('./authentication');
-
 /************************* Exported Methods *************************/
+
+function checkFreeBusy(slackId, email, start, end) {
+  return new Promise(function(resolve, reject) {
+    auth.getGoogleCalendar(slackId)
+      .then(calendar => {
+        calendar.freebusy.query({
+          resource: {
+            timeMin: start,
+            timeMax: end,
+            items: [{
+              id: email
+            }]
+          }
+        }, (err, resp) => {
+          if (err) reject(err);
+          const busy = resp.calendars[email].busy
+          resolve({slackId, email, busy});
+        } )
+    })
+  });
+
+}
 
 // calendar.craeteReminder(slackId, date, subject)
 //  - Param: slackId -> String
@@ -29,7 +50,7 @@ function createReminder(slackId, date, subject) {
 //           attendees -> Date
 //  - Description: Adds a Meeting event to the Google Calendars
 //    for the user aspecified by the slackId and the attendees specified
-//    for the start and end dates (with times) specified 
+//    for the start and end dates (with times) specified
 //    and with the subject specified
 function createMeeting(slackId, start, end, subject, attendees) {
   auth.getGoogleCalendar(slackId)
@@ -41,7 +62,20 @@ function createMeeting(slackId, start, end, subject, attendees) {
     })
     .catch(err => console.log('ERROR: ', err));
 }
-
+//
+// - Param: timeArray -> Array
+//
+// - Description: Finds and recommends event times to avoid conflict
+//
+ function findFreeTime(busyArray) {
+   let freeArray = [];
+   for(let slot = 0; slot < busyArray.length - 1; slot++){
+     if(((busyArray[slot+1].start-busyArray[slot].end) > 1800000)
+     &&(busyArray[slot+1].start.getDate() === busyArray[slot].end.getDate())){
+       freeArray.push({start:busyArray[slot].end, end:busyArray[slot+1].start})
+     }
+   }
+ }
 /************************* Local Methods *************************/
 
 // Local Helper Function
@@ -75,5 +109,6 @@ function generateMeeting(start, end, subject, attendees) {
 
 module.exports = {
   createReminder,
-  createMeeting
+  createMeeting,
+  checkFreeBusy
 }

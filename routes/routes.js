@@ -81,6 +81,7 @@ router.post('/slack/create_event', (req, res) => {
             const startDate = new Date(eventInfo.date + " " + eventInfo.time);
             const endDate = (eventInfo.duration) ? utils.getEndDate(startDate, eventInfo.duration) : utils.getEndDate(startDate);
             // const attendees = utils.linkEmails(eventInfo.slackIds).found;     
+            console.log('YOOOOOOOOOOOOOO date in meeting route', startDate.getHours()+startDate.getMinutes());
             
             utils.linkEmails(eventInfo.slackIds)
             .then((attendeesObj) => {

@@ -34,6 +34,7 @@ function createReminder(slackId, date, subject) {
 //    for the start and end dates (with times) specified 
 //    and with the subject specified
 function createMeeting(slackId, start, end, subject, attendees) {
+  console.log('YOOOOOOOOOOOOOOOO received start time for calendar: ', start);
   auth.getGoogleCalendar(slackId)
     .then(calendar => {
       console.log("andre's bp 3");      

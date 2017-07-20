@@ -36,7 +36,7 @@ const responseJSON = {
 getResponseMessage = (action, parameters) => {
     let returnMsg;
     if (action === 'reminder.add') {
-        returnMsg = 'Creating reminder to '+parameters.subject;
+        returnMsg = 'Creating reminder to ON AMANDA COMP '+parameters.subject;
     } else {
         let people = parameters['given-name'][0];
         parameters['given-name'].forEach((person, index) => {
@@ -54,14 +54,23 @@ getResponseMessage = (action, parameters) => {
 
 // method that takes a date from AI api and converts it to a Slack formatted date (and time)   
 getSlackEditableDate = (messageDate, messageTime) => {
-    // console.log('received date: ', messageDate);
+    //MINUS SEVEN PLUS 3
+
     let date;
 
+    //handle meeting with date and time
     if (messageTime) {
         date = new Date(messageDate+' '+messageTime) / 1000;
-        // console.log('received time: ',messageTime);
+        console.log('YOOOOOOOOOOOOOOOOOOOOOOOOO')
+        console.log('received time: ',messageTime);
+        console.log('new date with time: ',date.getHours()+':'+date.getMinutes());
+        console.log('YOOOOOOOOOOOOOOOOOOOOOOOOO')
+        
         return "<!date^"+date+"^ on {date_short} at {time}|Default date: 2000-01-01 1:11:11 AM>";
+
+    //handle reminder or meeting with just date
     } else {
+        console.log('YOOOOOOOOOOOOOOOOOOOOOOOOO  no time specified')        
         date = new Date(messageDate) / 1000 + 86400; 
         return "<!date^"+date+"^ on {date}|Default date: 2000-01-01 1:11:11 AM>";
     }
@@ -77,11 +86,7 @@ getApiResponse = (message, authUser) => {
         .then((response) => {
             let data = response.data;
 
-            // console.log(data);
-
             if (data.result.action.startsWith('smalltalk') || data.result.action.startsWith('profanity') || data.result.action.startsWith('numeric')) {
-                // console.log('responding to '+data.result.action);
-
                 const msg = response.data.result.fulfillment.speech;
                 return { send: msg };
 
@@ -98,6 +103,8 @@ getApiResponse = (message, authUser) => {
             } else {
                 // console.log('ACTION IS COMPLETE', data.result.parameters);
                 const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
+                if (data.result.parameters.time) { console.log('YOOOOOOOOOOOOOOOOOOOOOOO date in message:', data.result.parameters.time); }               
+                console.log('YOOOOOOOOOOOOOOOOOOOOOOO date in message:', responseMsg);
                 console.log('gar sending slackIds: ', SLACK_IDS)
                 return { post: { msg: responseMsg, json: responseJSON, data: data.result, slackIds: SLACK_IDS } };
             }
@@ -106,6 +113,7 @@ getApiResponse = (message, authUser) => {
             // console.log('OBJ: ', obj);
             return new Promise(function(resolve, reject) {
                 if (obj.post) {
+                    if (obj.post.data.parameters.time) { console.log('YOOOOOOOOOOOOOOOOOOO date in promise of obj.post: ', obj.post.data.parameters.time)}
                     authUser.pending = JSON.stringify(Object.assign({}, obj.post.data.parameters, {slackIds: obj.post.slackIds}, {type: obj.post.data.action} ))
                     authUser.save(() => resolve(obj));
                 } else {

@@ -28,10 +28,16 @@ getSlackEditableDate = (messageDate, messageTime) => {
     console.log('received date: ', messageDate);
     let date;
 
+    // hard code date fallback
+    if (typeof messageDate !== 'number') {
+      messageDate = '2000-01-01';
+    }
+
     if (messageTime) {
         date = new Date(messageDate+' '+messageTime) / 1000;
         console.log('received time: ',messageTime);
         console.log("AMANDA'S TIME:", date);
+        
         return "<!date^"+date+"^ on {date_short} at {time}|Default date: 2000-01-01 1:11:11 AM>";
     } else {
         date = new Date(messageDate) / 1000 + 86400; 

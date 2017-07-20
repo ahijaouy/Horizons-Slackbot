@@ -115,22 +115,10 @@ getApiResponse = (message, authUser, rtm) => {
         } else {
           // CHECK 4 HOURS
           console.log('REACHED UNAUTH ATTENDEES');
-          const isWithinFour = utils.fourHourCheck(start);
           
-          if (isWithinFour) {
-            const returnMsg = 'Cannot schedule! Event too soon!';
-            return { send: returnMsg };
-          } else {
-            // tell requester that bot does not have access and will need to send request to invitees
-            
-            // prompt for confirmation and ask requester what to do if bot could not objtain google cal access for ALL invitees within 2 hours
-            const returnMsg = 'here is where events 4+ hours later from now will be handled';
-            return { send: returnMsg };
-          }
+          return slackUnauth(start, SLACK_IDS, authUser);
         }
       });
-      
-      
     }
   })
   .then((obj) => {

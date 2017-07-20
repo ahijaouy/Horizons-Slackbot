@@ -76,7 +76,8 @@ getApiResponse = (message, authUser, rtm) => {
                 const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
                 console.log('gar sending slackIds: ', SLACK_IDS)
                
-               
+                // INSERT CHECK ALL ATTENDEES HAVE AUTH
+                
                 // INSERT TIME CONFLICTS CHECKS
 
 

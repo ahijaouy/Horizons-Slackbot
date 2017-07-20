@@ -79,7 +79,7 @@ getApiResponse = (message, authUser) => {
 
             // console.log(data);
 
-            if (data.result.action.startsWith('smalltalk') || data.result.action.startsWith('profanity')) {
+            if (data.result.action.startsWith('smalltalk') || data.result.action.startsWith('profanity') || data.result.action.startsWith('numeric')) {
                 // console.log('responding to '+data.result.action);
 
                 const msg = response.data.result.fulfillment.speech;

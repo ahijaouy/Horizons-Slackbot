@@ -1,13 +1,9 @@
 const { RtmClient, WebClient, CLIENT_EVENTS, RTM_EVENTS } = require('@slack/client');
-const slackConfig = require('../config/slack');
-const bot_token = slackConfig.SLACK_BOT_TOKEN || '';
-const slack_verification = slackConfig.PRADY_TOKEN || '';
-const axios = require('axios');
+const bot_token = require('../config/slack').SLACK_BOT_TOKEN || '';
 const slackService = require('./slackService');
 
 const rtm = new RtmClient(bot_token);
 var web = new WebClient(bot_token);
-
 
 let channel;
 
@@ -34,47 +30,50 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
         // do nothing if message is not DM
         return;
 
-    } else if (message.text) {
-        let slackIds = [];  // array with all slack user ids in message
+    } 
+    
+    let slackIds = [];  // array with all slack user ids in message
 
-        // process message has slack user ids: save to array, and replae with real names in text
-        if (message.text.indexOf('<@') >= 0) {
-            message.text = message.text.replace(/<@(\w+)>/g, function(match, userId) { 
-                console.log('MATCH:', match, userId);
-                slackIds.push(userId);
-                return  rtm.dataStore.getUserById(userId).profile.real_name+', ';
-            });
-        }
-        console.log('message: ',message);
-
-        // process message with slackService message 
-        // either chat.postMessage with confirmation/cancel interactive messages 
-        // or rtm.sendMessage with static message
-        // or do nothing 
-        slackService.processMessage(message)
-        .then((logic) => {
-            if (logic.post) { 
-                web.chat.postMessage(message.channel, logic.post.msg, logic.post.json, function(err, res) {
-                    if (err) {
-                        console.log('Error:', err);
-                    } else {
-                        console.log('Message sent: ', res);
-                        
-                    }
-                });
-            } else if (logic.send) {
-                console.log('check me', logic.send)
-                rtm.sendMessage(logic.send, message.channel);
-            } else if (logic.pending) {
-                rtm.sendMessage('You are in a pending state! Confirm or cancel above event to continue.', message.channel);
-            } else {
-                console.log('reached unspecified');
-            }
-        })
-        .catch((err) => {
-            console.log('error: ', err);
+    // MIDDLEWARE for messages: 
+    // replace message's slack user ids with usernames; store ids into array; 
+    if (message.text.indexOf('<@') >= 0) {
+        message.text = message.text.replace(/<@(\w+)>/g, function(match, userId) { 
+            console.log('MATCH:', match, userId);
+            slackIds.push(userId);
+            return  rtm.dataStore.getUserById(userId).profile.real_name+', ';
         });
     }
+    console.log('message: ',message);
+
+    // process message with slackService.processMessage which returns a logic object
+    // either chat.postMessage with confirmation/cancel interactive messages 
+    // or rtm.sendMessage with static message
+    // or do nothing 
+    slackService.processMessage(message)
+    .then((logic) => {
+        if (logic.post) { 
+            web.chat.postMessage(message.channel, logic.post.msg, logic.post.json, function(err, res) {
+                if (err) {
+                    console.log('Error:', err);
+                } else {
+                    console.log('Message sent: ', res);
+                    
+                }
+            });
+
+        } else if (logic.send) {
+            rtm.sendMessage(logic.send, message.channel);
+
+        } else if (logic.pending) {
+            rtm.sendMessage('You are in a pending state! Confirm or cancel above event to continue.', message.channel);
+        
+        } else {
+            console.log('reached unspecified');
+        }
+    })
+    .catch((err) => {
+        console.log('Error: ', err);
+    });
 });
 
 module.exports = { web, rtm };

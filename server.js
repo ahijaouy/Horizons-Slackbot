@@ -18,12 +18,10 @@ app.use('/', routes);
 // Database Connection
 mongoose.connect(dbconfig.url);
 
-
-
 // Start Server
 app.listen(port, function() {
     console.log('Server Listening on port ' + port);
 });
 
 // Start Slack Websockets
-//rtm.start();
+rtm.start();

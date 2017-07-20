@@ -16,7 +16,8 @@ function checkFreeBusy(slackId, email, start, end) {
           } 
         }, (err, resp) => {
           if (err) reject(err);
-          resolve(resp.calendars);
+          const busy = resp.calendars[email].busy
+          resolve({slackId, email, busy});
         } )
     })
   });

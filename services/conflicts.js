@@ -5,7 +5,12 @@ const _ = require('underscore');
 const calendar = require('./calendar');
 const User = require('../models/user');
 const util = require('./utils')
+
+
 /************************* Exported Methods *************************/
+
+
+
 function findFreeTimes(slackIds, start, end, duration = 30){
   return new Promise((resolve)=> {
     const durationInMs = duration * 60 * 1000;
@@ -49,6 +54,11 @@ function findFreeTimes(slackIds, start, end, duration = 30){
   })
 }
 
+
+
+
+/************************* Local Methods *************************/
+
 // Authentication.generateAuthUrl(slackId)
 //  - Param: slackIds -> Array
 //           start    -> Date
@@ -65,9 +75,6 @@ function generateFreeTimes(slackIds, start, end) {
   .then(consolidated => getAvailabilityFromConflicts(consolidated, start, end))
   .catch(console.log)
 }
-
-
-/************************* Local Methods *************************/
 
 // Local Helper Function
 // Makes calls to Google's API to generate information on
@@ -166,6 +173,5 @@ function checkForOverlap(first, second) {
 }
 
 module.exports = {
-  generateFreeTimes,
   findFreeTimes
 }

@@ -5,7 +5,7 @@ const { findFreeTimes, checkForConflicts } = require('./conflicts');
 const utils = require('./utils');
 
 const { getResponseMessage } = require('./slackUtils');
-const { responseJSON } = require('./slackInteractiveMessages');
+const { responseJSON, getDropdownJson } = require('./slackInteractiveMessages');
 
 let SLACK_IDS = [];
 

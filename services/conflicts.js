@@ -20,10 +20,11 @@ function findFreeTimes(slackIds, start, end, duration = 30){
       console.log('just left andre');
       allFreeArray.forEach( slot => {
         if((new Date(slot.end)- new Date(slot.start)) > durationInMs){
-          freeArray.push({
-            start: new Date(slot.start),
-            end: util.getEndDate(new Date(slot.start), duration)
-          })
+          for(let interval = 0; interval < ((new Date(slot.end)- new Date(slot.start)) % durationInMs); interval++){
+            freeArray.push({
+            start: util.getEndDate(new Date(slot.start), duration*interval),
+            end: util.getEndDate(new Date(slot.start), duration*(interval + 1))
+          })}
         }
       })
       let count = 1;

@@ -6,6 +6,11 @@ var bodyParser = require('body-parser');
 const calendar = require('../services/calendar');
 const utils = require('../services/utils');
 
+const User = require('../models/user');
+const Reminder = require('../models/reminder');
+
+/***************************** Routes *****************************/
+
 router.get('/connect', (req, res) => {
     auth.generateAuthUrl(req.query.auth_id).then(url => res.redirect(url));
 });
@@ -16,67 +21,178 @@ router.get('/connect/callback', (req, res) => {
     res.send('Successfully Authenticated with Google!');
 });
 
-router.post('/slack/create_event', (req, res) => {
-  const payload = JSON.parse(req.body.payload);
+router.post('/slack/create_event', (req, res) => { 
+    const payload = JSON.parse(req.body.payload);
+    const slackId = payload.user.id;
 
-  console.log('****************************')
-  console.log('THIS IS PAYLOAD!!! ',payload); 
-  console.log('****************************');
-
-  User.findById(payload.user.id, (user, err) => {
-
-    if (payload.actions[0].value === 'true') {
+    console.log('REACHES ROUTE CREATE', req.body.payload);
+  
+    // find user in order to get info abotu current event
+    User.findOne({ slackId }, (err, user) => {
+        console.log('BP, FOUND USER', user);
         if (err) {
-            console.log('ERROR: ',err);
-        } else {
-            const eventInfo = JSON.parse(authUser.pending);
+            console.log('ERROR: ', err);
+        }
 
+        // user clicked confirm
+        if (payload.actions[0].value === 'true') {        
+            const eventInfo = JSON.parse(user.pending);
+
+            // type is reminder
             if (eventInfo.type === 'reminder.add') {
-                const newReminder = new Reminder({
-                    subject: eventInfo.subject,
-                    date: eventInfo.date,
-                    user_id: user._id
-                });
-
-                newReminder.save((err) => {
-                    if (err) {
-                        console.log('ERROR HERE: ',err);
-                    } else {
-                        user.pending = JSON.stringify({});
-
-                        user.save((err) => {
-                            if (err) {
-                                console.log('ERROR THERE: ',err);
-                            } else {
-                            res.send('Event created! :white_check_mark:');
-                            }
-                        });  // close user save
-                    }
-                });  // close reminder save
+                createGoogleReminder(res, eventInfo, user);
+            // type is meeting
             } else {
-                user.pending = JSON.stringify({});
-                console.log('NEW USER: ', user);
-                user.save((err) => {
-                    if (err) {
-                        console.log('ERROR THERE: ',err);
-                    } else {
-                        res.send('Event created! :white_check_mark:');
-                    }
-                });  // close user save
+                createGoogleMeeting(res, eventInfo, user);
             } 
-        }  
-    } else {
-        user.pending = JSON.stringify({});
-        user.save((err) => {
-            if (err) {
-                console.log('ERROR THERE: ',err);
-            } else {
-                res.send('Canceled! :x:');
-            } 
-        }); // close user save
-    }
-  });  // close find User by id
+
+        // user clicked cancel
+        } else {
+            updateAndSaveUser(res, user, true);
+        }
+    });  // close find User by id
 });  //close router post
 
 
+
+/************************ Helper Functions ************************/
+
+// create Google reminder with date and subject
+createGoogleReminder = (res, eventInfo, user) => {
+    const newReminder = new Reminder({
+        subject: eventInfo.subject,
+        date: eventInfo.date,
+        user_id: user._id
+    });
+
+    calendar.createReminder(user.slackId, new Date(eventInfo.date), eventInfo.subject);
+    // should chain these two once create meeting is a promise *****
+    saveReminderAndUser(res, newReminder, user);
+}
+
+// create Google meeting with attendees, start date, end date, and subject
+createGoogleMeeting = (res, eventInfo, user) => {
+    const startDate = new Date(eventInfo.date + " " + eventInfo.time);
+    const endDate = (eventInfo.duration) ? utils.getEndDate(startDate, eventInfo.duration) : utils.getEndDate(startDate);
+    
+    utils.linkEmails(eventInfo.slackIds)
+    .then((attendeesObj) => {
+        calendar.createMeeting(user.slackId, startDate, endDate, eventInfo.subject, attendeesObj.found);
+        // should chain these two once create meeting is a promise *****
+        updateAndSaveUser(res, user, false);
+    });
+}
+
+// save a new Reminder to mongoDb then call to save user with empty pending state
+saveReminderAndUser = (res, newReminder, user) => {
+    newReminder.save((err) => {
+        if (err) {
+            console.log('ERROR HERE: ',err);
+        } else {
+            console.log('BP, SAVED REMINDER ');   
+            updateAndSaveUser(user, false);
+        }
+    });
+}
+
+// set user pending state to empty object and then save updated user to mongoDb
+updateAndSaveUser = (res, user, canceled) => {
+    user.pending = JSON.stringify({});
+    
+    user.save((err) => {
+        if (err) {
+            console.log('ERROR THERE: ',err);
+        } else {
+            console.log('BP, CANCEL, SAVED USER');
+            if (canceled) {
+                res.send('Canceled! :x:');
+            } else {
+                res.send('Event created! :white_check_mark:');                
+            }
+        } 
+    }); // close user save
+}
+
 module.exports = router;
+
+
+
+
+
+
+// OLD MESSY BUT WORKING WAY:
+//   User.findOne({slackId: payload.user.id}, (err, user) => {
+//     console.log('BP, FOUND USER', user);
+//     if (err) {
+//         console.log('ERROR: ', err);
+//         // return;
+//     } 
+
+//     // user clicked confirm
+//     if (payload.actions[0].value === 'true') {
+//         console.log('BP, CLICKED CONFIRM');
+        
+//         const eventInfo = JSON.parse(user.pending);
+
+//         if (eventInfo.type === 'reminder.add') {
+//             const newReminder = new Reminder({
+//                 subject: eventInfo.subject,
+//                 date: eventInfo.date,
+//                 user_id: user._id
+//             });
+
+//             console.log('BP, CREATED REMINDER ', newReminder);
+            
+
+//             newReminder.save((err) => {
+//                 if (err) {
+//                     console.log('ERROR HERE: ',err);
+//                 } else {
+//                     console.log('BP, SAVED REMINDER ');
+                        
+//                     user.pending = JSON.stringify({});
+
+//                     user.save((err) => {
+//                         if (err) {
+//                             console.log('ERROR THERE: ',err);
+//                         } else {
+//                             console.log('BP, SAVED NEW USER ', user);
+                            
+//                             res.send('Event created! :white_check_mark:');
+//                         }
+//                     });  // close user save
+//                 }
+//             });  // close reminder save
+//         } else {
+//             user.pending = JSON.stringify({});
+//             console.log('MEETING, NEW USER: ', user);
+//             user.save((err) => {
+//                 if (err) {
+//                     console.log('ERROR THERE: ',err);
+//                 } else {
+//                     console.log('BP, MEETING, SAVED USER ', user);
+                    
+//                     res.send('Event created! :white_check_mark:');
+//                 }
+//             });  // close user save
+//         } 
+
+//     //user clicked cancel
+//     } else {
+//         console.log('BP, PRESSED CANCEL')
+//         user.pending = JSON.stringify({});
+//         console.log('BP, NEW USER ', user);
+        
+//         user.save((err) => {
+//             if (err) {
+//                 console.log('ERROR THERE: ',err);
+//             } else {
+//                 console.log('BP, CANCEL, SAVED USER');
+//                 res.send('Canceled! :x:');
+//             } 
+//         }); // close user save
+//     }
+//   });  // close find User by id
+// });  //close router post
+
+

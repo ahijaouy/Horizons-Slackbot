@@ -52,7 +52,7 @@ function createReminder(slackId, date, subject) {
 //           start     -> Date
 //           end       -> Date
 //           subject   -> String
-//           attendees -> Date
+//           attendees -> Array of Emails
 //  - Description: Adds a Meeting event to the Google Calendars
 //    for the user aspecified by the slackId and the attendees specified
 //    for the start and end dates (with times) specified
@@ -70,9 +70,7 @@ function createMeeting(slackId, start, end, subject, attendees) {
         })
       })
       .catch(reject);
-
   });
-
 }
 //
 // - Param: timeArray -> Array

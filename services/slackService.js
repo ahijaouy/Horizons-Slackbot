@@ -2,137 +2,29 @@ const { sendQuery } = require('./nlp');
 const auth = require('./authentication');
 const AUTH_PREFIX = 'https://jarvis-horizons.herokuapp.com/';
 
-const responseJSON = {
-    // "text": "*optional add text here*",
-    "attachments": [
-        {
-            // "text": "Click to *Confirm* or *Cancel*!",
-            "fallback": "[insert confirm and cancel buttons]",
-            "callback_id": "something",
-            "color": "#3AA3E3",
-            "attachment_type": "default",
-            "actions": [
-                {
-                    "name": "confirm",
-                    "text": "Confirm",
-                    "type": "button",
-                    "value": "true"
-                },
-                {
-                    "name": "confirm",
-                    "text": "Cancel",
-                    "type": "button",
-                    "value": "false"
-                }
-            ]
-        }
-    ]
-};
+const { getResponseMessage } = require('./slackUtils');
+const { responseJSON } = require('./slackInteractiveMessages');
 
-// method that receives an action and its parameters
-// returns the return message to show in slack message about confirming reminder or meeting
-getResponseMessage = (action, parameters) => {
-    let returnMsg;
-    if (action === 'reminder.add') {
-        returnMsg = 'Creating reminder to '+parameters.subject;
-    } else {
-        let people = parameters['given-name'][0];
-        parameters['given-name'].forEach((person, index) => {
-            if (index === parameters['given-name'].length-1 && parameters['given-name'].length > 1) {
-                people += ' and '+person;
-            } else if (index !== 0) {
-                people += ', '+person;
-            }
-        })
-        returnMsg = 'Scheduling a meeting with '+people+' about '+parameters.subject;
-    }
-    returnMsg += getSlackEditableDate(parameters.date, parameters.time); 
-    return returnMsg       
-}
+let SLACK_IDS = [];  // array with all slack user ids in message
 
-// method that takes a date from AI api and converts it to a Slack formatted date (and time)   
-getSlackEditableDate = (messageDate, messageTime) => {
-    console.log('received date: ', messageDate);
-    let date;
-
-    if (messageTime) {
-        date = new Date(messageDate+' '+messageTime) / 1000;
-        console.log('received time: ',messageTime);
-        return "<!date^"+date+"^ on {date_short} at {time}|Default date: 2000-01-01 1:11:11 AM>";
-    } else {
-        date = new Date(messageDate) / 1000 + 86400; 
-        return "<!date^"+date+"^ on {date}|Default date: 2000-01-01 1:11:11 AM>";
-    }
-}
-
-// method that takes a message and returns objects with results from AI api
-// return: object with SEND key if rtm.sendMessage is to be used, and the message as its value
-// return: object with POST key if web.chat.postMessage is to be used, and msg + json as value object
-getApiResponse = (message, authUser) => {
-    console.log('get api response');
-
-    return sendQuery(message.text, authUser._id)
-        .then((response) => {
-            let data = response.data;
-
-            console.log(data);
-
-            if (data.result.action.startsWith('smalltalk') || data.result.action.startsWith('profanity')) {
-                console.log('responding to '+data.result.action);
-
-                const msg = response.data.result.fulfillment.speech;
-                return { send: msg };
-
-            } else if (data.result.action !== 'reminder.add' && data.result.action !== 'meeting.add') {
-                console.log('UNSPECIFIED intents');
-
-                return {} ;
-
-            } else if (data.result.actionIncomplete) {
-                console.log('action INCOMPLETE');
-                const msg =  response.data.result.fulfillment.speech;
-                return { send: msg };
-
-            } else {
-                console.log('ACTION IS COMPLETE', data.result.parameters);
-                const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
-                return { post: { msg: responseMsg, json: responseJSON, data: data.result } };
-            }
-        })
-        .then((obj) => {
-            console.log('OBJ: ', obj);
-            return new Promise(function(resolve, reject) {
-                if (obj.post) {
-                    authUser.pending = JSON.stringify(Object.assign({}, obj.post.data.parameters, {type: obj.post.data.action} ))
-                    authUser.save(() => resolve(obj));
-                } else {
-                    resolve(obj);
-                }
-            })
-        })
-}
-
-// main method called by slackrtm.js
+// main message processing method called by slackrtm.js
 // receives a message, checks authorization, returns sendMessage with link if user not authorized
 // or returns promise chain of processing a message
-processMessage = (message) => {
+processMessage = (message, rtm) => {
 
     return new Promise((resolve, reject) => {
-        console.log('bp 1: ', message.user);
         auth.checkUser(message.user)
         .then((authUser) => {            
-            console.log('bp 2');
             if (authUser.authenticated) {
-                console.log('authenticated route');
-
+                // console.log('authenticated route');
                 if (authUser.pending && JSON.parse(authUser.pending).type) {
                     resolve({pending: true});                    
                 } else {
-                    resolve(getApiResponse(message, authUser));
+                    resolve(getApiResponse(message, authUser, rtm));
                 }
 
             } else {
-                console.log('unauthenticated route');
+                // console.log('unauthenticated route');
                 const msg = 'Click this link before continuing! '+AUTH_PREFIX+'connect?auth_id='+authUser._id;
                 resolve({ send: msg });
             }
@@ -141,21 +33,74 @@ processMessage = (message) => {
     });
 } 
 
-module.exports = { getApiResponse, processMessage };
+// method that takes a message and returns objects with results from AI api
+// return: object with SEND key if rtm.sendMessage is to be used, and the message as its value
+// return: object with POST key if web.chat.postMessage is to be used, and msg + json as value object
+getApiResponse = (message, authUser, rtm) => {
 
-/* //Process if input is Slack user id
+    // MIDDLEWARE for messages: 
+    // replace message's slack user ids with usernames; store ids into array; 
+    if (message.text.indexOf('<@') >= 0) {
+        message.text = message.text.replace(/<@(\w+)>/g, function(match, userId) { 
+            console.log('MATCH:', match, userId);
+            SLACK_IDS.push(userId);
+            return  rtm.dataStore.getUserById(userId).profile.real_name+', ';
+        });
+    }
+    console.log('message: ',message);
 
-if (message.text.indexOf('<@') >= 0) {
-    console.log('recognizing user id input');
-    axios.get('https://slack.com/api/users.list?token=xoxp-214075203605-214001278996-215348011622-6220a67bf54d0165d770c06e356c255a&pretty=1')
-    .then((response) =>{
-        console.log('*****************************************');
-        console.log('axios response', response.data);
+    return sendQuery(message.text, authUser._id)
+        .then((response) => {
+            let data = response.data;
 
-        // GET USERNAME FROM ID
-        return message.text;
-    })
-    .then((resp) => {
-        getApiResponse(message);
-    });
-} else { */
+            if (data.result.action.startsWith('smalltalk') || data.result.action.startsWith('profanity') || data.result.action.startsWith('numeric')) {
+                const msg = response.data.result.fulfillment.speech;
+                return { send: msg };
+
+            } else if (data.result.action !== 'reminder.add' && data.result.action !== 'meeting.add') {
+                // console.log('UNSPECIFIED intents');
+
+                return {} ;
+
+            } else if (data.result.actionIncomplete) {
+                // console.log('action INCOMPLETE');
+                const msg =  response.data.result.fulfillment.speech;
+                return { send: msg };
+
+            } else if (data.result.action === 'reminder.add') {
+                // console.log('ACTION IS COMPLETE: REMINDER', data.result.parameters);
+                const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
+                return { post: { msg: responseMsg, json: responseJSON, data: data.result } };
+            } else {
+                // console.log('ACTION IS COMPLETE: MEETING', data.result.parameters);                
+                const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
+                console.log('gar sending slackIds: ', SLACK_IDS)
+               
+               
+                // INSERT TIME CONFLICTS CHECKS
+
+
+                return { post: { msg: responseMsg, json: responseJSON, data: data.result /*, slackIds: SLACK_IDS */} };
+                
+            }
+        })
+        .then((obj) => {
+            // console.log('OBJ: ', obj);
+            return new Promise(function(resolve, reject) {
+                if (obj.post) {
+                    let userPending;
+                    if (SLACK_IDS) {
+                        userPending = Object.assign({}, obj.post.data.parameters, {slackIds: SLACK_IDS}, {type: obj.post.data.action} );
+                    } else {
+                        userPending = Object.assign({}, obj.post.data.parameters, {type: obj.post.data.action} );                        
+                    }
+                    authUser.pending = JSON.stringify(userPending);
+                    authUser.save(() => resolve(obj));
+                } else {
+                    resolve(obj);
+                }
+            });
+        });
+}
+
+module.exports = { processMessage };

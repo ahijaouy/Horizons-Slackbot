@@ -6,6 +6,7 @@ var userSchema = new mongoose.Schema({
     google: Object,
     email: String,
     pending: String,
+    slackIds: Array
 });
 
 

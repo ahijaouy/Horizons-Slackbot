@@ -96,15 +96,15 @@ getApiResponse = (message, authUser, rtm) => {
                     if (! attendeesObj.notFound.length) {
                         const emails = attendeesObj.found;
                         const conflict = checkForConflicts(SLACK_IDS, emails, start, end)
+                        const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
 
                         // const conflict = true
                         if(!conflict){
-                            const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
                             return { post: { msg: responseMsg, json: responseJSON, data: data.result} };
 
-                        }else{
-                            const freeTimes = findFreeTimes(SLACK_IDS, start, end, duration)
-                            console.log('free', freeTimes)
+                        } else {
+                            const freeTimes = findFreeTimes(SLACK_IDS, start, end, duration);
+                            console.log('free', freeTimes);
                             return { post: { msg: responseMsg, json: getDropdownJson(freeTimes), data: data.result, slackIds: SLACK_IDS } };
 
                         }
@@ -116,10 +116,11 @@ getApiResponse = (message, authUser, rtm) => {
                         const isWithinFour = utils.fourHourCheck(start);
 
                         if (isWithinFour) {
-                            const returnMsg = 'Cannot schedule! Event too soon!'
+                            const returnMsg = 'Cannot schedule! Event too soon!';
                             return { send: returnMsg };
                         } else {
-                            return { send: 'here is where events 4+ hours later from now will be handled' };
+                            const returnMsg = 'here is where events 4+ hours later from now will be handled';
+                            return { send: returnMsg };
                         }
                     }
                 });

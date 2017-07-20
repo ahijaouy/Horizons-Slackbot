@@ -1,7 +1,8 @@
 const { sendQuery } = require('./nlp');
 const auth = require('./authentication');
 const AUTH_PREFIX = 'https://jarvis-horizons.herokuapp.com/';
-const { findFreeTimes } = require('./conflicts');
+const { findFreeTimes, checkForConflicts } = require('./conflicts');
+const utils = require('./utils');
 
 const { getResponseMessage } = require('./slackUtils');
 const { responseJSON } = require('./slackInteractiveMessages');
@@ -71,44 +72,49 @@ getApiResponse = (message, authUser) => {
             } else {
                 console.log('ACTION IS COMPLETE: MEETING', data.result);
 
-                //const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
-                //console.log('gar sending slackIds: ', SLACK_IDS)
-                //return { post: { msg: responseMsg, json: responseJSON, data: data.result, slackIds: SLACK_IDS } };
+                utils.linkEmails(SLACK_IDS)
+                .then((attendeesObj) => {
 
-                //// added by dom
-                ////#################### hello Amanda, hello Dom
+                    // all attendees have authed with google
+                    if (attendeesObj.notFound.length) {
+                        const emails = attendeesObj.found;
 
-                const start = new Date(data.result.parameters.date + ' ' + data.result.parameters.time);
-                /// 777600000 is 9 days in miliseconds
-                const end = new Date(start.getTime() + 777600000)
-                console.log('start date 1', start, 'end date 1', end);
-                const slackIds = SLACK_IDS;
+                        const start = new Date(data.result.parameters.date + ' ' + data.result.parameters.time);
+                        /// 777600000 is 9 days in miliseconds
+                        const end = new Date(start.getTime() + 777600000)
+                        console.log('start date 1', start, 'end date 1', end);
 
-                const conflict = checkForConflicts(slackIds, emails, start, end)
+                        const conflict = checkForConflicts(SLACK_IDS, emails, start, end)
 
-                // const conflict = true
-                if(!conflict){
-                    const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
-                    return { post: { msg: responseMsg, json: responseJSON, data: data.result} };
+                        // const conflict = true
+                        if(!conflict){
+                            const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
+                            return { post: { msg: responseMsg, json: responseJSON, data: data.result} };
 
-                }else{
-                    const start = new Date(data.result.parameters.date + ' ' + data.result.parameters.time);
-                    /// 777600000 is 9 days in miliseconds
-                    const end = new Date(start.getTime() + 777600000)
-                    console.log('start date', start, 'end date', end);
-                    const duration = data.result.parameters.duration ? data.result.parameters.duration : 30
-                    console.log(duration)
-                    const freeTimes = findFreeTimes(slackIds, start, end, duration)
-                    console.log('free', freeTimes)
-                    return { post: { msg: responseMsg, json: getDropdownJson(freeTimes), data: data.result, slackIds: SLACK_IDS } };
+                        }else{
+                            const start = new Date(data.result.parameters.date + ' ' + data.result.parameters.time);
+                            /// 777600000 is 9 days in miliseconds
+                            const end = new Date(start.getTime() + 777600000)
+                            console.log('start date', start, 'end date', end);
+                            const duration = data.result.parameters.duration ? data.result.parameters.duration : 30
+                            console.log(duration)
+                            const freeTimes = findFreeTimes(SLACK_IDS, start, end, duration)
+                            console.log('free', freeTimes)
+                            return { post: { msg: responseMsg, json: getDropdownJson(freeTimes), data: data.result, slackIds: SLACK_IDS } };
 
-                }
-                /////
+                        }
+
+                    // not all attendees have authed with google
+                    } else {
+                        // CHECK 4 HOURS
+                        
+                    }
+                });
+
+                
             }
         })
         .then((obj) => {
-            console.log('############OBJ: ', obj);
-
             return new Promise(function(resolve, reject) {
                 if (obj.post) {
                     let userPending;
@@ -127,3 +133,9 @@ getApiResponse = (message, authUser) => {
 }
 
 module.exports = { processMessage };
+
+
+//AMANDA'S OLD CODE:
+//const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
+//console.log('gar sending slackIds: ', SLACK_IDS)
+//return { post: { msg: responseMsg, json: responseJSON, data: data.result, slackIds: SLACK_IDS } };

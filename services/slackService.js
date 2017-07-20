@@ -66,7 +66,7 @@ getSlackEditableDate = (messageDate, messageTime) => {
         console.log('new date with time: ',date.getHours()+':'+date.getMinutes());
         console.log('YOOOOOOOOOOOOOOOOOOOOOOOOO')
         
-        date = date / 1000;
+        // date = date / 1000;
 
         return "<!date^"+date+"^ on {date_short} at {time}|Default date: 2000-01-01 1:11:11 AM>";
 

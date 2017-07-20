@@ -45,7 +45,7 @@ getApiResponse = (message, authUser) => {
     // replace message's slack user ids with usernames; store ids into array; 
     if (message.text.indexOf('<@') >= 0) {
         message.text = message.text.replace(/<@(\w+)>/g, function(match, userId) { 
-            console.log('MATCH:', match, userId);
+            console.log('MATCH:', match, userId, 'current slack ids: ', SLACK_IDS);
             SLACK_IDS.push(userId);
             return  rtm.dataStore.getUserById(userId).profile.real_name+', ';
         });

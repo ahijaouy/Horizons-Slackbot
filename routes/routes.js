@@ -113,8 +113,6 @@ updateAndSaveUser = (res, user, canceled) => {
     }); // close user save
 }
 
-
-
 module.exports = router;
 
 

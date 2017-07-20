@@ -41,8 +41,18 @@ const getEndDate = (date, duration = 30) => {
   return new Date(startDate+durationInMs);
 }
 
+const fourHourCheck = (date) =>{
+  const difference = new Date(date) - new Date();
+  if(0< difference && difference < 14400000){
+    return true;
+  }else{
+    return false;
+  }
+}
+
 
 module.exports = {
   linkEmails,
-  getEndDate
+  getEndDate,
+  fourHourCheck
 }

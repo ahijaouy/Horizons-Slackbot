@@ -45,7 +45,6 @@ function createReminder(slackId, date, subject) {
       })
       .catch(reject);
   })
-
 }
 
 // calendar.createMeeting(slackId, start, end, subject, attendees)

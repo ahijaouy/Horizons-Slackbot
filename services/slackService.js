@@ -93,7 +93,7 @@ getApiResponse = (message, authUser, rtm) => {
                     console.log('attendees!!', attendeesObj, 'found:', attendeesObj.found, 'not found:', attendeesObj.notFound);
 
                     // all attendees have authed with google
-                    if (attendeesObj.notFound.length) {
+                    if (! attendeesObj.notFound.length) {
                         const emails = attendeesObj.found;
                         const conflict = checkForConflicts(SLACK_IDS, emails, start, end)
 

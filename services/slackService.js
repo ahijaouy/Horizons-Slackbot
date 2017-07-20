@@ -7,7 +7,7 @@ const utils = require('./utils');
 const { getResponseMessage } = require('./slackUtils');
 const { responseJSON } = require('./slackInteractiveMessages');
 
-let SLACK_IDS;
+let SLACK_IDS = [];
 
 // main message processing method called by slackrtm.js
 // receives a message, checks authorization, returns sendMessage with link if user not authorized

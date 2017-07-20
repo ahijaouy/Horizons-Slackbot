@@ -63,21 +63,35 @@ getApiResponse = (message, authUser) => {
                 const msg =  response.data.result.fulfillment.speech;
                 return { send: msg };
 
-            } else {
-                // console.log('ACTION IS COMPLETE', data.result.parameters);
+            } else if (data.result.action === 'reminder.add') {
+                // console.log('ACTION IS COMPLETE: REMINDER', data.result.parameters);
                 const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
-                if (data.result.parameters.time) { console.log('YOOOOOOOOOOOOOOOOOOOOOOO date in message:', data.result.parameters.time); }               
-                console.log('YOOOOOOOOOOOOOOOOOOOOOOO date in message:', responseMsg);
+                return { post: { msg: responseMsg, json: responseJSON, data: data.result } };
+            } else {
+                // console.log('ACTION IS COMPLETE: MEETING', data.result.parameters);                
+                const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
                 console.log('gar sending slackIds: ', SLACK_IDS)
+               
+               
+                // INSERT TIME CONFLICTS CHECKS
+                
+
+
                 return { post: { msg: responseMsg, json: responseJSON, data: data.result, slackIds: SLACK_IDS } };
+                
             }
         })
         .then((obj) => {
             // console.log('OBJ: ', obj);
             return new Promise(function(resolve, reject) {
                 if (obj.post) {
-                    if (obj.post.data.parameters.time) { console.log('YOOOOOOOOOOOOOOOOOOO date in promise of obj.post: ', obj.post.data.parameters.time)}
-                    authUser.pending = JSON.stringify(Object.assign({}, obj.post.data.parameters, {slackIds: obj.post.slackIds}, {type: obj.post.data.action} ))
+                    let userPending;
+                    if (obj.post.slackIds) {
+                        Object.assign({}, obj.post.data.parameters, {slackIds: obj.post.slackIds}, {type: obj.post.data.action} );
+                    } else {
+                        Object.assign({}, obj.post.data.parameters, {type: obj.post.data.action} );                        
+                    }
+                    authUser.pending = JSON.stringify(userPending);
                     authUser.save(() => resolve(obj));
                 } else {
                     resolve(obj);

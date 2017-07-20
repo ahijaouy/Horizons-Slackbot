@@ -1,7 +1,8 @@
 // Local Import
 const User = require('../models/user.js');
+const _ = require('underscore');
 
-// utils.linkEmails(idArray) 
+// utils.linkEmails(idArray)
 //  - Param: idArray -> Array of SlackIds
 //  - Description: Generates an object with two
 //    keys (found & notFound). Found key contains
@@ -27,7 +28,7 @@ const linkEmails = (idArray) => {
   });
 }
 
-// utils.getEndDate(date, duration) 
+// utils.getEndDate(date, duration)
 //  - Param: date     -> Date
 //           duration -> Number (Optional)
 //  - Description: Generates a new date that is the
@@ -39,6 +40,7 @@ const getEndDate = (date, duration = 30) => {
   const durationInMs = duration * 1000 *60
   return new Date(startDate+durationInMs);
 }
+
 
 module.exports = {
   linkEmails,

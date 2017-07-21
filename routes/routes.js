@@ -40,6 +40,9 @@ router.post('/slack/create_event', (req, res) => {
       console.log('reaches unauth route in routes.js');
       res.send("YO, you're in the unauth route");
 
+
+
+
     }  // close handle unauth
 
     else if (payload.actions[0].name === 'conflicts') {
@@ -104,8 +107,8 @@ createGoogleMeeting = (res, eventInfo, user) => {
   console.log('REACHES creating meeting method')
   
   let startDate = new Date(eventInfo.date + " " + eventInfo.time);
-  // HARD CODE IN ADDITION OF SEVEN HOURS
-  startDate.setHours(startDate.getHours() + 7);
+  // // HARD CODE IN ADDITION OF SEVEN HOURS
+  // startDate.setHours(startDate.getHours() + 7);
   
   const endDate = (eventInfo.duration) ? utils.getEndDate(startDate, eventInfo.duration) : utils.getEndDate(startDate);
   

@@ -72,11 +72,11 @@ getApiResponse = (message, authUserOuter, rtm) => {
   }
   console.log('message: ',message);
 
-  authUserOne.slackIds = SLACK_IDS;
+  authUserOuter.slackIds = SLACK_IDS;
 
   let authUser;
 
-  return authUserOne.save() 
+  return authUserOuter.save() 
   .then( au => {
     authUser = au;
     return sendQuery(message.text, authUser._id)

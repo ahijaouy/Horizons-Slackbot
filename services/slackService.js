@@ -46,7 +46,9 @@ getApiResponse = (message, authUser, rtm) => {
   if (message.text.indexOf('<@') >= 0) {
     message.text = message.text.replace(/<@(\w+)>/g, function(match, userId) {
       console.log('MATCH:', match, userId, 'current slack ids: ', SLACK_IDS);
-      SLACK_IDS.push(userId);
+      if (SLACK_IDS.indexOf(userId) < 0) {
+        SLACK_IDS.push(userId);
+      }
       return  rtm.dataStore.getUserById(userId).profile.real_name+', ';
     });
   }

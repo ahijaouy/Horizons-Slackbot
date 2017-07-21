@@ -61,7 +61,7 @@ erasePendingAndSaveUser = (res, user, canceled) => {
     if (err) {
       console.log('ERROR THERE: ',err);
     } else {
-      console.log('BP, CANCEL, SAVED USER');
+      console.log('BP, SAVED USER');
       if (canceled) {
         res.send('Canceled! :x:');
       } else {

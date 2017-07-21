@@ -84,7 +84,8 @@ getApiResponse = (message, authUser, rtm) => {
       // handle complete meeting.add
     } else {
       console.log('ACTION IS COMPLETE: MEETING ... slack ids put into link emails', SLACK_IDS);
-
+      console.log('action parameters:', data.result.parameters);
+      
       const start = new Date(data.result.parameters.date + ' ' + data.result.parameters.time);
       /// 777600000 is 9 days in miliseconds
       const end = new Date(start.getTime() + 777600000)

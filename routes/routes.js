@@ -47,11 +47,11 @@ router.post('/slack/create_event', (req, res) => {
           // boolean - user going to schedule after wait, true or false
           // date - time that request of event was made, date.now()
       if (payload.actions[0].value === 'true') {
-        const newPending = { scheduleAnyway: true, requestDate, informedInvitees: false };
+        const newPending = { scheduleAnyway: true, requestDate, informedInvitees: false, slackId };
         changePendingAndSaveUser( res, user, newPending );
 
       } else {
-        const newPending = { scheduleAnyway: false, requestDate, informedInvitees: false  };
+        const newPending = { scheduleAnyway: false, requestDate, informedInvitees: false, slackId };
         changePendingAndSaveUser( res, user, newPending );
 
       }

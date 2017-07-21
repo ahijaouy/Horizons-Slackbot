@@ -23,11 +23,7 @@ createGoogleReminder = (res, eventInfo, user) => {
 createGoogleMeeting = (res, eventInfo, user) => {
   
   let startDate = (eventInfo.newDate) ? eventInfo.newDate : new Date(eventInfo.date + " " + eventInfo.time);
-  // // HARD CODE IN ADDITION OF SEVEN HOURS
-  // startDate.setHours(startDate.getHours() + 7);
-
   console.log('REACHES creating meeting method  : startDate: ', startDate);
-  console.log('could hard code start date to be: ', startDate.getHours() + 7);
   
   const endDate = (eventInfo.duration) ? utils.getEndDate(startDate, eventInfo.duration) : utils.getEndDate(startDate);
 

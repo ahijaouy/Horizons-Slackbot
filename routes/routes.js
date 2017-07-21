@@ -91,7 +91,17 @@ router.post('/slack/create_event', (req, res) => {
       console.log('ERROR: ', err);
     });    
 
-  // // find user in order to get info about current event
+  
+});  //close router post
+
+module.exports = router;
+
+
+
+
+// OLD CODE:
+
+// // find user in order to get info about current event
   // User.findOne({ slackId }, (err, user) => {
   //   console.log('BP, FOUND USER', user);
   //   if (err) {
@@ -147,7 +157,3 @@ router.post('/slack/create_event', (req, res) => {
   //     }
   //   }  // close confirm/cancel meetings
   // });  // close find User by id
-});  //close router post
-
-
-module.exports = router;

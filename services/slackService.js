@@ -25,28 +25,51 @@ processMessage = (message, rtm) => {
     console.log('bp 1: ', message.user);
     auth.checkUser(message.user)
     .then((authUser) => {
-      console.log('bp 2');
+      // handle authenticated user
       if (authUser.authenticated) {
         console.log('authenticated route');
 
+        // handle user pending in creating new meeting / reminder 
         if (authUser.pending && JSON.parse(authUser.pending).type) {
           resolve({pending: true});
+        
+        // handle user pending because of other unauth invitees
         } else if (authUser.pending && JSON.parse(authUser.pending).newPending) {
           const pending = JSON.parse(authUser.pending);
           console.log('reached pending with inviteees', pending);
-          resolve({pending: true, informedInvitees: pending.newPending.informedInvitees, invitees: pending.unauth.attendees.notFound });
+
+          //remain pending if already invited invitees
+          if (pending.newPending.informedInvitees) {
+            resolve({pending: true});       
+            
+          // remain pending but also invite unauth invitees
+          } else {
+            let arrayOfInvitations = [];
+            pending.unauth.attendees.notFound.forEach( invitee => {
+              let msg = rtm.dataStore.getUserById(authUser.slackId).profile.real_name + "(" + authUser.email + ")";
+              msg += " has invited to a meeting! Respond 'ACCEPT' to this message"
+              msg += " to get the link to authenticate access to your GCal to accept or decline the invite!";
+              
+              arrayOfInvitations.push([invitee, msg]);
+            });
+
+            resolve({pending: true, invitations: arrayOfInvitations});
+          }
+          // resolve({pending: true, informedInvitees: pending.newPending.informedInvitees, invitees: pending.unauth.attendees.notFound });
+        
+        // handle all other messages
         } else {
           resolve(getApiResponse(message, authUser, rtm));
           console.log('reaches after resolve');
         }
 
+      // handle unauthenticated user
       } else {
         console.log('unauthenticated route');
         const msg = 'Click this link before continuing! '+AUTH_PREFIX+'connect?auth_id='+authUser._id;
         resolve({ send: msg });
       }
     });
-
   });
 }
 
@@ -60,14 +83,14 @@ getApiResponse = (message, authUserOuter, rtm) => {
   let SLACK_IDS = authUserOuter.slackIds;
 
   // MIDDLEWARE for messages:
-  // replace message's slack user ids with usernames; store ids into array;
+  // replace message's slack user ids with usernames; store ids into array; save array to mongo user
   if (message.text.indexOf('<@') >= 0) {
     message.text = message.text.replace(/<@(\w+)>/g, function(match, userId) {
       console.log('MATCH:', match, userId, 'current slack ids: ', SLACK_IDS);
       if (SLACK_IDS.indexOf(userId) < 0) {
         SLACK_IDS.push(userId);
       }
-      return  rtm.dataStore.getUserById(userId).profile.real_name+', ';
+      return rtm.dataStore.getUserById(userId).profile.real_name+', ';
     });
   }
   console.log('message: ',message);
@@ -91,7 +114,8 @@ getApiResponse = (message, authUserOuter, rtm) => {
 
     } else if (data.result.action !== 'reminder.add' && data.result.action !== 'meeting.add') {
       console.log('UNSPECIFIED intents');
-      return {} ;
+      const msg = "Sorry, I don't understand. Try scheduling a reminder or meeting with me!";
+      return { send: msg } ;
 
       // handle reminder.add or meeting.add in progress
     } else if (data.result.actionIncomplete) {
@@ -107,13 +131,10 @@ getApiResponse = (message, authUserOuter, rtm) => {
 
       // handle complete meeting.add
     } else {
-      console.log('ACTION IS COMPLETE: MEETING ... slack ids put into link emails', SLACK_IDS);
       console.log('action parameters:', data.result.parameters);
-
       rtm.sendMessage('Hold on... Let me check your calendars!', message.channel);
 
       const times = getTimesForMeeting(data.result.parameters);
-
       return utils.linkEmails(SLACK_IDS)
       .then((attendeesObj) => {
         console.log('attendees!!', attendeesObj, 'found:', attendeesObj.found, 'not found:', attendeesObj.notFound);
@@ -142,7 +163,6 @@ getApiResponse = (message, authUserOuter, rtm) => {
         // obj.post is from unauth route
         if (obj.post.slackIds) {
           console.log('SAVING USER PENDING WITH: ', obj.post.data, obj.post.slackIds, obj.post.data.action);
-          
           userPending = Object.assign({}, obj.post.data, {slackIds: obj.post.slackIds}, {type: obj.post.data.action} );
 
         // obj.post is from auth route, meeting
@@ -162,7 +182,6 @@ getApiResponse = (message, authUserOuter, rtm) => {
         // message to be sent via rtm.sendMessage
       } else {
         console.log('NOT SAVING USER PENDING, NOT IN POST', obj);
-        // return obj;
         resolve(obj);
       }
     })
@@ -170,6 +189,15 @@ getApiResponse = (message, authUserOuter, rtm) => {
   .catch( err => {
     console.log('ERROR: ', err);
   });
+
+
+
+
+
+
+
+
+
 
   // return sendQuery(message.text, authUser._id)
   // .then( response => {

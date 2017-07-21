@@ -1,5 +1,6 @@
 // Local Import
-const User = require('../models/user.js');
+const User = require('../models/user')
+
 const _ = require('underscore');
 
 // utils.linkEmails(idArray)
@@ -24,7 +25,9 @@ function linkEmails(idArray){
         });
         resolve( {found, notFound});
       })
-      .catch(reject);
+      .catch(() => {
+          reject
+      });
   });
 }
 
@@ -33,7 +36,7 @@ function linkEmails(idArray){
 function userExists(slackId){
   return new Promise((resolve, reject) => {
     User.findOne({slackId}, (err, user) => {
-      if (err) reject(err);
+      if (err){ console.log('ERRORR!!!!!'); reject(err);}
       if (user && user.email) {
         resolve({
           exists: true,
@@ -62,7 +65,7 @@ function getEndDate(date, duration = 30){
 
 // utils.fourHourCheck(date)
 //  - Param: date     -> Date of start date
-//  - Description: Generates a boolean value true if the 
+//  - Description: Generates a boolean value true if the
 //    start date is before 4 hours from now, false otherwise
 //  - Returns: boolean
 function fourHourCheck (date) {

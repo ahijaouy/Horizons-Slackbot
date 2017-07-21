@@ -3,6 +3,7 @@ const { rtm } = require('./slackrtm');
 const { CLIENT_EVENTS } = require('@slack/client');
 const mongoose = require('mongoose')
 const _ = require('underscore')
+const utils = require('./utils')
 
 mongoose.connect(require('../config/database').url);
 mongoose.Promise = global.Promise;
@@ -11,12 +12,10 @@ function findUser(){
     return new Promise(function(resolve, reject){
         User.find({}).exec()
         .then(users => {
-            console.log('in here', users.length)
-
             const pendingArray = []
             users.forEach((user, index) => {
                 // console.log('user', index)
-                const pending = user.pending ? JSON.parse(user.pending): {}
+                const pending = user.pending ? JSON.parse(user.pending): {};
                 if(pending && !_.isEmpty(pending) && pending.newPending){
                     console.log('user',pending)
                     pendingArray.push(pending)
@@ -46,13 +45,65 @@ function findUser(){
               // if still people unfound, && still less than 2 hours, stop code
               // if still people unfound && equal to or greater than 2 hours, SCHEDULE or CANCEL
 
-  findUser()
-  .then((newPending) => {
-    const pendTime = new Date(newPending.requestDate)
-    console.log('we are done', pendTime);
-    // if()
-    process.exit(0);
-  });
-// });
+function removeExpire(array){
+    const validatedArray = []
+    array.forEach((pendState) =>{
+        const pendTime = pendState.newPending.requestDate
+        const difference = new Date().getTime() - pendTime
+        console.log('difference', difference)
+        if( difference < 7200000 && difference > 0){
+            validatedArray.push(pendState)
+        }else{
+            //// do whatever you need to when 2 hours is exceeded
+        }
+    })
+    console.log(' NA', validatedArray)
+    return validatedArray
+}
+
+
+function checkNotFound(array){
+    return new Promise(function(resolve, reject){
+    array.forEach((currentUser) => {
+        const notFound = currentUser.unauth.attendees.notFound;
+        if(notFound.length > 0){
+            console.log('yo1', notFound)
+            resolve(utils.linkEmails(notFound), currentUser)
+            }
+        })
+    })
+}
+
+let VA;
+findUser()
+.then((pendingArray) => {
+  return removeExpire(pendingArray)
+})
+.then((validatedArray) => {
+  VA = validatedArray
+  return checkNotFound(validatedArray)
+
+})
+.then((emailList) => {
+  if(emailList.notFound){
+    VA[0].unauth.attendees.found = VA[0].unauth.attendees.found.concat(emailList.found)
+    VA[0].unauth.attendees.notFound = emailList.notFound
+    console.log('herei am', VA[0].unauth.attendees)
+    User.findOne({slackId: VA[0].newPending.slackId}).exec()
+      .then((user) => {
+        user.pending = JSON.stringify(VA[0])
+        console.log('user new', user)
+        user.save((err) => {
+          console.log(err)
+        })
+      })
+  }else{
+    ///// send schedule since everyone has authenticated
+  }
+})
+.then(() => {
+  process.exit(0)
+});
+
 
 // rtm.start();

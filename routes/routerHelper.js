@@ -17,7 +17,7 @@ createGoogleReminder = (res, eventInfo, user) => {
 // create Google meeting with attendees, start date, end date, and subject
 createGoogleMeeting = (res, eventInfo, user) => {
   
-  let startDate = new Date(eventInfo.date + " " + eventInfo.time);
+  let startDate = (eventInfo.newDate) ? eventInfo.newDate : new Date(eventInfo.date + " " + eventInfo.time);
   // // HARD CODE IN ADDITION OF SEVEN HOURS
   // startDate.setHours(startDate.getHours() + 7);
 

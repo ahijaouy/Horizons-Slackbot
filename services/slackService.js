@@ -21,20 +21,20 @@ processMessage = (message, rtm) => {
       console.log('bp 2');
       if (authUser.authenticated) {
         console.log('authenticated route');
-        
+
         if (authUser.pending && JSON.parse(authUser.pending).type) {
           resolve({pending: true});
         } else {
           resolve(getApiResponse(message, authUser, rtm));
         }
-        
+
       } else {
         console.log('unauthenticated route');
         const msg = 'Click this link before continuing! '+AUTH_PREFIX+'connect?auth_id='+authUser._id;
         resolve({ send: msg });
       }
     });
-    
+
   });
 }
 
@@ -54,47 +54,47 @@ getApiResponse = (message, authUser, rtm) => {
     });
   }
   console.log('message: ',message);
-  
-  
+
+
   return sendQuery(message.text, authUser._id)
   .then((response) => {
     let data = response.data;
-    
+
     if (data.result.action.startsWith('smalltalk') || data.result.action.startsWith('profanity') || data.result.action.startsWith('numeric')) {
       const msg = response.data.result.fulfillment.speech;
       return { send: msg };
-      
+
     } else if (data.result.action !== 'reminder.add' && data.result.action !== 'meeting.add') {
       // console.log('UNSPECIFIED intents');
-      
+
       return {} ;
-      
+
       // handle reminder.add or meeting.add in progress
     } else if (data.result.actionIncomplete) {
       // console.log('action INCOMPLETE');
       const msg =  response.data.result.fulfillment.speech;
       return { send: msg };
-      
+
       // handle complete reminder.add
     } else if (data.result.action === 'reminder.add') {
       // console.log('ACTION IS COMPLETE: REMINDER', data.result.parameters);
       const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
       return { post: { msg: responseMsg, json: responseJSON, data: data.result } };
-      
+
       // handle complete meeting.add
     } else {
       console.log('ACTION IS COMPLETE: MEETING ... slack ids put into link emails', SLACK_IDS);
-      
+
       const start = new Date(data.result.parameters.date + ' ' + data.result.parameters.time);
       /// 777600000 is 9 days in miliseconds
       const end = new Date(start.getTime() + 777600000)
       console.log('start date 1', start, 'end date 1', end);
       const duration = data.result.parameters.duration ? data.result.parameters.duration : 30
-      
+
       return utils.linkEmails(SLACK_IDS)
       .then((attendeesObj) => {
         console.log('attendees!!', attendeesObj, 'found:', attendeesObj.found, 'not found:', attendeesObj.notFound);
-        
+
         // all attendees have authed with google
         if (! attendeesObj.notFound.length) {
           const emails = attendeesObj.found;
@@ -104,21 +104,25 @@ getApiResponse = (message, authUser, rtm) => {
             console.log('YO THIS IS X', x);
             if(!x.conflicts){
               return { post: { msg: responseMsg, json: responseJSON, data: data.result} };
-            } else {
+            } else {  
               return findFreeTimes(SLACK_IDS, start, end, duration)
               .then(freeTimes => {
-                const startTimes = [];
-                
-                freeTimes.forEach((sections) => {
-                  startTimes.push(  'start: ' + sections.start.getMonth()
-                    + '/' + sections.start.getDay()
-                    + '/' + sections.start.getFullYear()
-                    + ' at ' + sections.start.getHours()
-                    + ':' +
-                    (sections.start.getMinutes() !== 0 ? sections.start.getMinutes() : '00') )
+                const timesArray = {read:[], not:[]};
+                while (timesArray.read.length < 4){
+                    freeTimes.forEach((sections) => {
+                        timesArray.read.push('start: ' + (sections.start.getMonth() + 1)
+                        + '/' + sections.start.getDate()
+                        + '/' + sections.start.getFullYear()
+                        + ' at ' + (sections.start.getHours() !== 0 ? sections.start.getHours() : '12')
+                        + ':' +
+                        (sections.start.getMinutes() !== 0 ? sections.start.getMinutes() : '00')
+                    )
+                    timesArray.not.push(sections.start)
+
                 })
-                console.log('******', startTimes)
-                return { post: { msg: responseMsg, json: getDropdownJson(startTimes.slice(1,4)), data: data.result, slackIds: SLACK_IDS } };
+            }
+                console.log('******', timesArray)
+                return { post: { msg: responseMsg, json: getDropdownJson(timesArray), data: data.result, slackIds: SLACK_IDS } };
               })
             };
           });
@@ -126,38 +130,38 @@ getApiResponse = (message, authUser, rtm) => {
         } else {
           // CHECK 4 HOURS
           console.log('REACHED UNAUTH ATTENDEES');
-          
+
           return slackUnauth(start, SLACK_IDS, authUser);
         }
       });
-      
-      
+
+
     }
   })
   .then((obj) => {
     return new Promise(function(resolve, reject) {
       console.log('REACHES THEN 1');
-      
+
       // message to be sent via web.chat.postMessage
       if (obj.post) {
         let userPending;
-        
+
         // obj.post is from unauth route
         if (obj.post.slackIds) {
           userPending = Object.assign({}, obj.post.data, {slackIds: obj.post.slackIds}, {type: obj.post.data.action} );
-          
+
           // obj.post is from auth route, meeting
         } else if (SLACK_IDS) {
           userPending = Object.assign({}, obj.post.data.parameters, {slackIds: SLACK_IDS}, {type: obj.post.data.action} );
-          
+
           // obj.post is from auth route, reminder
         } else {
           resolve(obj);
         }
-        
+
         authUser.pending = JSON.stringify(userPending);
         authUser.save(() => resolve(obj));
-        
+
         // message to be sent via rtm.sendMessage
       } else {
         resolve(obj);

@@ -77,7 +77,7 @@ router.post('/slack/create_event', (req, res) => {
         erasePendingAndSaveUser(res, user, true);
       }
     }  // close confirm/cancel meetings
-
+    console.log('hit nothing')
   });  // close find User by id
 });  //close router post
 

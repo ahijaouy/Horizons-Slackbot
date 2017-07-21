@@ -49,9 +49,15 @@ router.post('/slack/create_event', (req, res) => {
       if (payload.actions[0].value === 'true') {
         res.send("YO, you're in the SCHEDULE ANYWAY unauth route");
 
+        // REMOVE AFTER REAL THINGS PUT IN:
+        erasePendingAndSaveUser(res, user, true);
+
       } else {
         res.send("YO, you're in the CANCEL unauth route");
         
+        // REMOVE AFTER REAL THINGS PUT IN:
+        erasePendingAndSaveUser(res, user, true);
+
       }
 
 

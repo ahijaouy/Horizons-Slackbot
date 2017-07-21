@@ -104,6 +104,7 @@ getApiResponse = (message, authUser, rtm) => {
             console.log('YO THIS IS X', x);
             if(!x.conflicts){
               return { post: { msg: responseMsg, json: responseJSON, data: data.result} };
+              
             } else {  
               return findFreeTimes(SLACK_IDS, start, end, duration)
               .then(freeTimes => {

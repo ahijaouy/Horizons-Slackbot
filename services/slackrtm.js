@@ -60,12 +60,12 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
         
       } else if (logic.pending && logic.pending.invitations) {
         console.log('hits logic pending with invitations', logic.pending.invitations);
-        logic.pending.invitations.forEach( message => {
-          console.log('sending out individual message: ', message[1], 'to ', message[0])
-          rtm.sendMessage(message[1], message[0]);
+        logic.pending.invitations.forEach( msg => {
+          console.log('sending out individual message: ', msg[1], 'to ', msg[0])
+          rtm.sendMessage(msg[1], msg[0]);
         });
 
-        rtm.sendMessage('Sent invitations to all unauthorized invitees!');
+        rtm.sendMessage('Sent invitations to all unauthorized invitees!', message.channel);
 
       } else if (logic.pending) {
         rtm.sendMessage('You are in a pending state! Confirm or cancel above event to continue.', message.channel);

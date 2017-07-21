@@ -58,7 +58,7 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
         console.log('MESSAGE TO SEND VIA send MESSAGE:', logic.send, message.channel);        
         rtm.sendMessage(logic.send, message.channel);
         
-      } else if (logic.pending && logic.pending.invitations) {
+      } else if (logic.pending && logic.invitations) {
         console.log('hits logic pending with invitations', logic.pending.invitations);
         logic.pending.invitations.forEach( msg => {
           console.log('sending out individual message: ', msg[1], 'to ', msg[0])

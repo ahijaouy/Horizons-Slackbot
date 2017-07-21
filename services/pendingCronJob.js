@@ -86,24 +86,33 @@ findUser()
 })
 .then((emailList) => {
   if(emailList.notFound){
-    VA[0].unauth.attendees.found = VA[0].unauth.attendees.found.concat(emailList.found)
-    VA[0].unauth.attendees.notFound = emailList.notFound
-    console.log('herei am', VA[0].unauth.attendees)
-    User.findOne({slackId: VA[0].newPending.slackId}).exec()
+    VA.forEach((pend, index) => {
+      console.log('index', index)
+      pend.unauth.attendees.found = pend.unauth.attendees.found.concat(emailList.found)
+      pend.unauth.attendees.notFound = emailList.notFound
+      console.log('herei am', pend.unauth.attendees, String(pend.newPending.slackId))
+      // console.log('user', User);
+      User.find({slackId: pend.newPending.slackId}).exec()
       .then((user) => {
-        user.pending = JSON.stringify(VA[0])
+        console.log('im here')
+        user.pending = JSON.stringify(pend)
         console.log('user new', user)
-        user.save((err) => {
-          console.log(err)
-        })
+        user.save()
+        return 
       })
+      .catch((err) => {
+        console.log('error', err)
+      })
+    })
   }else{
     ///// send schedule since everyone has authenticated
   }
 })
-.then(() => {
+.then((x) => {
+  console.log('I am done')
   process.exit(0)
-});
+})
+
 
 
 // rtm.start();

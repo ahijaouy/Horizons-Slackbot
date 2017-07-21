@@ -6,7 +6,7 @@ const utils = require('./utils');
 
 const { getResponseMessage } = require('./slackUtils');
 const { responseJSON, getDropdownJson } = require('./slackInteractiveMessages');
-const { slackUnauth } = require('./slackUnath');
+const { slackUnauth } = require('./slackUnauth');
 
 let SLACK_IDS = [];
 

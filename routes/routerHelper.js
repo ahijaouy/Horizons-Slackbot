@@ -67,3 +67,11 @@ erasePendingAndSaveUser = (res, user, canceled) => {
 }
 
 // set user pending state to be same object with additional info about pending authorization
+
+
+module.exports = { 
+  createGoogleReminder,
+  createGoogleMeeting,
+  saveReminderAndUser,
+  erasePendingAndSaveUser 
+}

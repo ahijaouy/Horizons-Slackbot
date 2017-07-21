@@ -1,10 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../services/authentication');
-var bodyParser = require('body-parser');
+const bodyParser = require('body-parser');
 
 const calendar = require('../services/calendar');
 const utils = require('../services/utils');
+const { 
+  createGoogleReminder,
+  createGoogleMeeting,
+  saveReminderAndUser,
+  erasePendingAndSaveUser 
+} = require('./routerHelper');
 
 const User = require('../models/user');
 const Reminder = require('../models/reminder');

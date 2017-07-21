@@ -36,7 +36,7 @@ router.post('/slack/create_event', (req, res) => {
     }
 
     // handle unauth confirm/cancel route
-    if (payload.actions.waitOnAttendees) {
+    if (payload.actions[0].name === 'waitOnAttendees') {
       console.log('reaches unauth route in routes.js');
       res.send("YO, you're in the unauth route");
     }

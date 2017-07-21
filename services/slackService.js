@@ -1,15 +1,21 @@
+/* File that contains the foundation for the logic of processing an incoming message 
+   Handles: filtering through types of messages, sending message to API.AI, and sending off the 
+   event information received to the right path */
+
 const { sendQuery } = require('./nlp');
 const auth = require('./authentication');
-const AUTH_PREFIX = 'https://jarvis-horizons.herokuapp.com/';
-const { findFreeTimes, checkForConflicts } = require('./conflicts');
 const utils = require('./utils');
+const AUTH_PREFIX = 'https://jarvis-horizons.herokuapp.com/';
 
+const { findFreeTimes, checkForConflicts } = require('./conflicts');
 const { getResponseMessage, getTimesForMeeting } = require('./slackUtils');
 const { responseJSON } = require('./slackInteractiveMessages');
 const { slackUnauth } = require('./slackUnauth');
 const { slackAuth } = require('./slackAuth');
 
 let SLACK_IDS = [];
+
+/********************* EXPORTED FUNCTION *********************/
 
 // main message processing method called by slackrtm.js
 // receives a message, checks authorization, returns sendMessage with link if user not authorized
@@ -43,6 +49,8 @@ processMessage = (message, rtm) => {
   });
 }
 
+/********************* LOCAL HELPER FUNCTION *********************/
+
 // method that takes a message and returns objects with results from AI api
 // return: object with SEND key if rtm.sendMessage is to be used, and the message as its value
 // return: object with POST key if web.chat.postMessage is to be used, and msg + json as value object
@@ -63,20 +71,21 @@ getApiResponse = (message, authUser, rtm) => {
 
 
   return sendQuery(message.text, authUser._id)
-  .then((response) => {
+  .then( response => {
     let data = response.data;
 
     if (data.result.action.startsWith('smalltalk') || data.result.action.startsWith('profanity') || data.result.action.startsWith('numeric') || data.result.action.startsWith('ultron')) {
+      console.log('FUN intents');
       const msg = response.data.result.fulfillment.speech;
       return { send: msg };
 
     } else if (data.result.action !== 'reminder.add' && data.result.action !== 'meeting.add') {
-      // console.log('UNSPECIFIED intents');
+      console.log('UNSPECIFIED intents');
       return {} ;
 
       // handle reminder.add or meeting.add in progress
     } else if (data.result.actionIncomplete) {
-      // console.log('action INCOMPLETE');
+      console.log('action INCOMPLETE');
       const msg =  response.data.result.fulfillment.speech;
       return { send: msg };
 
@@ -104,14 +113,13 @@ getApiResponse = (message, authUser, rtm) => {
         
           // not all attendees have authed with google
         } else {
-          // CHECK 4 HOURS
           console.log('REACHED UNAUTH ATTENDEES');
           return slackUnauth(times.start, SLACK_IDS, authUser, attendeesObj, data);
         }
       });
     }
   })
-  .then((obj) => {
+  .then( obj => {
     return new Promise(function(resolve, reject) {
       console.log('REACHES THEN 1');
 

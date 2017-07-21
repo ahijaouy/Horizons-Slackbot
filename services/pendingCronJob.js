@@ -51,7 +51,7 @@ function findUser(){
     const pendTime = new Date(newPending.requestDate)
     console.log('we are done', pendTime);
     // if()
-    process.exit(0);
+    // process.exit(0);
   });
 // });
 

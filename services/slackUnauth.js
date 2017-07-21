@@ -16,7 +16,11 @@ function slackUnauth(start, slackIds, user, attendees, data) {
       let returnMsg = 'Not all invitees have authorized access Google Calendar. '
       returnMsg += 'What would you like to do in two hours if not all invitees authorize access?'
 
-      const dataToSend = Object.assign({}, { unauth: { start, attendees } }, data.result );
+      console.log('data.result: ', data.result);
+
+      const dataToSend = Object.assign({}, { unauth: { start, attendees } }, data.result.action, data.result.parameters );
+
+      console.log("this is what i'm sending into data for message processing: ", dataToSend);      
 
       // resolve sends back to slackService to save start time, user, attendees, and INSERT MORE to user.pending
       resolve({ post: { msg: returnMsg, json: unauthJSON, data: dataToSend, slackIds }}); 

@@ -48,7 +48,7 @@ saveReminderAndUser = (res, newReminder, user) => {
       console.log('ERROR HERE: ',err);
     } else {
       console.log('BP, SAVED REMINDER ');
-      erasePendingAndSaveUser(user, false);
+      erasePendingAndSaveUser(res, user, false);
     }
   });
 }

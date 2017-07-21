@@ -61,7 +61,7 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
       } else if (logic.pending && logic.pending.invitations) {
         console.log('hits logic pending with invitations', logic.pending.invitations);
         logic.pending.invitations.forEach( message => {
-          rtm.sendMessage(message[0], message[1]);
+          rtm.sendMessage(message[1], message[0]);
         });
 
         rtm.sendMessage('Sent invitations to all unauthorized invitees!');

@@ -48,7 +48,9 @@ router.post('/slack/create_event', (req, res) => {
     else if (payload.actions[0].name === 'conflicts') {
         const eventInfo = JSON.parse(user.pending);
         console.log('eventInfo', eventInfo);
-        console.log('payload conflicts route', payload.actions.selected_options)
+        const newDate = new Date(payload.actions.selected_options[0].value);
+        eventInfo.newDate = newDate;
+        createGoogleMeeting(res, eventInfo, user);
       // DOM'S CODE
     }
 

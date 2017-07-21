@@ -72,7 +72,7 @@ function getDropdownJson(dates) {
   return {
     "attachments": [
       {
-        "text": "Choose a date that you are free",
+        "text": "There is a conflict with that time, please choose an alternative below",
         "fallback": "pick a date",
         "color": "#3AA3E3",
         "attachment_type": "default",

@@ -9,7 +9,7 @@ const routes = require('./routes/routes');
 const dbconfig = require('./config/database');
 
 ////********REMOVE***********///
-const pcj = require('./services/pendingCronJob')
+// const pcj = require('./services/pendingCronJob')
 ////********REMOVE***********///
 
 // Global Variables

@@ -41,10 +41,10 @@ processMessage = (message, rtm) => {
 // return: object with SEND key if rtm.sendMessage is to be used, and the message as its value
 // return: object with POST key if web.chat.postMessage is to be used, and msg + json as value object
 getApiResponse = (message, authUser, rtm) => {
-  // MIDDLEWARE for messages: 
-  // replace message's slack user ids with usernames; store ids into array; 
+  // MIDDLEWARE for messages:
+  // replace message's slack user ids with usernames; store ids into array;
   if (message.text.indexOf('<@') >= 0) {
-    message.text = message.text.replace(/<@(\w+)>/g, function(match, userId) { 
+    message.text = message.text.replace(/<@(\w+)>/g, function(match, userId) {
       console.log('MATCH:', match, userId, 'current slack ids: ', SLACK_IDS);
       SLACK_IDS.push(userId);
       return  rtm.dataStore.getUserById(userId).profile.real_name+', ';
@@ -97,20 +97,27 @@ getApiResponse = (message, authUser, rtm) => {
           const emails = attendeesObj.found;
           const conflict = checkForConflicts(SLACK_IDS, emails, start, end)
           const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
-          
-          // const conflict = true
-          if(!conflict){
-            console.log('no conflict');
-            return { post: { msg: responseMsg, json: responseJSON, data: data.result} };
-            
-          } else {
-            return findFreeTimes(SLACK_IDS, start, end, duration)
-            .then(freeTimes => {
-              console.log('REACHES free', freeTimes);
-              return { post: { msg: responseMsg, json: getDropdownJson(freeTimes), data: data.result, slackIds: SLACK_IDS } };
-            });
-          }
-          
+          return conflict.then((x) => {
+            if(!x.conflicts){
+              return { post: { msg: responseMsg, json: responseJSON, data: data.result} };
+            } else {
+              return findFreeTimes(SLACK_IDS, start, end, duration)
+              .then(freeTimes => {
+                const startTimes = [];
+                
+                freeTimes.forEach((sections) => {
+                  startTimes.push('start: ' + sections.start.getMonth()
+                  + '/' + sections.start.getDay()
+                  + '/' + sections.start.getFullYear()
+                  + ' at ' + sections.start.getHours()
+                  + ':' +
+                  (sections.start.getMinutes() !== 0 ? sections.start.getMinutes() : '00'))
+                })
+                console.log('******', startTimes)
+                return { post: { msg: responseMsg, json: getDropdownJson(startTimes.slice(1,4)), data: data.result, slackIds: SLACK_IDS } };
+              })
+            };
+          });
           // not all attendees have authed with google
         } else {
           // CHECK 4 HOURS
@@ -119,6 +126,8 @@ getApiResponse = (message, authUser, rtm) => {
           return slackUnauth(start, SLACK_IDS, authUser);
         }
       });
+      
+      
     }
   })
   .then((obj) => {
@@ -128,24 +137,24 @@ getApiResponse = (message, authUser, rtm) => {
       // message to be sent via web.chat.postMessage
       if (obj.post) {
         let userPending;
-
+        
         // obj.post is from unauth route
         if (obj.post.slackIds) {
           userPending = Object.assign({}, obj.post.data, {slackIds: obj.post.slackIds}, {type: obj.post.data.action} );
-        
-        // obj.post is from auth route, meeting
+          
+          // obj.post is from auth route, meeting
         } else if (SLACK_IDS) {
           userPending = Object.assign({}, obj.post.data.parameters, {slackIds: SLACK_IDS}, {type: obj.post.data.action} );
-        
-        // obj.post is from auth route, reminder
+          
+          // obj.post is from auth route, reminder
         } else {
-          userPending = Object.assign({}, obj.post.data.parameters, {type: obj.post.data.action} );
+          resolve(obj);
         }
-
+        
         authUser.pending = JSON.stringify(userPending);
         authUser.save(() => resolve(obj));
-
-      // message to be sent via rtm.sendMessage
+        
+        // message to be sent via rtm.sendMessage
       } else {
         resolve(obj);
       }

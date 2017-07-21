@@ -76,14 +76,16 @@ function findFreeTimes(slackIds, start, end, duration = 30){
   }
 
   return new Promise((resolve, reject)=> {
-    const durationInMs = duration * 60 * 1000;
+    const durationInMs = duration? duration * 60 * 1000 : 1;
+    console.log('duration', durationInMs)
     let freeArray = [];
     let optionArray = [];
-    generateFreeTimes(slackIds, start,end)
+    generateFreeTimes(slackIds, start, end)
     .then( allFreeArray => {
+        console.log('all free', allFreeArray)
       allFreeArray.forEach( slot => {
         if((new Date(slot.end) - new Date(slot.start)) > durationInMs){
-          for(let interval = 0; interval < ((new Date(slot.end) - new Date(slot.start)) % durationInMs); interval++){
+          for(let interval = 0; interval < ((new Date(slot.end) - new Date(slot.start)) / durationInMs); interval++){
             freeArray.push({
               start: util.getEndDate(new Date(slot.start), duration * interval),
               end: util.getEndDate(new Date(slot.start), duration * (interval + 1))

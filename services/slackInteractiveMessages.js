@@ -59,6 +59,9 @@ const unauthJSON = {
 /* function that returns JSON object for interactive message
 has dropdown with dates from dates array */
 function getDropdownJson(dates) {
+    ///
+    // const abc = ['monday', 'tuesday', 'wednesday']
+    ///
   return {
     "attachments": [
       {

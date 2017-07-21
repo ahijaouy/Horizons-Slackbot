@@ -95,7 +95,7 @@ getApiResponse = (message, authUser, rtm) => {
         // all attendees have authed with google
         if (! attendeesObj.notFound.length) {
           const emails = attendeesObj.found;
-          const conflict = checkForConflicts(SLACK_IDS, emails, start, end)
+          const conflict = checkForConflicts(SLACK_IDS, emails, start, end);
           const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
           return conflict.then((x) => {
             console.log('YO THIS IS X', x);

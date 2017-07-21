@@ -16,7 +16,7 @@ function slackUnauth(start, slackIds, user, attendees) {
       let returnMsg = 'Not all invitees have authorized access Google Calendar. '
       returnMsg += 'What would you like to do in two hours if not all invitees authorize access?'
 
-      const dataToSend = { start, user, attendees};
+      const dataToSend = { unauth: { start, attendees } };
 
       // resolve sends back to slackService to save start time, user, attendees, and INSERT MORE to user.pending
       resolve({ post: { msg: returnMsg, json: unauthJSON, data: dataToSend, slackIds }}); 

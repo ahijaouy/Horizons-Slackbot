@@ -9,7 +9,8 @@ const {
   createGoogleReminder,
   createGoogleMeeting,
   saveReminderAndUser,
-  erasePendingAndSaveUser 
+  erasePendingAndSaveUser,
+  changePendingAndSaveUser
 } = require('./routerHelper');
 
 const User = require('../models/user');
@@ -35,7 +36,7 @@ router.post('/slack/create_event', (req, res) => {
   console.log('REACHES ROUTE CREATE', req.body.payload);
   console.log('NAME OF ROUTE: ', payload.actions[0])
   
-  // find user in order to get info abosut current event
+  // find user in order to get info about current event
   User.findOne({ slackId }, (err, user) => {
     console.log('BP, FOUND USER', user);
     if (err) {
@@ -45,33 +46,36 @@ router.post('/slack/create_event', (req, res) => {
     // handle unauth confirm/cancel route
     if (payload.actions[0].name === 'waitOnAttendees') {
       console.log('reaches unauth route in routes.js');
-
+      const eventInfo = JSON.parse(user.pending);    
+      const requestDate = Date.now();    
+      
       if (payload.actions[0].value === 'true') {
         res.send("YO, you're in the SCHEDULE ANYWAY unauth route");
+        console.log('event info: ', eventInfo);
 
         // ADD TO PENDING: onHold object:
           // boolean - user going to schedule after wait, true
           // date - time that request of event was made, date.now()
-          // object - attendees, found & not found, attendeesObj
+        const newPending = { scheduleAnyway: false, requestDate };
+        changePendingAndSaveUser( res, user, newPending );
 
-        // REMOVE AFTER REAL THINGS PUT IN:
-        erasePendingAndSaveUser(res, user, true);
+        // // REMOVE AFTER REAL THINGS PUT IN:
+        // erasePendingAndSaveUser(res, user, true);
 
       } else {
         res.send("YO, you're in the CANCEL unauth route");
+        console.log('event info: ', eventInfo);
         
         // ADD TO PENDING: onHold object:
           // boolean - user going to schedule after wait, false
           // date - time that request of event was made, date.now()
-          // object - attendees, found & not found, attendeesObj
+        const newPending = { scheduleAnyway: false, requestDate };
+        changePendingAndSaveUser( res, user, newPending );
 
-        // REMOVE AFTER REAL THINGS PUT IN:
-        erasePendingAndSaveUser(res, user, true);
+        // // REMOVE AFTER REAL THINGS PUT IN:
+        // erasePendingAndSaveUser(res, user, true);
 
       }
-
-
-
 
     }  // close handle unauth
 

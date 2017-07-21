@@ -71,7 +71,7 @@ erasePendingAndSaveUser = (res, user, canceled) => {
       }
     })
     .catch( err => {
-      console.log(err);
+      console.log('ERROR: ', err);
     });
 
   // user.save((err) => {
@@ -90,11 +90,29 @@ erasePendingAndSaveUser = (res, user, canceled) => {
 }
 
 // set user pending state to be same object with additional info about pending authorization
-
+changePendingAndSaveUser = (res, user, newPending) => {
+  user.pending.newPending = newPending;
+  
+  return user.save()
+    .then( savedUser => {
+      console.log('BP, SAVED USER with CHANGED PENDING');
+      if (user.pending.newPending.scheduleAnyway) {
+        const sendMsg = 'Invitations sent! I will schedule the meeting anyway with those who authorize. Check back in two hours!';
+        res.send(sendMsg);
+      } else {
+        const sendMsg = 'Invitations sent! If not all authorize calendar access, I will cancel the meeting. Check back in two hours!';        
+        res.send(sendMsg);
+      }
+    })
+    .catch( err => {
+      console.log('ERROR: ', err);      
+    });
+}
 
 module.exports = { 
   createGoogleReminder,
   createGoogleMeeting,
   saveReminderAndUser,
-  erasePendingAndSaveUser 
+  erasePendingAndSaveUser,
+  changePendingAndSaveUser
 }

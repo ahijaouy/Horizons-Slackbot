@@ -117,11 +117,13 @@ getApiResponse = (message, authUser, rtm) => {
 
         // obj.post is from unauth route
         if (obj.post.slackIds) {
+          console.log('SAVING USER PENDING WITH: ', obj.post.data, obj.post.slackIds, obj.post.data.action);
+          
           userPending = Object.assign({}, obj.post.data, {slackIds: obj.post.slackIds}, {type: obj.post.data.action} );
 
         // obj.post is from auth route, meeting
         } else if (SLACK_IDS) {
-          console.log('SAVING USER PENDING WITH: ', obj.post.data.paramters, SLACK_IDS, obj.post.data.action);
+          console.log('SAVING USER PENDING WITH: ', obj.post.data.parameters, SLACK_IDS, obj.post.data.action);
           userPending = Object.assign({}, obj.post.data.parameters, {slackIds: SLACK_IDS}, {type: obj.post.data.action} );
 
         // obj.post is from auth route, reminder

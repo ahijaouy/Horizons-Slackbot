@@ -1,5 +1,7 @@
 /* File that contains the formatting of the json object that any interactive message requires */
 
+/******************** EXPORTED FUNCTIONS & OBJECTS ********************/
+
 /* JSON object for interactive message with Confirm and Cancel buttons */
 const responseJSON = {
   // "text": "*optional add text here*",

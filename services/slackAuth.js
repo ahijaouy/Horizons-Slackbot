@@ -1,4 +1,6 @@
-/* This file contains  */
+/* This file contains a function that handles the processing of a Meeting event
+   in which all invitees have authorized calendar access
+*/
 
 const { findFreeTimes, checkForConflicts } = require('./conflicts');
 const { responseJSON, getDropdownJson } = require('./slackInteractiveMessages');

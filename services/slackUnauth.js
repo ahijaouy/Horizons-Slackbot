@@ -18,7 +18,7 @@ function slackUnauth(start, slackIds, user, attendees, data) {
 
       console.log('data.result: ', data.result);
 
-      const meetingInfo = Object.assign({}, data.result.action, data.result.parameters);
+      const meetingInfo = Object.assign({}, {action: data.result.action}, data.result.parameters);
       const dataToSend = Object.assign({}, { unauth: { start, attendees } }, meetingInfo );
 
       console.log("this is what i'm sending into data for message processing: ", dataToSend);      

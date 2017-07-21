@@ -5,7 +5,7 @@ const { findFreeTimes, checkForConflicts } = require('./conflicts');
 const utils = require('./utils');
 
 const { getResponseMessage, getTimesForMeeting } = require('./slackUtils');
-// const { responseJSON, getDropdownJson } = require('./slackInteractiveMessages');
+const { responseJSON } = require('./slackInteractiveMessages');
 const { slackUnauth } = require('./slackUnauth');
 const { slackAuth } = require('./slackAuth');
 
@@ -128,16 +128,14 @@ getApiResponse = (message, authUser, rtm) => {
           //     })
           //   };
           // });
+        
           // not all attendees have authed with google
         } else {
           // CHECK 4 HOURS
           console.log('REACHED UNAUTH ATTENDEES');
-
           return slackUnauth(times.start, SLACK_IDS, authUser);
         }
       });
-
-
     }
   })
   .then((obj) => {

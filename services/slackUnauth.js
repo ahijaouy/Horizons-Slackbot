@@ -27,3 +27,5 @@ function slackUnauth(start, slackIds, user) {
     }
   });
 }
+
+module.exports = { slackUnauth };

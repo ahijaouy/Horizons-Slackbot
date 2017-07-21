@@ -41,7 +41,9 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
     // or do nothing 
     slackService.processMessage(message, rtm)
     .then((logic) => {
+      console.log('REACHES HERE WITH LOGIC', logic);
       if (logic.post) { 
+        console.log('MESSAGE TO SEND VIA process MESSAGE:', logic.post.msg, message.channel);
         web.chat.postMessage(message.channel, logic.post.msg, logic.post.json, function(err, res) {
           if (err) {
             console.log('Error:', err);
@@ -51,6 +53,7 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
         });
         
       } else if (logic.send) {
+        console.log('MESSAGE TO SEND VIA send MESSAGE:', logic.send, message.channel);        
         rtm.sendMessage(logic.send, message.channel);
         
       } else if (logic.pending) {

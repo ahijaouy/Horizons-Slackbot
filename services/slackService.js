@@ -37,6 +37,7 @@ processMessage = (message, rtm) => {
           resolve({pending: true, informedInvitees: pending.newPending.informedInvitees, invitees: pending.unauth.attendees.notFound });
         } else {
           resolve(getApiResponse(message, authUser, rtm));
+          console.log('reaches after resolve');
         }
 
       } else {
@@ -54,7 +55,9 @@ processMessage = (message, rtm) => {
 // method that takes a message and returns objects with results from AI api
 // return: object with SEND key if rtm.sendMessage is to be used, and the message as its value
 // return: object with POST key if web.chat.postMessage is to be used, and msg + json as value object
-getApiResponse = (message, authUser, rtm) => {
+getApiResponse = (message, authUserOne, rtm) => {
+
+  let SLACK_IDS = authUserOne.slackIds;
 
   // MIDDLEWARE for messages:
   // replace message's slack user ids with usernames; store ids into array;
@@ -69,8 +72,15 @@ getApiResponse = (message, authUser, rtm) => {
   }
   console.log('message: ',message);
 
+  authUserOne.slackIds = SLACK_IDS;
 
-  return sendQuery(message.text, authUser._id)
+  let authUser;
+
+  return authUserOne.save() 
+  .then( au => {
+    authUser = au;
+    return sendQuery(message.text, authUser._id)
+  })
   .then( response => {
     let data = response.data;
 
@@ -140,6 +150,7 @@ getApiResponse = (message, authUser, rtm) => {
 
         // obj.post is from auth route, reminder
         } else {
+          console.log('NOT SAVING USER PENDING, IN POST', obj);
           resolve(obj);
         }
 
@@ -148,10 +159,98 @@ getApiResponse = (message, authUser, rtm) => {
 
         // message to be sent via rtm.sendMessage
       } else {
+        console.log('NOT SAVING USER PENDING, NOT IN POST', obj);
+        // return obj;
         resolve(obj);
       }
-    });
+    })
+  })
+  .catch( err => {
+    console.log('ERROR: ', err);
   });
+
+  // return sendQuery(message.text, authUser._id)
+  // .then( response => {
+  //   let data = response.data;
+
+  //   if (data.result.action.startsWith('smalltalk') || data.result.action.startsWith('profanity') || data.result.action.startsWith('numeric') || data.result.action.startsWith('ultron')) {
+  //     console.log('FUN intents');
+  //     const msg = response.data.result.fulfillment.speech;
+  //     return { send: msg };
+
+  //   } else if (data.result.action !== 'reminder.add' && data.result.action !== 'meeting.add') {
+  //     console.log('UNSPECIFIED intents');
+  //     return {} ;
+
+  //     // handle reminder.add or meeting.add in progress
+  //   } else if (data.result.actionIncomplete) {
+  //     console.log('action INCOMPLETE');
+  //     const msg =  response.data.result.fulfillment.speech;
+  //     return { send: msg };
+
+  //     // handle complete reminder.add
+  //   } else if (data.result.action === 'reminder.add') {
+  //     console.log('ACTION IS COMPLETE: REMINDER', data.result.parameters);
+  //     const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
+  //     return { post: { msg: responseMsg, json: responseJSON, data: data.result } };
+
+  //     // handle complete meeting.add
+  //   } else {
+  //     console.log('ACTION IS COMPLETE: MEETING ... slack ids put into link emails', SLACK_IDS);
+  //     console.log('action parameters:', data.result.parameters);
+
+  //     const times = getTimesForMeeting(data.result.parameters);
+
+  //     return utils.linkEmails(SLACK_IDS)
+  //     .then((attendeesObj) => {
+  //       console.log('attendees!!', attendeesObj, 'found:', attendeesObj.found, 'not found:', attendeesObj.notFound);
+
+  //       // all attendees have authed with google
+  //       if (! attendeesObj.notFound.length) {
+  //         console.log('REACHED ALL AUTH ATTENDEES');
+  //         return slackAuth(attendeesObj, SLACK_IDS, times, data);
+        
+  //         // not all attendees have authed with google
+  //       } else {
+  //         console.log('REACHED UNAUTH ATTENDEES');
+  //         return slackUnauth(times.start, SLACK_IDS, authUser, attendeesObj, data);
+  //       }
+  //     });
+  //   }
+  // })
+  // .then( obj => {
+  //   return new Promise(function(resolve, reject) {
+  //     console.log('REACHES THEN 1');
+
+  //     // message to be sent via web.chat.postMessage
+  //     if (obj.post) {
+  //       let userPending;
+
+  //       // obj.post is from unauth route
+  //       if (obj.post.slackIds) {
+  //         console.log('SAVING USER PENDING WITH: ', obj.post.data, obj.post.slackIds, obj.post.data.action);
+          
+  //         userPending = Object.assign({}, obj.post.data, {slackIds: obj.post.slackIds}, {type: obj.post.data.action} );
+
+  //       // obj.post is from auth route, meeting
+  //       } else if (SLACK_IDS) {
+  //         console.log('SAVING USER PENDING WITH: ', obj.post.data.parameters, SLACK_IDS, obj.post.data.action);
+  //         userPending = Object.assign({}, obj.post.data.parameters, {slackIds: SLACK_IDS}, {type: obj.post.data.action} );
+
+  //       // obj.post is from auth route, reminder
+  //       } else {
+  //         resolve(obj);
+  //       }
+
+  //       authUser.pending = JSON.stringify(userPending);
+  //       authUser.save(() => resolve(obj));
+
+  //       // message to be sent via rtm.sendMessage
+  //     } else {
+  //       resolve(obj);
+  //     }
+  //   });
+  // });
 }
 
 module.exports = { processMessage };

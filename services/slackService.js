@@ -95,45 +95,14 @@ getApiResponse = (message, authUser, rtm) => {
 
         // all attendees have authed with google
         if (! attendeesObj.notFound.length) {
-          
+          console.log('REACHED ALL AUTH ATTENDEES');
           return slackAuth(attendeesObj, SLACK_IDS, times, data);
-          
-          // const emails = attendeesObj.found;
-          // const conflict = checkForConflicts(SLACK_IDS, emails, start, end);
-          // const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
-          // return conflict.then((x) => {
-          //   console.log('YO THIS IS X', x);
-          //   if(!x.conflicts){
-          //     return { post: { msg: responseMsg, json: responseJSON, data: data.result} };
-              
-          //   } else {  
-          //     return findFreeTimes(SLACK_IDS, start, end, duration)
-          //     .then(freeTimes => {
-          //       const timesArray = {read:[], not:[]};
-          //       while (timesArray.read.length < 4){
-          //           freeTimes.forEach((sections) => {
-          //               timesArray.read.push('start: ' + (sections.start.getMonth() + 1)
-          //               + '/' + sections.start.getDate()
-          //               + '/' + sections.start.getFullYear()
-          //               + ' at ' + (sections.start.getHours() !== 0 ? sections.start.getHours() : '12')
-          //               + ':' +
-          //               (sections.start.getMinutes() !== 0 ? sections.start.getMinutes() : '00')
-          //           )
-          //           timesArray.not.push(sections.start)
-
-          //       })
-          //   }
-          //       console.log('******', timesArray)
-          //       return { post: { msg: responseMsg, json: getDropdownJson(timesArray), data: data.result } };
-          //     })
-          //   };
-          // });
         
           // not all attendees have authed with google
         } else {
           // CHECK 4 HOURS
           console.log('REACHED UNAUTH ATTENDEES');
-          return slackUnauth(times.start, SLACK_IDS, authUser);
+          return slackUnauth(times.start, SLACK_IDS, authUser, attendeesObj);
         }
       });
     }
@@ -150,12 +119,12 @@ getApiResponse = (message, authUser, rtm) => {
         if (obj.post.slackIds) {
           userPending = Object.assign({}, obj.post.data, {slackIds: obj.post.slackIds}, {type: obj.post.data.action} );
 
-          // obj.post is from auth route, meeting
+        // obj.post is from auth route, meeting
         } else if (SLACK_IDS) {
           console.log('SAVING USER PENDING WITH: ', obj.post.data.paramters, SLACK_IDS, obj.post.data.action);
           userPending = Object.assign({}, obj.post.data.parameters, {slackIds: SLACK_IDS}, {type: obj.post.data.action} );
 
-          // obj.post is from auth route, reminder
+        // obj.post is from auth route, reminder
         } else {
           resolve(obj);
         }
@@ -178,3 +147,39 @@ module.exports = { processMessage };
 //const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
 //console.log('gar sending slackIds: ', SLACK_IDS)
 //return { post: { msg: responseMsg, json: responseJSON, data: data.result, slackIds: SLACK_IDS } };
+
+
+
+
+
+// // DOM'S OLD CODE - NOW IN SLACKAUTH.JS
+// const emails = attendeesObj.found;
+// const conflict = checkForConflicts(SLACK_IDS, emails, start, end);
+// const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
+// return conflict.then((x) => {
+//   console.log('YO THIS IS X', x);
+//   if(!x.conflicts){
+//     return { post: { msg: responseMsg, json: responseJSON, data: data.result} };
+    
+//   } else {  
+//     return findFreeTimes(SLACK_IDS, start, end, duration)
+//     .then(freeTimes => {
+//       const timesArray = {read:[], not:[]};
+//       while (timesArray.read.length < 4){
+//           freeTimes.forEach((sections) => {
+//               timesArray.read.push('start: ' + (sections.start.getMonth() + 1)
+//               + '/' + sections.start.getDate()
+//               + '/' + sections.start.getFullYear()
+//               + ' at ' + (sections.start.getHours() !== 0 ? sections.start.getHours() : '12')
+//               + ':' +
+//               (sections.start.getMinutes() !== 0 ? sections.start.getMinutes() : '00')
+//           )
+//           timesArray.not.push(sections.start)
+
+//       })
+//   }
+//       console.log('******', timesArray)
+//       return { post: { msg: responseMsg, json: getDropdownJson(timesArray), data: data.result } };
+//     })
+//   };
+// });

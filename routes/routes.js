@@ -49,12 +49,22 @@ router.post('/slack/create_event', (req, res) => {
       if (payload.actions[0].value === 'true') {
         res.send("YO, you're in the SCHEDULE ANYWAY unauth route");
 
+        // ADD TO PENDING: onHold object:
+          // boolean - user going to schedule after wait, true
+          // date - time that request of event was made, date.now()
+          // object - attendees, found & not found, attendeesObj
+
         // REMOVE AFTER REAL THINGS PUT IN:
         erasePendingAndSaveUser(res, user, true);
 
       } else {
         res.send("YO, you're in the CANCEL unauth route");
         
+        // ADD TO PENDING: onHold object:
+          // boolean - user going to schedule after wait, false
+          // date - time that request of event was made, date.now()
+          // object - attendees, found & not found, attendeesObj
+
         // REMOVE AFTER REAL THINGS PUT IN:
         erasePendingAndSaveUser(res, user, true);
 
@@ -102,83 +112,3 @@ router.post('/slack/create_event', (req, res) => {
 
 
 module.exports = router;
-
-
-
-
-
-
-// OLD MESSY BUT WORKING WAY:
-//   User.findOne({slackId: payload.user.id}, (err, user) => {
-  //     console.log('BP, FOUND USER', user);
-  //     if (err) {
-    //         console.log('ERROR: ', err);
-    //         // return;
-    //     }
-
-    //     // user clicked confirm
-    //     if (payload.actions[0].value === 'true') {
-      //         console.log('BP, CLICKED CONFIRM');
-
-      //         const eventInfo = JSON.parse(user.pending);
-
-      //         if (eventInfo.type === 'reminder.add') {
-        //             const newReminder = new Reminder({
-          //                 subject: eventInfo.subject,
-          //                 date: eventInfo.date,
-          //                 user_id: user._id
-          //             });
-
-          //             console.log('BP, CREATED REMINDER ', newReminder);
-
-
-          //             newReminder.save((err) => {
-            //                 if (err) {
-              //                     console.log('ERROR HERE: ',err);
-              //                 } else {
-                //                     console.log('BP, SAVED REMINDER ');
-
-                //                     user.pending = JSON.stringify({});
-
-                //                     user.save((err) => {
-                  //                         if (err) {
-                    //                             console.log('ERROR THERE: ',err);
-                    //                         } else {
-                      //                             console.log('BP, SAVED NEW USER ', user);
-
-                      //                             res.send('Event created! :white_check_mark:');
-                      //                         }
-                      //                     });  // close user save
-                      //                 }
-                      //             });  // close reminder save
-                      //         } else {
-                        //             user.pending = JSON.stringify({});
-                        //             console.log('MEETING, NEW USER: ', user);
-                        //             user.save((err) => {
-                          //                 if (err) {
-                            //                     console.log('ERROR THERE: ',err);
-                            //                 } else {
-                              //                     console.log('BP, MEETING, SAVED USER ', user);
-
-                              //                     res.send('Event created! :white_check_mark:');
-                              //                 }
-                              //             });  // close user save
-                              //         }
-
-                              //     //user clicked cancel
-                              //     } else {
-                                //         console.log('BP, PRESSED CANCEL')
-                                //         user.pending = JSON.stringify({});
-                                //         console.log('BP, NEW USER ', user);
-
-                                //         user.save((err) => {
-                                  //             if (err) {
-                                    //                 console.log('ERROR THERE: ',err);
-                                    //             } else {
-                                      //                 console.log('BP, CANCEL, SAVED USER');
-                                      //                 res.send('Canceled! :x:');
-                                      //             }
-                                      //         }); // close user save
-                                      //     }
-                                      //   });  // close find User by id
-                                      // });  //close router post

@@ -35,15 +35,19 @@ createGoogleMeeting = (res, eventInfo, user) => {
   .then((attendeesObj) => {
     console.log('REACHES getting emails for calendar')
 
-    calendar.createMeeting(user.slackId, startDate, endDate, eventInfo.subject, attendeesObj.found);
-    // should chain these two once create meeting is a promise *****
-    erasePendingAndSaveUser(res, user, false);
-  });
+    return calendar.createMeeting(user.slackId, startDate, endDate, eventInfo.subject, attendeesObj.found);
+  })
+  .then(() => {
+    erasePendingAndSaveUser(res, user, false);    
+  })
+  .catch(err => {
+    console.log(err);
+  })
 }
 
 // save a new Reminder to mongoDb then call to save user with empty pending state
 saveReminderAndUser = (res, newReminder, user) => {
-  newReminder.save((err) => {
+  newReminder.save( err => {
     if (err) {
       console.log('ERROR HERE: ',err);
     } else {
@@ -57,18 +61,32 @@ saveReminderAndUser = (res, newReminder, user) => {
 erasePendingAndSaveUser = (res, user, canceled) => {
   user.pending = JSON.stringify({});
 
-  user.save((err) => {
-    if (err) {
-      console.log('ERROR THERE: ',err);
-    } else {
+  return user.save()
+    .then( savedUser => {
       console.log('BP, SAVED USER');
       if (canceled) {
         res.send('Canceled! :x:');
       } else {
         res.send('Event created! :white_check_mark:');
       }
-    }
-  }); // close user save
+    })
+    .catch( err => {
+      console.log(err);
+    });
+
+  // user.save((err) => {
+  //   if (err) {
+  //     console.log('ERROR THERE: ',err);
+  //   } else {
+  //     console.log('BP, SAVED USER');
+  //     if (canceled) {
+  //       res.send('Canceled! :x:');
+  //     } else {
+  //       res.send('Event created! :white_check_mark:');
+  //     }
+  //   }
+  // }) // close user save
+  
 }
 
 // set user pending state to be same object with additional info about pending authorization

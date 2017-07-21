@@ -23,7 +23,7 @@ processMessage = (message, rtm) => {
       if (authUser.authenticated) {
         console.log('authenticated route');
 
-        if (authUser.pending && JSON.parse(authUser.pending).type) {
+        if (authUser.pending && (JSON.parse(authUser.pending).type || JSON.parse(authUser.pending).newPending)) {
           resolve({pending: true});
         } else {
           resolve(getApiResponse(message, authUser, rtm));

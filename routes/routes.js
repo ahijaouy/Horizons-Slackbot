@@ -56,7 +56,7 @@ router.post('/slack/create_event', (req, res) => {
         // ADD TO PENDING: onHold object:
           // boolean - user going to schedule after wait, true
           // date - time that request of event was made, date.now()
-        const newPending = { scheduleAnyway: false, requestDate };
+        const newPending = { scheduleAnyway: true, requestDate };
         changePendingAndSaveUser( res, user, newPending );
 
         // // REMOVE AFTER REAL THINGS PUT IN:

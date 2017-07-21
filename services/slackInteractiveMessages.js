@@ -45,7 +45,7 @@ function getDropdownJson(dates) {
         "callback_id": "date",
         "actions": [
           {
-            "name": "date_list",
+            "name": "conflicts",
             "text": "Pick a date...",
             "type": "select",
             "options": dates.map((date) => ({"text": date, "value": date}))

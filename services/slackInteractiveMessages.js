@@ -7,7 +7,7 @@ const responseJSON = {
     {
       // "text": "Click to *Confirm* or *Cancel*!",
       "fallback": "[insert confirm and cancel buttons]",
-      "callback_id": "something",
+      "callback_id": "confirm_cancel_event",
       "color": "#3AA3E3",
       "attachment_type": "default",
       "actions": [
@@ -28,9 +28,36 @@ const responseJSON = {
   ]
 };
 
+/* JSON object for interactive message with Confirm and Cancel buttons */
+const unauthJSON = {
+  // "text": "*optional add text here*",
+  "attachments": [
+    {
+      // "text": "Click to *Confirm* or *Cancel*!",
+      "fallback": "[insert unauth confirm and cancel buttons]",
+      "callback_id": "unauth_route",
+      "color": "#3AA3E3",
+      "attachment_type": "default",
+      "actions": [
+        {
+          "name": "waitOnAttendees",
+          "text": "Schedule Anyway!",
+          "type": "button",
+          "value": "true"
+        },
+        {
+          "name": "waitOnAttendees",
+          "text": "Cancel Meeting",
+          "type": "button",
+          "value": "false"
+        }
+      ]
+    }
+  ]
+};
+
 /* function that returns JSON object for interactive message
 has dropdown with dates from dates array */
-
 function getDropdownJson(dates) {
   return {
     "attachments": [
@@ -55,5 +82,6 @@ function getDropdownJson(dates) {
 
 module.exports = {
   responseJSON,
+  unauthJSON,
   getDropdownJson
 };

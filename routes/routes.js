@@ -28,11 +28,17 @@ router.post('/slack/create_event', (req, res) => {
   
   console.log('REACHES ROUTE CREATE', req.body.payload);
   
-  // find user in order to get info abotu current event
+  // find user in order to get info about current event
   User.findOne({ slackId }, (err, user) => {
     console.log('BP, FOUND USER', user);
     if (err) {
       console.log('ERROR: ', err);
+    }
+
+    // handle unauth confirm/cancel route
+    if (payload.actions.waitOnAttendees) {
+      console.log('reaches unauth route in routes.js');
+      res.send("YO, you're in the unauth route");
     }
     
     // user clicked confirm

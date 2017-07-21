@@ -124,15 +124,28 @@ getApiResponse = (message, authUser, rtm) => {
   .then((obj) => {
     return new Promise(function(resolve, reject) {
       console.log('REACHES THEN 1');
+      
+      // message to be sent via web.chat.postMessage
       if (obj.post) {
         let userPending;
-        if (SLACK_IDS) {
+
+        // obj.post is from unauth route
+        if (obj.post.slackIds) {
+          userPending = Object.assign({}, obj.post.data, {slackIds: obj.post.slackIds}, {type: obj.post.data.action} );
+        
+        // obj.post is from auth route, meeting
+        } else if (SLACK_IDS) {
           userPending = Object.assign({}, obj.post.data.parameters, {slackIds: SLACK_IDS}, {type: obj.post.data.action} );
+        
+        // obj.post is from auth route, reminder
         } else {
           userPending = Object.assign({}, obj.post.data.parameters, {type: obj.post.data.action} );
         }
+
         authUser.pending = JSON.stringify(userPending);
         authUser.save(() => resolve(obj));
+
+      // message to be sent via rtm.sendMessage
       } else {
         resolve(obj);
       }

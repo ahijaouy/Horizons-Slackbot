@@ -28,30 +28,57 @@ router.post('/slack/create_event', (req, res) => {
   
   console.log('REACHES ROUTE CREATE', req.body.payload);
   
-  // find user in order to get info abotu current event
+  // find user in order to get info about current event
   User.findOne({ slackId }, (err, user) => {
     console.log('BP, FOUND USER', user);
     if (err) {
       console.log('ERROR: ', err);
     }
-    
-    // user clicked confirm
-    if (payload.actions[0].value === 'true') {        
-      const eventInfo = JSON.parse(user.pending);
-      
-      // type is reminder
-      if (eventInfo.type === 'reminder.add') {
-        createGoogleReminder(res, eventInfo, user);
-        // type is meeting
-      } else {
-        console.log('REACHES creating meeting')
-        createGoogleMeeting(res, eventInfo, user);
-      } 
-      
-      // user clicked cancel
-    } else {
-      updateAndSaveUser(res, user, true);
+
+    // handle unauth confirm/cancel route
+    if (payload.actions[0].name === 'waitOnAttendees') {
+      console.log('reaches unauth route in routes.js');
+      res.send("YO, you're in the unauth route");
+
+    }  // close handle unauth
+
+    else if (payload.actions[0].name === 'conflicts') {
+      // DOM'S CODE
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
+
+    // user clicked confirm
+    else if (payload.actions[0].name === 'confirm') {
+      if (payload.actions[0].value === 'true') {        
+        const eventInfo = JSON.parse(user.pending);
+        
+        // type is reminder
+        if (eventInfo.type === 'reminder.add') {
+          createGoogleReminder(res, eventInfo, user);
+          // type is meeting
+        } else {
+          console.log('REACHES creating meeting')
+          createGoogleMeeting(res, eventInfo, user);
+        } 
+        
+        // user clicked cancel
+      } else {
+        updateAndSaveUser(res, user, true);
+      }
+    }  // close confirm/cancel meetings
+
   });  // close find User by id
 });  //close router post
 

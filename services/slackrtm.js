@@ -42,7 +42,6 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
     slackService.processMessage(message, rtm)
     .then((logic) => {
       if (logic.post) { 
-        rtm.sendMessage('YO THE RESPONSE IS BEING SENT from post', message.channel);
         web.chat.postMessage(message.channel, logic.post.msg, logic.post.json, function(err, res) {
           if (err) {
             console.log('Error:', err);

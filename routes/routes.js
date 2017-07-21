@@ -50,7 +50,7 @@ router.post('/slack/create_event', (req, res) => {
       const requestDate = Date.now();    
       
       if (payload.actions[0].value === 'true') {
-        res.send("YO, you're in the SCHEDULE ANYWAY unauth route");
+        console.log("YO, you're in the SCHEDULE ANYWAY unauth route");
         console.log('event info: ', eventInfo);
 
         // ADD TO PENDING: onHold object:
@@ -63,7 +63,7 @@ router.post('/slack/create_event', (req, res) => {
         // erasePendingAndSaveUser(res, user, true);
 
       } else {
-        res.send("YO, you're in the CANCEL unauth route");
+        console.log("YO, you're in the CANCEL unauth route");
         console.log('event info: ', eventInfo);
         
         // ADD TO PENDING: onHold object:

@@ -43,6 +43,7 @@ processMessage = (message, rtm) => {
 // return: object with SEND key if rtm.sendMessage is to be used, and the message as its value
 // return: object with POST key if web.chat.postMessage is to be used, and msg + json as value object
 getApiResponse = (message, authUser, rtm) => {
+
   // MIDDLEWARE for messages:
   // replace message's slack user ids with usernames; store ids into array;
   if (message.text.indexOf('<@') >= 0) {
@@ -67,7 +68,6 @@ getApiResponse = (message, authUser, rtm) => {
 
     } else if (data.result.action !== 'reminder.add' && data.result.action !== 'meeting.add') {
       // console.log('UNSPECIFIED intents');
-
       return {} ;
 
       // handle reminder.add or meeting.add in progress
@@ -78,7 +78,7 @@ getApiResponse = (message, authUser, rtm) => {
 
       // handle complete reminder.add
     } else if (data.result.action === 'reminder.add') {
-      // console.log('ACTION IS COMPLETE: REMINDER', data.result.parameters);
+      console.log('ACTION IS COMPLETE: REMINDER', data.result.parameters);
       const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
       return { post: { msg: responseMsg, json: responseJSON, data: data.result } };
 
@@ -102,7 +102,7 @@ getApiResponse = (message, authUser, rtm) => {
         } else {
           // CHECK 4 HOURS
           console.log('REACHED UNAUTH ATTENDEES');
-          return slackUnauth(times.start, SLACK_IDS, authUser, attendeesObj);
+          return slackUnauth(times.start, SLACK_IDS, authUser, attendeesObj, data);
         }
       });
     }
@@ -143,45 +143,3 @@ getApiResponse = (message, authUser, rtm) => {
 }
 
 module.exports = { processMessage };
-
-
-//AMANDA'S OLD CODE:
-//const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
-//console.log('gar sending slackIds: ', SLACK_IDS)
-//return { post: { msg: responseMsg, json: responseJSON, data: data.result, slackIds: SLACK_IDS } };
-
-
-
-
-
-// // DOM'S OLD CODE - NOW IN SLACKAUTH.JS
-// const emails = attendeesObj.found;
-// const conflict = checkForConflicts(SLACK_IDS, emails, start, end);
-// const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
-// return conflict.then((x) => {
-//   console.log('YO THIS IS X', x);
-//   if(!x.conflicts){
-//     return { post: { msg: responseMsg, json: responseJSON, data: data.result} };
-    
-//   } else {  
-//     return findFreeTimes(SLACK_IDS, start, end, duration)
-//     .then(freeTimes => {
-//       const timesArray = {read:[], not:[]};
-//       while (timesArray.read.length < 4){
-//           freeTimes.forEach((sections) => {
-//               timesArray.read.push('start: ' + (sections.start.getMonth() + 1)
-//               + '/' + sections.start.getDate()
-//               + '/' + sections.start.getFullYear()
-//               + ' at ' + (sections.start.getHours() !== 0 ? sections.start.getHours() : '12')
-//               + ':' +
-//               (sections.start.getMinutes() !== 0 ? sections.start.getMinutes() : '00')
-//           )
-//           timesArray.not.push(sections.start)
-
-//       })
-//   }
-//       console.log('******', timesArray)
-//       return { post: { msg: responseMsg, json: getDropdownJson(timesArray), data: data.result } };
-//     })
-//   };
-// });

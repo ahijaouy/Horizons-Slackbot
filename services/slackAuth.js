@@ -1,6 +1,9 @@
 /* This file contains  */
 
-const slackAuth = (attendeesObj, SLACK_IDS, times) => {
+const { responseJSON, getDropdownJson } = require('./slackInteractiveMessages');
+const { getResponseMessage } = require('./slackUtils');
+
+const slackAuth = (attendeesObj, SLACK_IDS, times, data) => {
   const emails = attendeesObj.found;
   const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
 

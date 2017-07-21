@@ -5,7 +5,7 @@ const { findFreeTimes, checkForConflicts } = require('./conflicts');
 const utils = require('./utils');
 
 const { getResponseMessage, getTimesForMeeting } = require('./slackUtils');
-const { responseJSON, getDropdownJson } = require('./slackInteractiveMessages');
+// const { responseJSON, getDropdownJson } = require('./slackInteractiveMessages');
 const { slackUnauth } = require('./slackUnauth');
 const { slackAuth } = require('./slackAuth');
 
@@ -96,7 +96,7 @@ getApiResponse = (message, authUser, rtm) => {
         // all attendees have authed with google
         if (! attendeesObj.notFound.length) {
           
-          slackAuth(attendeesObj, SLACK_IDS, times);
+          slackAuth(attendeesObj, SLACK_IDS, times, data);
           
           // const emails = attendeesObj.found;
           // const conflict = checkForConflicts(SLACK_IDS, emails, start, end);

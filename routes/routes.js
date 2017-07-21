@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 
 const calendar = require('../services/calendar');
 const utils = require('../services/utils');
-const { 
+const {
   createGoogleReminder,
   createGoogleMeeting,
   saveReminderAndUser,
@@ -87,7 +87,7 @@ router.post('/slack/create_event', (req, res) => {
         const newDate = new Date(payload.actions[0].selected_options[0].value);
         eventInfo.newDate = newDate;
         console.log('***** eventInfo NEW', eventInfo);
-        
+
         createGoogleMeeting(res, eventInfo, user);
     }
 

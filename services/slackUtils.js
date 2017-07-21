@@ -1,6 +1,5 @@
-/* This file contains functions that help process slack messages
-by taking the input of message and event parameters and outputting
-a slack friendly message with formatted dates or values */
+/* This file contains functions that help process slack messages by taking the input of message 
+   and event parameters and outputting a slack friendly message with formatted dates or values */
 
 /************************** EXPORTED FUNCTIONS **************************/
 

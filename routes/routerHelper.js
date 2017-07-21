@@ -1,4 +1,4 @@
-/************** File with Helper Functions for Routes.js (pronounced rOOOOtes) ***************/
+/********** File with Helper Functions for Routes.js (pronounced rOOOOtes) ***********/
 
 const utils = require('../services/utils');
 const calendar = require('../services/calendar');
@@ -23,11 +23,7 @@ createGoogleReminder = (res, eventInfo, user) => {
 createGoogleMeeting = (res, eventInfo, user) => {
   
   let startDate = (eventInfo.newDate) ? eventInfo.newDate : new Date(eventInfo.date + " " + eventInfo.time);
-  // // HARD CODE IN ADDITION OF SEVEN HOURS
-  // startDate.setHours(startDate.getHours() + 7);
-
   console.log('REACHES creating meeting method  : startDate: ', startDate);
-  console.log('could hard code start date to be: ', startDate.getHours() + 7);
   
   const endDate = (eventInfo.duration) ? utils.getEndDate(startDate, eventInfo.duration) : utils.getEndDate(startDate);
 
@@ -57,9 +53,12 @@ saveReminderAndUser = (res, newReminder, user) => {
   });
 }
 
-// set user pending state to empty object and then save updated user to mongoDb
+// set user pending state to empty object 
+// set user slack ids array to be empty
+// save to mongodb
 erasePendingAndSaveUser = (res, user, canceled) => {
   user.pending = JSON.stringify({});
+  user.slackIds = [];
 
   return user.save()
     .then( savedUser => {
@@ -73,29 +72,18 @@ erasePendingAndSaveUser = (res, user, canceled) => {
     .catch( err => {
       console.log('ERROR: ', err);
     });
-
-  // user.save((err) => {
-  //   if (err) {
-  //     console.log('ERROR THERE: ',err);
-  //   } else {
-  //     console.log('BP, SAVED USER');
-  //     if (canceled) {
-  //       res.send('Canceled! :x:');
-  //     } else {
-  //       res.send('Event created! :white_check_mark:');
-  //     }
-  //   }
-  // }) // close user save
-  
 }
 
 // set user pending state to be same object with additional info about pending authorization
+// set user slack ids array to be empty
 changePendingAndSaveUser = (res, user, newPending) => {
   console.log('BP, REACHED USER to CHANGE PENDING');
   
   const userPending = JSON.parse(user.pending);
   userPending.newPending = newPending;
   user.pending = JSON.stringify(userPending);
+
+  user.slackIds = [];
   
   return user.save()
     .then( savedUser => {
@@ -120,3 +108,20 @@ module.exports = {
   erasePendingAndSaveUser,
   changePendingAndSaveUser
 }
+
+
+
+// OLD CODE:
+// user.save((err) => {
+  //   if (err) {
+  //     console.log('ERROR THERE: ',err);
+  //   } else {
+  //     console.log('BP, SAVED USER');
+  //     if (canceled) {
+  //       res.send('Canceled! :x:');
+  //     } else {
+  //       res.send('Event created! :white_check_mark:');
+  //     }
+  //   }
+  // }) // close user save
+  

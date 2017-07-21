@@ -16,7 +16,7 @@ const {
 const User = require('../models/user');
 const Reminder = require('../models/reminder');
 
-/***************************** Routes *****************************/
+/***************************** ROUTES *****************************/
 
 router.get('/connect', (req, res) => {
   auth.generateAuthUrl(req.query.auth_id).then(url => res.redirect(url));
@@ -35,60 +35,34 @@ router.post('/slack/create_event', (req, res) => {
 
   console.log('REACHES ROUTE CREATE', req.body.payload);
   console.log('NAME OF ROUTE: ', payload.actions[0])
-  
-  // find user in order to get info about current event
-  User.findOne({ slackId }, (err, user) => {
-    console.log('BP, FOUND USER', user);
-    if (err) {
-      console.log('ERROR: ', err);
-    }
 
-    // handle unauth confirm/cancel route
+  User.findOne({ slackId })
+    .then( user => {
+       // handle unauth confirm/cancel route
     if (payload.actions[0].name === 'waitOnAttendees') {
-      console.log('reaches unauth route in routes.js');
-      const eventInfo = JSON.parse(user.pending);    
       const requestDate = Date.now();    
-      
-      if (payload.actions[0].value === 'true') {
-        console.log("YO, you're in the SCHEDULE ANYWAY unauth route");
-        console.log('event info: ', eventInfo);
 
-        // ADD TO PENDING: onHold object:
-          // boolean - jarvis has informed all unauth invitees, false        
-          // boolean - user going to schedule after wait, true
+      // ADD TO PENDING: onHold object:
+          // boolean - jarvis has informed all unauth invitees, false       
+          // boolean - user going to schedule after wait, true or false
           // date - time that request of event was made, date.now()
-        const newPending = { scheduleAnyway: true, requestDate, informedInvitees: false };
+      if (payload.actions[0].value === 'true') {
+        const newPending = { scheduleAnyway: true, requestDate, informedInvitees: false, slackId };
         changePendingAndSaveUser( res, user, newPending );
-
-        // // REMOVE AFTER REAL THINGS PUT IN:
-        // erasePendingAndSaveUser(res, user, true);
 
       } else {
-        console.log("YO, you're in the CANCEL unauth route");
-        console.log('event info: ', eventInfo);
-        
-        // ADD TO PENDING: onHold object:
-          // boolean - jarvis has informed all unauth invitees, false                
-          // boolean - user going to schedule after wait, false
-          // date - time that request of event was made, date.now()
-        const newPending = { scheduleAnyway: false, requestDate, informedInvitees: false  };
+        const newPending = { scheduleAnyway: false, requestDate, informedInvitees: false, slackId };
         changePendingAndSaveUser( res, user, newPending );
 
-        // // REMOVE AFTER REAL THINGS PUT IN:
-        // erasePendingAndSaveUser(res, user, true);
       }
     }  // close handle unauth
 
     else if (payload.actions[0].name === 'conflicts') {
-        const eventInfo = JSON.parse(user.pending);
-        console.log('***** eventInfo', eventInfo);
-        console.log('payload conflicts route', payload.actions[0].selected_options)
-        // DOM'S CODE
-        const newDate = new Date(payload.actions[0].selected_options[0].value);
-        eventInfo.newDate = newDate;
-        console.log('***** eventInfo NEW', eventInfo);
+      const eventInfo = JSON.parse(user.pending);
+      const newDate = new Date(payload.actions[0].selected_options[0].value);
+      eventInfo.newDate = newDate;
 
-        createGoogleMeeting(res, eventInfo, user);
+      createGoogleMeeting(res, eventInfo, user);
     }
 
     // user clicked confirm
@@ -99,20 +73,87 @@ router.post('/slack/create_event', (req, res) => {
         // type is reminder
         if (eventInfo.type === 'reminder.add') {
           createGoogleReminder(res, eventInfo, user);
+        
           // type is meeting
         } else {
           console.log('REACHES creating meeting')
           createGoogleMeeting(res, eventInfo, user);
         }
 
-        // user clicked cancel
+      // user clicked cancel
       } else {
         erasePendingAndSaveUser(res, user, true);
+
       }
     }  // close confirm/cancel meetings
-    console.log('hit nothing')
-  });  // close find User by id
+    })
+    .catch( err => {
+      console.log('ERROR: ', err);
+    });    
+
+  
 });  //close router post
 
-
 module.exports = router;
+
+
+
+
+// OLD CODE:
+
+// // find user in order to get info about current event
+  // User.findOne({ slackId }, (err, user) => {
+  //   console.log('BP, FOUND USER', user);
+  //   if (err) {
+  //     console.log('ERROR: ', err);
+  //   }
+
+  //   // handle unauth confirm/cancel route
+  //   if (payload.actions[0].name === 'waitOnAttendees') {
+  //     const requestDate = Date.now();    
+
+  //     // ADD TO PENDING: onHold object:
+  //         // boolean - jarvis has informed all unauth invitees, false       
+  //         // boolean - user going to schedule after wait, true or false
+  //         // date - time that request of event was made, date.now()
+  //     if (payload.actions[0].value === 'true') {
+  //       const newPending = { scheduleAnyway: true, requestDate, informedInvitees: false };
+  //       changePendingAndSaveUser( res, user, newPending );
+
+  //     } else {
+  //       const newPending = { scheduleAnyway: false, requestDate, informedInvitees: false  };
+  //       changePendingAndSaveUser( res, user, newPending );
+
+  //     }
+  //   }  // close handle unauth
+
+  //   else if (payload.actions[0].name === 'conflicts') {
+  //       const eventInfo = JSON.parse(user.pending);
+  //       const newDate = new Date(payload.actions[0].selected_options[0].value);
+  //       eventInfo.newDate = newDate;
+
+  //       createGoogleMeeting(res, eventInfo, user);
+  //   }
+
+  //   // user clicked confirm
+  //   else if (payload.actions[0].name === 'confirm') {
+  //     if (payload.actions[0].value === 'true') {
+  //       const eventInfo = JSON.parse(user.pending);
+
+  //       // type is reminder
+  //       if (eventInfo.type === 'reminder.add') {
+  //         createGoogleReminder(res, eventInfo, user);
+        
+  //         // type is meeting
+  //       } else {
+  //         console.log('REACHES creating meeting')
+  //         createGoogleMeeting(res, eventInfo, user);
+  //       }
+
+  //     // user clicked cancel
+  //     } else {
+  //       erasePendingAndSaveUser(res, user, true);
+
+  //     }
+  //   }  // close confirm/cancel meetings
+  // });  // close find User by id

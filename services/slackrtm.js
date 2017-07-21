@@ -30,18 +30,22 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
     const dm = rtm.dataStore.getDMByUserId(message.user);
     if (!dm || dm.id !== message.channel || message.type !== 'message') {
       // do nothing if message is not DM
-      rtm.sendMessage("Hi. You're a dummy. Talk to me in DM.")
+      // rtm.sendMessage("Hi. You're a dummy. Talk to me in DM.", )
       return;
       
     } 
     
+    console.log('incoming message!', message);
+
     // process message with slackService.processMessage which returns a logic object
     // either chat.postMessage with confirmation/cancel interactive messages 
     // or rtm.sendMessage with static message
     // or do nothing 
     slackService.processMessage(message, rtm)
     .then((logic) => {
+      console.log('REACHES HERE WITH LOGIC', logic);
       if (logic.post) { 
+        console.log('MESSAGE TO SEND VIA process MESSAGE:', logic.post.msg, message.channel);
         web.chat.postMessage(message.channel, logic.post.msg, logic.post.json, function(err, res) {
           if (err) {
             console.log('Error:', err);
@@ -51,8 +55,17 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
         });
         
       } else if (logic.send) {
+        console.log('MESSAGE TO SEND VIA send MESSAGE:', logic.send, message.channel);        
         rtm.sendMessage(logic.send, message.channel);
         
+      } else if (logic.pending && logic.pending.invitations) {
+        console.log('hits logic pending with invitations', logic.pending.invitations);
+        logic.pending.invitations.forEach( message => {
+          rtm.sendMessage(message[0], message[1]);
+        });
+
+        rtm.sendMessage('Sent invitations to all unauthorized invitees!');
+
       } else if (logic.pending) {
         rtm.sendMessage('You are in a pending state! Confirm or cancel above event to continue.', message.channel);
         

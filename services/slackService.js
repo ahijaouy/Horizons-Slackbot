@@ -98,6 +98,7 @@ getApiResponse = (message, authUser, rtm) => {
           const conflict = checkForConflicts(SLACK_IDS, emails, start, end)
           const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
           return conflict.then((x) => {
+            console.log('YO THIS IS X', x);
             if(!x.conflicts){
               return { post: { msg: responseMsg, json: responseJSON, data: data.result} };
             } else {
@@ -106,14 +107,12 @@ getApiResponse = (message, authUser, rtm) => {
                 const startTimes = [];
                 
                 freeTimes.forEach((sections) => {
-                  startTimes.push( sections.start 
-                  //   'start: ' + sections.start.getMonth()
-                  // + '/' + sections.start.getDay()
-                  // + '/' + sections.start.getFullYear()
-                  // + ' at ' + sections.start.getHours()
-                  // + ':' +
-                  // (sections.start.getMinutes() !== 0 ? sections.start.getMinutes() : '00')
-                )
+                  startTimes.push(  'start: ' + sections.start.getMonth()
+                    + '/' + sections.start.getDay()
+                    + '/' + sections.start.getFullYear()
+                    + ' at ' + sections.start.getHours()
+                    + ':' +
+                    (sections.start.getMinutes() !== 0 ? sections.start.getMinutes() : '00') )
                 })
                 console.log('******', startTimes)
                 return { post: { msg: responseMsg, json: getDropdownJson(startTimes.slice(1,4)), data: data.result, slackIds: SLACK_IDS } };

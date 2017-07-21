@@ -101,7 +101,7 @@ function createMeeting(slackId, start, end, subject, attendees) {
     throw new Error(`Expected param attendees to be a Array object. Instead it was type ${typeof attendees}`);
   }
 
-  return new Promise((response, reject) => {
+  return new Promise((resolve, reject) => {
     auth.getGoogleCalendar(slackId)
     .then(calendar => {
       calendar.events.insert({

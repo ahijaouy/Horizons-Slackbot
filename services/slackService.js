@@ -6,6 +6,7 @@ const utils = require('./utils');
 
 const { getResponseMessage } = require('./slackUtils');
 const { responseJSON, getDropdownJson } = require('./slackInteractiveMessages');
+const { slackUnauth } = require('./slackUnath');
 
 let SLACK_IDS = [];
 
@@ -46,7 +47,9 @@ getApiResponse = (message, authUser, rtm) => {
   if (message.text.indexOf('<@') >= 0) {
     message.text = message.text.replace(/<@(\w+)>/g, function(match, userId) {
       console.log('MATCH:', match, userId, 'current slack ids: ', SLACK_IDS);
-      SLACK_IDS.push(userId);
+      if (SLACK_IDS.indexOf(userId) < 0) {
+        SLACK_IDS.push(userId);
+      }
       return  rtm.dataStore.getUserById(userId).profile.real_name+', ';
     });
   }
@@ -98,6 +101,7 @@ getApiResponse = (message, authUser, rtm) => {
           const conflict = checkForConflicts(SLACK_IDS, emails, start, end);
           const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
           return conflict.then((x) => {
+            console.log('YO THIS IS X', x);
             if(!x.conflicts){
               return { post: { msg: responseMsg, json: responseJSON, data: data.result} };
             } else {
@@ -106,12 +110,12 @@ getApiResponse = (message, authUser, rtm) => {
                 const startTimes = [];
                 
                 freeTimes.forEach((sections) => {
-                  startTimes.push('start: ' + sections.start.getMonth()
-                  + '/' + sections.start.getDay()
-                  + '/' + sections.start.getFullYear()
-                  + ' at ' + sections.start.getHours()
-                  + ':' +
-                  (sections.start.getMinutes() !== 0 ? sections.start.getMinutes() : '00'))
+                  startTimes.push(  'start: ' + sections.start.getMonth()
+                    + '/' + sections.start.getDay()
+                    + '/' + sections.start.getFullYear()
+                    + ' at ' + sections.start.getHours()
+                    + ':' +
+                    (sections.start.getMinutes() !== 0 ? sections.start.getMinutes() : '00') )
                 })
                 console.log('******', startTimes)
                 return { post: { msg: responseMsg, json: getDropdownJson(startTimes.slice(1,4)), data: data.result, slackIds: SLACK_IDS } };

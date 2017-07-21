@@ -34,7 +34,7 @@ function userExists(slackId){
   return new Promise((resolve, reject) => {
     User.findOne({slackId}, (err, user) => {
       if (err) reject(err);
-      if (user) {
+      if (user && user.email) {
         resolve({
           exists: true,
           slackId: slackId,

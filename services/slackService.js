@@ -29,17 +29,14 @@ processMessage = (message, rtm) => {
       if (authUser.authenticated) {
         console.log('authenticated route');
 
-        // handle user pending in creating new meeting / reminder 
-        if (authUser.pending && JSON.parse(authUser.pending).type) {
-          resolve({pending: true});
-        
-        // handle user pending because of other unauth invitees
-        } else if (authUser.pending && JSON.parse(authUser.pending).newPending) {
+         // handle user pending because of other unauth invitees
+         if (authUser.pending && JSON.parse(authUser.pending).newPending) {
           const pending = JSON.parse(authUser.pending);
           console.log('reached pending with inviteees', pending);
 
           //remain pending if already invited invitees
           if (pending.newPending.informedInvitees) {
+            console.log('no need to invite: all is good');
             resolve({pending: true});       
             
           // remain pending but also invite unauth invitees
@@ -60,8 +57,14 @@ processMessage = (message, rtm) => {
           }
           // resolve({pending: true, informedInvitees: pending.newPending.informedInvitees, invitees: pending.unauth.attendees.notFound });
         
+        }
+
+        // handle user pending in creating new meeting / reminder 
+        else if (authUser.pending && JSON.parse(authUser.pending).type) {
+          resolve({pending: true});
+        
         // handle all other messages
-        } else {
+        }  else {
           resolve(getApiResponse(message, authUser, rtm));
           console.log('reaches after resolve');
         }

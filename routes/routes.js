@@ -27,8 +27,9 @@ router.post('/slack/create_event', (req, res) => {
   const slackId = payload.user.id;
   
   console.log('REACHES ROUTE CREATE', req.body.payload);
+  console.log('NAME OF ROUTE: ', payload.actions[0])
   
-  // find user in order to get info about current event
+  // find user in order to get info abosut current event
   User.findOne({ slackId }, (err, user) => {
     console.log('BP, FOUND USER', user);
     if (err) {

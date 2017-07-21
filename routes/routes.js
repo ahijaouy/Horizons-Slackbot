@@ -54,9 +54,10 @@ router.post('/slack/create_event', (req, res) => {
         console.log('event info: ', eventInfo);
 
         // ADD TO PENDING: onHold object:
+          // boolean - jarvis has informed all unauth invitees, false        
           // boolean - user going to schedule after wait, true
           // date - time that request of event was made, date.now()
-        const newPending = { scheduleAnyway: true, requestDate };
+        const newPending = { scheduleAnyway: true, requestDate, informedInvitees: false };
         changePendingAndSaveUser( res, user, newPending );
 
         // // REMOVE AFTER REAL THINGS PUT IN:
@@ -67,9 +68,10 @@ router.post('/slack/create_event', (req, res) => {
         console.log('event info: ', eventInfo);
         
         // ADD TO PENDING: onHold object:
+          // boolean - jarvis has informed all unauth invitees, false                
           // boolean - user going to schedule after wait, false
           // date - time that request of event was made, date.now()
-        const newPending = { scheduleAnyway: false, requestDate };
+        const newPending = { scheduleAnyway: false, requestDate, informedInvitees: false  };
         changePendingAndSaveUser( res, user, newPending );
 
         // // REMOVE AFTER REAL THINGS PUT IN:

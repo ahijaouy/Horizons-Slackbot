@@ -23,8 +23,12 @@ processMessage = (message, rtm) => {
       if (authUser.authenticated) {
         console.log('authenticated route');
 
-        if (authUser.pending && (JSON.parse(authUser.pending).type || JSON.parse(authUser.pending).newPending)) {
+        if (authUser.pending && JSON.parse(authUser.pending).type) {
           resolve({pending: true});
+        } else if (authUser.pending && JSON.parse(authUser.pending).newPending) {
+          const pending = JSON.parse(authUser.pending);
+          console.log('reached pending with inviteees', pending);
+          resolve({pending: true, informedInvitees: pending.newPending.informedInvitees, invitees: pending.unauth.attendees.notFound });
         } else {
           resolve(getApiResponse(message, authUser, rtm));
         }

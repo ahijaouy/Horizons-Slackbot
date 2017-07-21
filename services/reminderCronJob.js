@@ -1,3 +1,6 @@
+/* File that includes the Cron Job for Heroku Scheduler to run once a day
+  sends out messages to every user with their reminders for today and tomorrow */
+
 const Reminder = require('../models/reminder')
 const User = require('../models/user')
 const mongoose = require('mongoose')
@@ -45,7 +48,6 @@ function appendRemind(obj, reminder, current){
   }
   return obj
 }
-
 
 function findDateMatches(date, array) {
   let matchedDates = [];

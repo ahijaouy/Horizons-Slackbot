@@ -91,12 +91,16 @@ erasePendingAndSaveUser = (res, user, canceled) => {
 
 // set user pending state to be same object with additional info about pending authorization
 changePendingAndSaveUser = (res, user, newPending) => {
-  user.pending.newPending = newPending;
+  console.log('BP, REACHED USER to CHANGE PENDING');
+  
+  const userPending = JSON.parse(user.pending);
+  userPending.newPending = newPending;
+  user.pending = JSON.stringify(userPending);
   
   return user.save()
     .then( savedUser => {
       console.log('BP, SAVED USER with CHANGED PENDING');
-      if (user.pending.newPending.scheduleAnyway) {
+      if (userPending.newPending.scheduleAnyway) {
         const sendMsg = 'Invitations sent! I will schedule the meeting anyway with those who authorize. Check back in two hours!';
         res.send(sendMsg);
       } else {

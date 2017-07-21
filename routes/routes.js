@@ -74,9 +74,7 @@ router.post('/slack/create_event', (req, res) => {
 
         // // REMOVE AFTER REAL THINGS PUT IN:
         // erasePendingAndSaveUser(res, user, true);
-
       }
-
     }  // close handle unauth
 
     else if (payload.actions[0].name === 'conflicts') {

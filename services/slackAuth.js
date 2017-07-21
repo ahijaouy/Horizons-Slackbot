@@ -1,5 +1,6 @@
 /* This file contains  */
 
+const { findFreeTimes, checkForConflicts } = require('./conflicts');
 const { responseJSON, getDropdownJson } = require('./slackInteractiveMessages');
 const { getResponseMessage } = require('./slackUtils');
 

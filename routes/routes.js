@@ -45,19 +45,6 @@ router.post('/slack/create_event', (req, res) => {
     else if (payload.actions[0].name === 'conflicts') {
         console.log('payload conflicts route', payload.action)
       // DOM'S CODE
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 
     // user clicked confirm

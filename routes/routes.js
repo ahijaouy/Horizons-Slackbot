@@ -26,7 +26,7 @@ router.post('/slack/create_event', (req, res) => {
   const payload = JSON.parse(req.body.payload);
   const slackId = payload.user.id;
 
-  console.log('REACHES ROUTE CREATE', req.body.payload);
+  // console.log('REACHES ROUTE CREATE', req.body.payload);
 
   // find user in order to get info about current event
   User.findOne({ slackId }, (err, user) => {
@@ -46,7 +46,9 @@ router.post('/slack/create_event', (req, res) => {
     }  // close handle unauth
 
     else if (payload.actions[0].name === 'conflicts') {
-        console.log('payload conflicts route', payload.actions)
+        const eventInfo = JSON.parse(user.pending);
+        console.log('eventInfo', eventInfo);
+        console.log('payload conflicts route', payload.actions.selected_options)
       // DOM'S CODE
     }
 
@@ -93,14 +95,14 @@ createGoogleReminder = (res, eventInfo, user) => {
 
 // create Google meeting with attendees, start date, end date, and subject
 createGoogleMeeting = (res, eventInfo, user) => {
-  
+
   let startDate = new Date(eventInfo.date + " " + eventInfo.time);
   // // HARD CODE IN ADDITION OF SEVEN HOURS
   // startDate.setHours(startDate.getHours() + 7);
 
   console.log('REACHES creating meeting method  : startDate: ', startDate);
   console.log('could hard code start date to be: ', startDate.getHours() + 7);
-  
+
   const endDate = (eventInfo.duration) ? utils.getEndDate(startDate, eventInfo.duration) : utils.getEndDate(startDate);
 
   utils.linkEmails(eventInfo.slackIds)

@@ -64,12 +64,11 @@ router.post('/slack/create_event', (req, res) => {
         console.log('***** eventInfo', eventInfo);
         console.log('payload conflicts route', payload.actions[0].selected_options)
         // DOM'S CODE
-        const newDate = new Date(payload.actions.selected_options[0].value);
+        const newDate = new Date(payload.actions[0].selected_options[0].value);
         eventInfo.newDate = newDate;
         console.log('***** eventInfo NEW', eventInfo);
         
         createGoogleMeeting(res, eventInfo, user);
-
     }
 
     // user clicked confirm

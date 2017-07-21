@@ -122,7 +122,7 @@ getApiResponse = (message, authUser, rtm) => {
                 })
             }
                 console.log('******', timesArray)
-                return { post: { msg: responseMsg, json: getDropdownJson(timesArray), data: data.result, slackIds: SLACK_IDS } };
+                return { post: { msg: responseMsg, json: getDropdownJson(timesArray), data: data.result } };
               })
             };
           });

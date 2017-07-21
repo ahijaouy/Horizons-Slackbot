@@ -1,3 +1,6 @@
+/* File that contains the logic and processing of a message that has
+attendees who have not authorize Google */
+
 const { fourHourCheck } = require('./utils');
 const { unauthJSON } = require('./slackInteractiveMessages');
 

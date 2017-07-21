@@ -62,7 +62,7 @@ router.post('/slack/create_event', (req, res) => {
     else if (payload.actions[0].name === 'conflicts') {
         const eventInfo = JSON.parse(user.pending);
         console.log('***** eventInfo', eventInfo);
-        console.log('payload conflicts route', payload.actions.selected_options)
+        console.log('payload conflicts route', payload.actions[0].selected_options)
       // DOM'S CODE
     }
 

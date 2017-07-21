@@ -21,17 +21,10 @@ function findUser(){
                     console.log('user',pending)
                     pendingArray.push(pending)
                 }
-                // console.log('what is happening')
-                // if (index === users.length - 1) {
-                //     return (pendingArray);
-                // }
             })
             console.log('PA', pendingArray)
             resolve(pendingArray)
         })
-        // .then(array => {
-        //     resolve(array)
-        // })
         .catch((err) => {
             reject(err)
         })

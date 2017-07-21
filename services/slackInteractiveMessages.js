@@ -32,6 +32,9 @@ const responseJSON = {
 has dropdown with dates from dates array */
 
 function getDropdownJson(dates) {
+    ///
+    // const abc = ['monday', 'tuesday', 'wednesday']
+    ///
   return {
     "attachments": [
       {

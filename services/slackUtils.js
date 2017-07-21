@@ -1,4 +1,4 @@
-/* This file contains two functions that help process slack messages 
+/* This file contains two functions that help process slack messages
 by taking the input of message and event parameters and outputting
 a slack friendly message with formatted dates */
 
@@ -19,28 +19,28 @@ getResponseMessage = (action, parameters) => {
         })
         returnMsg = 'Scheduling a meeting with '+people+' about '+parameters.subject;
     }
-    returnMsg += getSlackEditableDate(parameters.date, parameters.time); 
-    return returnMsg       
+    returnMsg += getSlackEditableDate(parameters.date, parameters.time);
+    return returnMsg
 }
 
-// method that takes a date from AI api and converts it to a Slack formatted date (and time)   
+// method that takes a date from AI api and converts it to a Slack formatted date (and time)
 getSlackEditableDate = (messageDate, messageTime) => {
     console.log('received date: ', messageDate);
     let date;
 
     // hard code date fallback
-    if (typeof messageDate !== 'number') {
-      messageDate = '2000-01-01';
+    if (typeof messageDate !== 'number' && typeof messageDate !== 'string') {
+          messageDate = '2000-01-01';
     }
 
     if (messageTime) {
         date = new Date(messageDate+' '+messageTime) / 1000;
         console.log('received time: ',messageTime);
         console.log("AMANDA'S TIME:", date);
-        
+
         return "<!date^"+date+"^ on {date_short} at {time}|Default date: 2000-01-01 1:11:11 AM>";
     } else {
-        date = new Date(messageDate) / 1000 + 86400; 
+        date = new Date(messageDate) / 1000 + 86400;
         return "<!date^"+date+"^ on {date}|Default date: 2000-01-01 1:11:11 AM>";
     }
 }

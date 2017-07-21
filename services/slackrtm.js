@@ -18,7 +18,7 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
   
   // When bot loads and opens connection to channel(s), send message to general that bot has started
   rtm.on(CLIENT_EVENTS.RTM.RTM_CONNECTION_OPENED, () => {
-    const feelings = ['horny ;)', 'ready for you ;)', 'slack', 'ready to fight Amanda', 'ready to eat a watermelon']
+    const feelings = ['into #ahbiFitness', 'ready for you ;)', 'slack', 'ready to fight Amanda', 'ready to eat a watermelon']
     const item = feelings[Math.floor(Math.random()*feelings.length)];
     rtm.sendMessage('Hello Mr Stark, I am ' + item, channel);
     console.log('JARVIS started!');

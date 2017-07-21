@@ -61,7 +61,7 @@ getApiResponse = (message, authUser, rtm) => {
   .then((response) => {
     let data = response.data;
 
-    if (data.result.action.startsWith('smalltalk') || data.result.action.startsWith('profanity') || data.result.action.startsWith('numeric')) {
+    if (data.result.action.startsWith('smalltalk') || data.result.action.startsWith('profanity') || data.result.action.startsWith('numeric') || data.result.action.startsWith('ultron')) {
       const msg = response.data.result.fulfillment.speech;
       return { send: msg };
 

@@ -5,6 +5,7 @@
 /* JSON object for interactive message with Confirm and Cancel buttons */
 const responseJSON = {
   // "text": "*optional add text here*",
+  "as_user": true,
   "attachments": [
     {
       // "text": "Click to *Confirm* or *Cancel*!",
@@ -33,6 +34,7 @@ const responseJSON = {
 /* JSON object for interactive message with Confirm and Cancel buttons */
 const unauthJSON = {
   // "text": "*optional add text here*",
+  "as_user": true,
   "attachments": [
     {
       // "text": "Click to *Confirm* or *Cancel*!",
@@ -72,6 +74,7 @@ function getDropdownJson(dates) {
     }
 
   return {
+    "as_user": true,
     "attachments": [
       {
         "text": "There is a conflict with that time, please choose an alternative below",

@@ -60,6 +60,7 @@ saveReminderAndUser = (res, newReminder, user) => {
 // set user pending state to empty object and then save updated user to mongoDb
 erasePendingAndSaveUser = (res, user, canceled) => {
   user.pending = JSON.stringify({});
+  user.slackIds = [];
 
   return user.save()
     .then( savedUser => {

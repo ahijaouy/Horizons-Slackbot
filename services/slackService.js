@@ -13,7 +13,7 @@ const { responseJSON } = require('./slackInteractiveMessages');
 const { slackUnauth } = require('./slackUnauth');
 const { slackAuth } = require('./slackAuth');
 
-let SLACK_IDS = [];
+// let SLACK_IDS = [];
 
 /********************* EXPORTED FUNCTION *********************/
 
@@ -55,9 +55,9 @@ processMessage = (message, rtm) => {
 // method that takes a message and returns objects with results from AI api
 // return: object with SEND key if rtm.sendMessage is to be used, and the message as its value
 // return: object with POST key if web.chat.postMessage is to be used, and msg + json as value object
-getApiResponse = (message, authUserOne, rtm) => {
+getApiResponse = (message, authUserOuter, rtm) => {
 
-  let SLACK_IDS = authUserOne.slackIds;
+  let SLACK_IDS = authUserOuter.slackIds;
 
   // MIDDLEWARE for messages:
   // replace message's slack user ids with usernames; store ids into array;
@@ -85,7 +85,7 @@ getApiResponse = (message, authUserOne, rtm) => {
     let data = response.data;
 
     if (data.result.action.startsWith('smalltalk') || data.result.action.startsWith('profanity') || data.result.action.startsWith('numeric') || data.result.action.startsWith('ultron')) {
-      console.log('FUN intents');
+      console.log('FUN intents'); 
       const msg = response.data.result.fulfillment.speech;
       return { send: msg };
 
@@ -109,6 +109,8 @@ getApiResponse = (message, authUserOne, rtm) => {
     } else {
       console.log('ACTION IS COMPLETE: MEETING ... slack ids put into link emails', SLACK_IDS);
       console.log('action parameters:', data.result.parameters);
+
+      rtm.sendMessage('Hold on... Let me check your calendars!', message.channel);
 
       const times = getTimesForMeeting(data.result.parameters);
 

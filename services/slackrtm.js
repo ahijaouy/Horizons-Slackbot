@@ -30,11 +30,13 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
     const dm = rtm.dataStore.getDMByUserId(message.user);
     if (!dm || dm.id !== message.channel || message.type !== 'message') {
       // do nothing if message is not DM
-      rtm.sendMessage("Hi. You're a dummy. Talk to me in DM.")
+      // rtm.sendMessage("Hi. You're a dummy. Talk to me in DM.", )
       return;
       
     } 
     
+    console.log('incoming message!', message);
+
     // process message with slackService.processMessage which returns a logic object
     // either chat.postMessage with confirmation/cancel interactive messages 
     // or rtm.sendMessage with static message

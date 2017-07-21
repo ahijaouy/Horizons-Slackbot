@@ -43,7 +43,7 @@ router.post('/slack/create_event', (req, res) => {
     }  // close handle unauth
 
     else if (payload.actions[0].name === 'conflicts') {
-        console.log('payload conflicts route', payload.action)
+        console.log('payload conflicts route', payload.actions)
       // DOM'S CODE
     }
 
@@ -63,10 +63,11 @@ router.post('/slack/create_event', (req, res) => {
 
         // user clicked cancel
       } else {
+
         updateAndSaveUser(res, user, true);
       }
     }  // close confirm/cancel meetings
-
+    console.log('hit nothing')
   });  // close find User by id
 });  //close router post
 

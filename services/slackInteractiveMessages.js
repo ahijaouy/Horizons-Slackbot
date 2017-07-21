@@ -62,6 +62,13 @@ function getDropdownJson(dates) {
     ///
     // const abc = ['monday', 'tuesday', 'wednesday']
     ///
+    const datesArray = []
+    for(var i = 2 ; i < dates.read.length ; i ++){
+        const value = dates.not[i];
+        const text = dates.read[i]
+        datesArray.push({"text": text, "value": value})
+    }
+
   return {
     "attachments": [
       {
@@ -75,7 +82,7 @@ function getDropdownJson(dates) {
             "name": "conflicts",
             "text": "Pick a date...",
             "type": "select",
-            "options": dates.map((date) => ({"text": date, "value": date}))
+            "options": datesArray
           }
         ]
       }

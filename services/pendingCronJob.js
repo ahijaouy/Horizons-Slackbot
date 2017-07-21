@@ -16,8 +16,8 @@ function findUser(){
             const pendingArray = []
             users.forEach((user, index) => {
                 // console.log('user', index)
-                const pending = user.pending ? JSON.parse(user.pending): false
-                if(pending && !_.isEmpty(pending && pending.newPending)){
+                const pending = user.pending ? JSON.parse(user.pending): {}
+                if(pending && !_.isEmpty(pending) && pending.newPending){
                     console.log('user',pending)
                     pendingArray.push(pending)
                 }

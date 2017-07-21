@@ -4,7 +4,7 @@ const AUTH_PREFIX = 'https://jarvis-horizons.herokuapp.com/';
 const { findFreeTimes, checkForConflicts } = require('./conflicts');
 const utils = require('./utils');
 
-const { getResponseMessage } = require('./slackUtils');
+const { getResponseMessage, getDuration } = require('./slackUtils');
 const { responseJSON, getDropdownJson } = require('./slackInteractiveMessages');
 const { slackUnauth } = require('./slackUnauth');
 
@@ -85,12 +85,13 @@ getApiResponse = (message, authUser, rtm) => {
     } else {
       console.log('ACTION IS COMPLETE: MEETING ... slack ids put into link emails', SLACK_IDS);
       console.log('action parameters:', data.result.parameters);
-      
+
       const start = new Date(data.result.parameters.date + ' ' + data.result.parameters.time);
       /// 777600000 is 9 days in miliseconds
       const end = new Date(start.getTime() + 777600000)
       console.log('start date 1', start, 'end date 1', end);
-      const duration = data.result.parameters.duration ? data.result.parameters.duration : 30
+      // const duration = data.result.parameters.duration ? data.result.parameters.duration : 30
+      const duration = getDuration(data.result.parameters);
 
       return utils.linkEmails(SLACK_IDS)
       .then((attendeesObj) => {

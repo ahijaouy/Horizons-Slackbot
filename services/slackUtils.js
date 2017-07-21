@@ -2,6 +2,22 @@
 by taking the input of message and event parameters and outputting
 a slack friendly message with formatted dates */
 
+/************************** EXPORTED FUNCTIONS **************************/
+
+// method that receives an actions' parameters, may or may not include duration
+// returns the number of minutes for this duration
+getDuration = (parameters) => {
+  if (! parameters.duration) {
+    return 30;
+  } else if (parameters.duration.unit === 'min') {
+    return parameters.duration.amount;
+  } else if (parameters.duration.unit === 'h') {
+    return 60 * parameters.duration.amount;
+  } else {
+    return parameters.duration.amount; // should not reach here, but want to return amt if unknown unit
+  }
+}
+
 // method that receives an action and its parameters
 // returns the return message to show in slack message about confirming reminder or meeting
 getResponseMessage = (action, parameters) => {
@@ -22,6 +38,9 @@ getResponseMessage = (action, parameters) => {
     returnMsg += getSlackEditableDate(parameters.date, parameters.time);
     return returnMsg
 }
+
+
+/************************** LOCAL FUNCTIONS **************************/
 
 // method that takes a date from AI api and converts it to a Slack formatted date (and time)
 getSlackEditableDate = (messageDate, messageTime) => {
@@ -45,23 +64,4 @@ getSlackEditableDate = (messageDate, messageTime) => {
     }
 }
 
-module.exports = { getResponseMessage };
-
-
-//NOTES:
-/* //Process if input is Slack user id
-
-if (message.text.indexOf('<@') >= 0) {
-    console.log('recognizing user id input');
-    axios.get('https://slack.com/api/users.list?token=xoxp-214075203605-214001278996-215348011622-6220a67bf54d0165d770c06e356c255a&pretty=1')
-    .then((response) =>{
-        console.log('*****************************************');
-        console.log('axios response', response.data);
-
-        // GET USERNAME FROM ID
-        return message.text;
-    })
-    .then((resp) => {
-        getApiResponse(message);
-    });
-} else { */
+module.exports = { getResponseMessage, getDuration };

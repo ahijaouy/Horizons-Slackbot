@@ -44,6 +44,7 @@ processMessage = (message, rtm) => {
             
           // remain pending but also invite unauth invitees
           } else {
+            console.log('reached here in pending to send out invites');
             let arrayOfInvitations = [];
             pending.unauth.attendees.notFound.forEach( invitee => {
               let msg = rtm.dataStore.getUserById(authUser.slackId).profile.real_name + "(" + authUser.email + ")";
@@ -52,6 +53,8 @@ processMessage = (message, rtm) => {
               
               arrayOfInvitations.push([invitee, msg]);
             });
+
+            console.log('invitations:', arrayOfInvitations);            
 
             resolve({pending: true, invitations: arrayOfInvitations});
           }

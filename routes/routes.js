@@ -1,10 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../services/authentication');
-var bodyParser = require('body-parser');
+const bodyParser = require('body-parser');
 
 const calendar = require('../services/calendar');
 const utils = require('../services/utils');
+const {
+  createGoogleReminder,
+  createGoogleMeeting,
+  saveReminderAndUser,
+  erasePendingAndSaveUser
+} = require('./routerHelper');
 
 const User = require('../models/user');
 const Reminder = require('../models/reminder');
@@ -26,9 +32,10 @@ router.post('/slack/create_event', (req, res) => {
   const payload = JSON.parse(req.body.payload);
   const slackId = payload.user.id;
 
-  // console.log('REACHES ROUTE CREATE', req.body.payload);
+  console.log('REACHES ROUTE CREATE', req.body.payload);
+  console.log('NAME OF ROUTE: ', payload.actions[0])
 
-  // find user in order to get info about current event
+  // find user in order to get info abosut current event
   User.findOne({ slackId }, (err, user) => {
     console.log('BP, FOUND USER', user);
     if (err) {
@@ -38,7 +45,20 @@ router.post('/slack/create_event', (req, res) => {
     // handle unauth confirm/cancel route
     if (payload.actions[0].name === 'waitOnAttendees') {
       console.log('reaches unauth route in routes.js');
-      res.send("YO, you're in the unauth route");
+
+      if (payload.actions[0].value === 'true') {
+        res.send("YO, you're in the SCHEDULE ANYWAY unauth route");
+
+        // REMOVE AFTER REAL THINGS PUT IN:
+        erasePendingAndSaveUser(res, user, true);
+
+      } else {
+        res.send("YO, you're in the CANCEL unauth route");
+
+        // REMOVE AFTER REAL THINGS PUT IN:
+        erasePendingAndSaveUser(res, user, true);
+
+      }
 
 
 
@@ -47,11 +67,14 @@ router.post('/slack/create_event', (req, res) => {
 
     else if (payload.actions[0].name === 'conflicts') {
         const eventInfo = JSON.parse(user.pending);
-        console.log('eventInfo', eventInfo);
-        const newDate = new Date(payload.actions.selected_options[0].value);
+        console.log('***** eventInfo', eventInfo);
+        console.log('payload conflicts route', payload.actions[0].selected_options)
+        // DOM'S CODE
+        const newDate = new Date(payload.actions[0].selected_options[0].value);
         eventInfo.newDate = newDate;
+        console.log('***** eventInfo NEW', eventInfo);
+
         createGoogleMeeting(res, eventInfo, user);
-      // DOM'S CODE
     }
 
     // user clicked confirm
@@ -70,82 +93,13 @@ router.post('/slack/create_event', (req, res) => {
 
         // user clicked cancel
       } else {
-
-        updateAndSaveUser(res, user, true);
+        erasePendingAndSaveUser(res, user, true);
       }
     }  // close confirm/cancel meetings
     console.log('hit nothing')
   });  // close find User by id
 });  //close router post
 
-
-
-/************************ Helper Functions ************************/
-
-// create Google reminder with date and subject
-createGoogleReminder = (res, eventInfo, user) => {
-  const newReminder = new Reminder({
-    subject: eventInfo.subject,
-    date: eventInfo.date,
-    user_id: user._id
-  });
-
-  calendar.createReminder(user.slackId, new Date(eventInfo.date), eventInfo.subject);
-  // should chain these two once create meeting is a promise *****
-  saveReminderAndUser(res, newReminder, user);
-}
-
-// create Google meeting with attendees, start date, end date, and subject
-createGoogleMeeting = (res, eventInfo, user) => {
-
-  let startDate = new Date(eventInfo.date + " " + eventInfo.time);
-  // // HARD CODE IN ADDITION OF SEVEN HOURS
-  // startDate.setHours(startDate.getHours() + 7);
-
-  console.log('REACHES creating meeting method  : startDate: ', startDate);
-  console.log('could hard code start date to be: ', startDate.getHours() + 7);
-
-  const endDate = (eventInfo.duration) ? utils.getEndDate(startDate, eventInfo.duration) : utils.getEndDate(startDate);
-
-  utils.linkEmails(eventInfo.slackIds)
-  .then((attendeesObj) => {
-    console.log('REACHES getting emails for calendar')
-
-    calendar.createMeeting(user.slackId, startDate, endDate, eventInfo.subject, attendeesObj.found);
-    // should chain these two once create meeting is a promise *****
-    updateAndSaveUser(res, user, false);
-  });
-}
-
-// save a new Reminder to mongoDb then call to save user with empty pending state
-saveReminderAndUser = (res, newReminder, user) => {
-  newReminder.save((err) => {
-    if (err) {
-      console.log('ERROR HERE: ',err);
-    } else {
-      console.log('BP, SAVED REMINDER ');
-      updateAndSaveUser(user, false);
-    }
-  });
-}
-
-// set user pending state to empty object and then save updated user to mongoDb
-updateAndSaveUser = (res, user, canceled) => {
-  user.pending = JSON.stringify({});
-
-  user.save((err) => {
-    if (err) {
-      console.log('ERROR THERE: ',err);
-    } else {
-      console.log('BP, CANCEL, SAVED USER');
-      if (canceled) {
-        res.send('Canceled! :x:');
-      } else {
-        res.send('Event created! :white_check_mark:');
-      }
-    }
-  }); // close user save
-}
 
 module.exports = router;
 

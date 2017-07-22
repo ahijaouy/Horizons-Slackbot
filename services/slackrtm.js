@@ -59,9 +59,9 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
         rtm.sendMessage(logic.send, message.channel);
 
       } else if (logic.pending && logic.invitations) {
-        console.log('hits logic pending with invitations', logic.pending.invitations);
+        console.log('hits logic pending with invitations', logic.invitations);
         logic.invitations.forEach( msg => {
-          const chnl = rtm.dataStore.getDMByUserId(msg[0]);
+          const chnl = rtm.dataStore.getDMByUserId(msg[0]).id;
           console.log('sending out individual message: ', msg[1], 'to ', chnl);
           rtm.sendMessage(msg[1], chnl);
         });

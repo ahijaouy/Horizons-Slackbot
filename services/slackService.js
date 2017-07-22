@@ -51,9 +51,15 @@ processMessage = (message, rtm) => {
               arrayOfInvitations.push([invitee, msg]);
             });
 
-            console.log('invitations:', arrayOfInvitations);            
+            console.log('invitations:', arrayOfInvitations);  
+            
+            pending.newPending.informedInvitees = true;
+            authUser.pending = JSON.stringify(pending);
 
-            resolve({pending: true, invitations: arrayOfInvitations});
+            return authUser.save()
+            .then( user => {
+              resolve({pending: true, invitations: arrayOfInvitations});
+            });
           }
           // resolve({pending: true, informedInvitees: pending.newPending.informedInvitees, invitees: pending.unauth.attendees.notFound });
         

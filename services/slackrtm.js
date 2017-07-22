@@ -69,7 +69,7 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
         rtm.sendMessage('Sent invitations to all unauthorized invitees!', message.channel);
 
       } else if (logic.pending) {
-        rtm.sendMessage('You are in a pending state! Confirm or cancel above event to continue.', message.channel);
+        rtm.sendMessage(logic.pending, message.channel);
 
       } else {
         console.log('reached unspecified');

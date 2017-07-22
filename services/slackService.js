@@ -13,8 +13,6 @@ const { responseJSON } = require('./slackInteractiveMessages');
 const { slackUnauth } = require('./slackUnauth');
 const { slackAuth } = require('./slackAuth');
 
-// let SLACK_IDS = [];
-
 /********************* EXPORTED FUNCTION *********************/
 
 // main message processing method called by slackrtm.js
@@ -37,7 +35,8 @@ processMessage = (message, rtm) => {
           //remain pending if already invited invitees
           if (pending.newPending.informedInvitees) {
             console.log('no need to invite: all is good');
-            resolve({pending: true});       
+            const returnMsg = 'Not all your invitees have answered yet. Check back later!';
+            resolve({pending: returnMsg});       
             
           // remain pending but also invite unauth invitees
           } else {
@@ -60,14 +59,13 @@ processMessage = (message, rtm) => {
             .then( user => {
               resolve({pending: true, invitations: arrayOfInvitations});
             });
-          }
-          // resolve({pending: true, informedInvitees: pending.newPending.informedInvitees, invitees: pending.unauth.attendees.notFound });
-        
+          }        
         }
 
         // handle user pending in creating new meeting / reminder 
         else if (authUser.pending && JSON.parse(authUser.pending).type) {
-          resolve({pending: true});
+          const returnMsg = 'You are in a pending state! Confirm or cancel above event to continue.';
+          resolve({pending: returnMsg});
         
         // handle all other messages
         }  else {
@@ -129,19 +127,19 @@ getApiResponse = (message, authUserOuter, rtm) => {
       const msg = "Sorry, I don't understand. Try scheduling a reminder or meeting with me!";
       return { send: msg } ;
 
-      // handle reminder.add or meeting.add in progress
+    // handle reminder.add or meeting.add in progress
     } else if (data.result.actionIncomplete) {
       console.log('action INCOMPLETE');
       const msg =  response.data.result.fulfillment.speech;
       return { send: msg };
 
-      // handle complete reminder.add
+    // handle complete reminder.add
     } else if (data.result.action === 'reminder.add') {
       console.log('ACTION IS COMPLETE: REMINDER', data.result.parameters);
       const responseMsg = getResponseMessage(data.result.action, data.result.parameters);
       return { post: { msg: responseMsg, json: responseJSON, data: data.result } };
 
-      // handle complete meeting.add
+    // handle complete meeting.add
     } else {
       console.log('action parameters:', data.result.parameters);
       rtm.sendMessage('Hold on... Let me check your calendars!', message.channel);
@@ -156,7 +154,7 @@ getApiResponse = (message, authUserOuter, rtm) => {
           console.log('REACHED ALL AUTH ATTENDEES');
           return slackAuth(attendeesObj, SLACK_IDS, times, data);
         
-          // not all attendees have authed with google
+        // not all attendees have authed with google
         } else {
           console.log('REACHED UNAUTH ATTENDEES');
           return slackUnauth(times.start, SLACK_IDS, authUser, attendeesObj, data);

@@ -185,7 +185,7 @@ getApiResponse = (message, authUserOuter, rtm) => {
         authUser.pending = JSON.stringify(userPending);
         authUser.save(() => resolve(obj));
 
-        // message to be sent via rtm.sendMessage
+      // message to be sent via rtm.sendMessage
       } else {
         console.log('NOT SAVING USER PENDING, NOT IN POST', obj);
         resolve(obj);

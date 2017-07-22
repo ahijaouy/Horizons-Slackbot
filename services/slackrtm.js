@@ -15,7 +15,7 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
     }
     console.log(`Logged in as ${rtmStartData.self.name} of team ${rtmStartData.team.name}, but not yet connected to a channel`);
   });
-  
+
   // When bot loads and opens connection to channel(s), send message to general that bot has started
   rtm.on(CLIENT_EVENTS.RTM.RTM_CONNECTION_OPENED, () => {
     const feelings = ['into #ahbiFitness', 'ready for you ;)', 'slack', 'ready to fight Amanda', 'ready to eat a watermelon']
@@ -23,28 +23,28 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
     rtm.sendMessage('Hello Mr Stark, I am ' + item, channel);
     console.log('JARVIS started!');
   });
-  
+
   // When bot receives a message:  filter to only receive DMs, filter to replace slack ids in code,
   rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
-    
+
     const dm = rtm.dataStore.getDMByUserId(message.user);
     if (!dm || dm.id !== message.channel || message.type !== 'message') {
       // do nothing if message is not DM
       // rtm.sendMessage("Hi. You're a dummy. Talk to me in DM.", )
       return;
-      
-    } 
-    
+
+    }
+
     console.log('incoming message!', message);
 
     // process message with slackService.processMessage which returns a logic object
-    // either chat.postMessage with confirmation/cancel interactive messages 
+    // either chat.postMessage with confirmation/cancel interactive messages
     // or rtm.sendMessage with static message
-    // or do nothing 
+    // or do nothing
     slackService.processMessage(message, rtm)
     .then((logic) => {
       console.log('REACHES HERE WITH LOGIC', logic);
-      if (logic.post) { 
+      if (logic.post) {
         console.log('MESSAGE TO SEND VIA process MESSAGE:', logic.post.msg, message.channel);
         web.chat.postMessage(message.channel, logic.post.msg, logic.post.json, function(err, res) {
           if (err) {
@@ -53,23 +53,24 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
             console.log('Message SENT: ', res);
           }
         });
-        
+
       } else if (logic.send) {
-        console.log('MESSAGE TO SEND VIA send MESSAGE:', logic.send, message.channel);        
+        console.log('MESSAGE TO SEND VIA send MESSAGE:', logic.send, message.channel);
         rtm.sendMessage(logic.send, message.channel);
-        
+
       } else if (logic.pending && logic.invitations) {
         console.log('hits logic pending with invitations', logic.pending.invitations);
         logic.invitations.forEach( msg => {
-          console.log('sending out individual message: ', msg[1], 'to ', msg[0])
-          rtm.sendMessage(msg[1], msg[0]);
+          const chnl = rtm.dataStore.getDMByUserId(msg[0]);
+          console.log('sending out individual message: ', msg[1], 'to ', chnl);
+          rtm.sendMessage(msg[1], chnl);
         });
 
         rtm.sendMessage('Sent invitations to all unauthorized invitees!', message.channel);
 
       } else if (logic.pending) {
         rtm.sendMessage('You are in a pending state! Confirm or cancel above event to continue.', message.channel);
-        
+
       } else {
         console.log('reached unspecified');
       }
@@ -78,6 +79,5 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
       console.log('Error: ', err);
     });
   });
-  
+
   module.exports = { web, rtm };
-  

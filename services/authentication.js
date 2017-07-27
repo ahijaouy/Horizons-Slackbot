@@ -6,29 +6,33 @@ const axios = require('axios');
 const User = require('../models/user');
 const authConfig = require('../config/auth').googleAuth;
 
-
 // Global Variables
 const OAuth2 = google.auth.OAuth2;
 const plus = google.plus('v1');
 const oauth2Client = new OAuth2(authConfig.clientID,authConfig.clientSecret, authConfig.callbackURL);
 
-
 /************************* Exported Methods *************************/
 
 // Authentication.generateAuthUrl(slackId)
 //  - Param: slackId -> String
-//  - Description: Generate a Google Auth URL 
+//  - Description: Generate a Google Auth URL
 //    for a user given their SlackId
-function generateAuthUrl(slackId) {
-    return oauth2Client.generateAuthUrl({
+function generateAuthUrl(id) {
+  return new Promise((resolve, reject) => {
+    User.findById(id)
+    .then(user => {
+      const url = oauth2Client.generateAuthUrl({
         access_type: 'offline',
         prompt: 'consent',
         scope: [
-            'https://www.googleapis.com/auth/userinfo.email',
-            'https://www.googleapis.com/auth/calendar'
+          'https://www.googleapis.com/auth/userinfo.email',
+          'https://www.googleapis.com/auth/calendar'
         ],
-        state: encodeURIComponent(JSON.stringify({auth_id:slackId}))
-    });
+        state: encodeURIComponent(JSON.stringify({auth_id:user._id}))
+      });
+      resolve(url)
+    }).catch(reject);
+  })
 }
 
 // Authentication.getGoogleCalendar(slackId)
@@ -38,124 +42,95 @@ function generateAuthUrl(slackId) {
 //    slackId passed in.
 //  - Returns: Google Calendar Object
 function getGoogleCalendar(slackId) {
-    return new Promise(function(resolve, reject) {
-        getAuthClient(slackId)
-            .then(client => resolve(google.calendar({version: 'v3',auth: client})))
-            .catch(reject)
-    })
-    
+  return new Promise((resolve, reject) => {
+    getAuthClient(slackId)
+    .then(client => resolve(google.calendar({version: 'v3',auth: client})))
+    .catch(reject)
+  })
 }
 
 // Authentication.checkUser(slackId)
 //  - Param: slackId -> String
-//  - Description: Ensures the user exists in DB and 
-//    checks if they have been authenticated with Google.
-//  - Returns: True  -> User is authenticated by Google.
-//             False -> User is not authenticated by Google.
+//  - Description: Ensures the user exists in DB and
+//    creates it if it doesn't
+//  - Returns: the User Model associated with the SlackId
 function checkUser(slackId) {
-    return new Promise(function(resolve, reject) {
-        console.log('Test:');
-        userRegistered(slackId)
-            .then(() => userAuthenticated(slackId))
-            .then(resolve)
-            .catch(reject)
+  return new Promise((resolve, reject) => {
+    User.findOne({slackId}, (err, user) => {
+      if (err) reject(err);
+      if (!user) {
+        const newUser = new User({slackId: slackId, authenticated: false});
+        newUser.save().then(resolve)
+      } else {
+        resolve(user);
+      }
     });
+  });
 }
 
-// Authentication.generateAuthTokens(code, slackId)
-//  - Param: slackId -> String
-//           code    -> String
-//  - Description: Generates Google Tokens 
+// Authentication.generateAuthTokens(code, id)
+//  - Param: id   -> String
+//           code -> String
+//  - Description: Generates Google Tokens
 //    for a user given the Google Code & SlackID.
 //    Then saves tokens & email in MongoDB
-function generateAuthTokens(code, slackId) {
-    oauth2Client.getToken(code, function (err, tokens) {
-        if (err) {
-            console.log(err) 
-        } else {
-            oauth2Client.setCredentials(tokens);
-            //Get the user's email 
-            plus.people.get({auth: oauth2Client, userId: 'me'}, function(err, resp) {
-                const userEmail = resp.emails[0].value;
-                //Update the user profile with their email & google tokens
-                User.findOneAndUpdate({slackId}, { 
-                    google: tokens, 
-                    authenticated: true,
-                    email: userEmail }, function(err, result) {
-                        if (err) console.log(err);
-                    });
-                })
-        }
+function generateAuthTokens(code, id) {
+  return new Promise((resolve, reject) => {
+    const localoAuth2Client = getoAuthClient();
+    localoAuth2Client.getToken(code, function (err, tokens) {
+      if (err) {
+        reject(err);
+      } else {
+        localoAuth2Client.setCredentials(tokens);
+        //Get the user's email
+        plus.people.get({auth: localoAuth2Client, userId: 'me'}, function(err, resp) {
+          if (err) reject(err);
+          const email2 = resp.emails[0].value;
+          //Update the user profile with their email & google tokens
+          User.findByIdAndUpdate(id, {google: tokens, authenticated: true, email: email2}, function(err, result) {
+            if (err) reject(err);
+            resolve();
+          });
+        })
+      }
     });
+
+  })
+
 }
 
 /************************* Local Methods *************************/
 
 // Local Helper Function
-// Checks to see if a user exists in DB
-// If a user does not exist in DB creates a record in DB
-function userRegistered(slackId) {
-    return new Promise(function(resolve, reject) {
-        User.findOne({slackId}, (err, user) =>{
-            if (err) reject(err);
-            if (!user) {
-                const newUser = new User({slackId: slackId, authenticated: false});
-                newUser.save(resolve());
-            } else {
-                resolve();
-            }
-        });
-    });
-}
-
-// Local Helper Function
-// Determine if the user has already been authenticated with Google
-function userAuthenticated(slackId) {
-    return new Promise (function(resolve, reject) {
-        User.findOne({slackId}, (err, user) => {
-            if (err) reject(err);
-            resolve(user.authenticated);
-            
-        });
-    })
-    
-}
-
-// Local Helper Function
-// Configures the 0Auth Client for an authenticated User 
+// Configures the 0Auth Client for an authenticated User
 // given  a SlackID. Also ensures the token is active.
 function getAuthClient(slackId) {
-    return new Promise(function(resolve, reject) {
-        User.findOne({slackId}, (err, user) => {
-            if (err) console.log('Error: ', err);
-            axios.get('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=' + user.google.access_token)
-                .then(resp => {
-                    oauth2Client.setCredentials(user.google);
-                    if (resp.expires_in < 50) {
-                        oauth2Client.refreshAccessToken(function(err, tokens) {
-                            User.findByIdAndUpdate(user.id, {google: tokens, authenticated: true })
-                        });
-                    } 
-                    resolve(oauth2Client);
-                })
-                .catch(err => {
-                    if (err.response.data.error === 'invalid_token') {
-                        oauth2Client.setCredentials(user.google);
-                        oauth2Client.refreshAccessToken(function(err, newTokens) {
-                            User.findByIdAndUpdate(user.id, { google: newTokens, authenticated: true })
-                        });
-                        resolve(oauth2Client);
-                    } else {
-                        reject(err);
-                    }
-                })
-        });
-    });
+  return User.findOne({slackId})
+  .then(user => {
+    const localoAuth2Client = getoAuthClient();
+    localoAuth2Client.setCredentials(user.google);
+
+    const expiryDate = new Date(user.expiry_date);
+    if (expiryDate < new Date()) {
+      localoAuth2Client.refreshAccessToken((err, tokens) => {
+        localoAuth2Client.setCredentials(tokens);
+        user.google = tokens;
+        user.authenticated = true;
+        return user.save().then(() => localoAuth2Client);
+      });
+    } else {
+      return localoAuth2Client;
+    }
+  })
+}
+
+function getoAuthClient() {
+  return new OAuth2(authConfig.clientID,authConfig.clientSecret, authConfig.callbackURL);
 }
 
 module.exports = {
-    generateAuthUrl,
-    generateAuthTokens,
-    getGoogleCalendar,
-    checkUser,
+  generateAuthUrl,
+  generateAuthTokens,
+  getGoogleCalendar,
+  checkUser
 }

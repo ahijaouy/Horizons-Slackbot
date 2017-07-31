@@ -49,7 +49,7 @@ function findUser(){
   // if everyone found SCHEDULE EVENT
   // if still people unfound, && still less than 2 hours, stop code
   // if still people unfound && equal to or greater than 2 hours, SCHEDULE or CANCEL
-  
+
   function removeExpire(array){
     const validatedArray = []
     array.forEach((pendState) =>{
@@ -71,7 +71,7 @@ function findUser(){
     console.log(' NA', validatedArray)
     return validatedArray
   }
-  
+
   function checkNotFound(array){
     return new Promise(function(resolve, reject){
       array.forEach((currentUser) => {
@@ -83,7 +83,7 @@ function findUser(){
       })
     })
   }
-  
+
   // rtm.on(CLIENT_EVENTS.RTM.RTM_CONNECTION_OPENED, () => {
 
   let VA;
@@ -94,7 +94,7 @@ function findUser(){
   .then((validatedArray) => {
     VA = validatedArray
     return checkNotFound(validatedArray)
-    
+
   })
   .then((emailList) => {
     if(emailList.notFound){
@@ -110,7 +110,7 @@ function findUser(){
           user.pending = JSON.stringify(pend)
           console.log('user new', user)
           user.save()
-          return 
+          return
         })
         .catch((err) => {
           console.log('error', err)
@@ -124,8 +124,7 @@ function findUser(){
     console.log('I am done')
     process.exit(0)
   })
-  
-  
-  
+
+
+
   // rtm.start();
-  
